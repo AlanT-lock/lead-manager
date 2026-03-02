@@ -136,7 +136,7 @@ interface TeleprospectionStatusBarProps {
   lead: Record<string, unknown>;
   leadId: string;
   nextLeadId: string | null;
-  onStatusChangeSuccess: (nextId: string | null) => void;
+  onStatusChangeSuccess: (nextId: string | null, removedLeadId?: string) => void;
   onNrpClickSuccess: (nextId: string | null) => void;
   onLeadUpdate: (updates: Record<string, unknown>) => void;
 }
@@ -172,7 +172,7 @@ export function TeleprospectionStatusBar({
     setSaving(false);
     if (res.ok) {
       onLeadUpdate(updates);
-      onStatusChangeSuccess(nextLeadId ?? null);
+      onStatusChangeSuccess(nextLeadId ?? null, newStatus === "annule" ? leadId : undefined);
     }
   };
 
