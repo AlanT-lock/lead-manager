@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
@@ -10,7 +10,6 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
 
@@ -35,8 +34,8 @@ function LoginForm() {
       return;
     }
 
-    router.refresh();
-    router.push("/");
+    // Redirection complète pour que les cookies de session soient bien envoyés au serveur (Netlify/serverless)
+    window.location.href = "/";
   };
 
   return (
