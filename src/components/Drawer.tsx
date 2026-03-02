@@ -28,6 +28,7 @@ interface DrawerProps {
   role: "admin" | "telepro" | "secretaire";
   userName?: string;
   unreadNotifications?: number;
+  statusCounts?: Record<string, number>;
 }
 
 const adminNav = [
@@ -54,7 +55,7 @@ const teleproNav = [
   { href: "/telepro/agenda", label: "Agenda", icon: Calendar },
 ];
 
-export function Drawer({ role, userName, unreadNotifications = 0 }: DrawerProps) {
+export function Drawer({ role, userName, unreadNotifications = 0, statusCounts = {} }: DrawerProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -144,30 +145,36 @@ export function Drawer({ role, userName, unreadNotifications = 0 }: DrawerProps)
                     {item.label}
                   </Link>
                   {"hasStatusSubmenu" in item && item.hasStatusSubmenu && (
-                    <div className="pl-4 pr-2 py-1 flex flex-wrap gap-1.5">
+                    <div className="pl-4 pr-2 py-1 space-y-1">
                       <Link
                         href={item.href}
                         onClick={() => setOpen(false)}
-                        className={`px-2.5 py-1 text-xs rounded-md transition-colors ${
+                        className={`flex items-center justify-between w-full px-3 py-2 text-sm rounded-md transition-colors ${
                           !currentStatus
                             ? "bg-blue-100 text-blue-700 font-medium"
-                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                            : "text-slate-600 hover:bg-slate-100"
                         }`}
                       >
-                        Tous
+                        <span>Tous</span>
+                        <span className="text-slate-500 tabular-nums">
+                          {Object.values(statusCounts).reduce((a, b) => a + b, 0)}
+                        </span>
                       </Link>
                       {statuses.map((s) => (
                         <Link
                           key={s}
                           href={`${item.href}?status=${s}`}
                           onClick={() => setOpen(false)}
-                          className={`px-2.5 py-1 text-xs rounded-md transition-colors ${
+                          className={`flex items-center justify-between w-full px-3 py-2 text-sm rounded-md transition-colors ${
                             currentStatus === s
                               ? "bg-blue-100 text-blue-700 font-medium"
-                              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                              : "text-slate-600 hover:bg-slate-100"
                           }`}
                         >
-                          {LEAD_STATUS_LABELS[s as LeadStatus]}
+                          <span>{LEAD_STATUS_LABELS[s as LeadStatus]}</span>
+                          <span className="text-slate-500 tabular-nums">
+                            {statusCounts[s] ?? 0}
+                          </span>
                         </Link>
                       ))}
                     </div>
