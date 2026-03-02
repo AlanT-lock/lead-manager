@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 /**
  * Hook qui remplit automatiquement la ville quand le code postal français (5 chiffres) change.
  * Déclenche la requête dès que 5 chiffres sont saisis ET au blur du champ.
- * Retourne { fetchCity, isLoading } pour déclencher manuellement et afficher le chargement.
+ * Compatible Safari (pas d'AbortController, headers explicites).
  */
 export function usePostalCodeToCity(
   postalCode: string,
@@ -13,51 +13,51 @@ export function usePostalCodeToCity(
 ) {
   const [isLoading, setIsLoading] = useState(false);
   const lastFetchedRef = useRef<string>("");
+  const requestIdRef = useRef(0);
   const onCityFoundRef = useRef(onCityFound);
   onCityFoundRef.current = onCityFound;
 
-  const fetchCity = useCallback(() => {
-    const code = postalCode.replace(/\D/g, "");
+  const doFetch = useCallback((code: string) => {
     if (code.length !== 5) return;
     if (lastFetchedRef.current === code) return;
 
     lastFetchedRef.current = code;
     setIsLoading(true);
+    const id = ++requestIdRef.current;
 
-    fetch(`/api/geocode/postal-code?code=${encodeURIComponent(code)}`)
-      .then((res) => res.json())
-      .then((data) => {
+    fetch(`/api/geocode/postal-code?code=${encodeURIComponent(code)}`, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+      credentials: "same-origin",
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Geocoding failed");
+        return res.text();
+      })
+      .then((text) => {
+        if (id !== requestIdRef.current) return;
+        const data = JSON.parse(text) as { city?: string };
         if (data.city) onCityFoundRef.current(data.city);
       })
       .catch(() => {
-        lastFetchedRef.current = "";
+        if (id === requestIdRef.current) lastFetchedRef.current = "";
       })
-      .finally(() => setIsLoading(false));
-  }, [postalCode]);
+      .finally(() => {
+        if (id === requestIdRef.current) setIsLoading(false);
+      });
+  }, []);
+
+  const fetchCity = useCallback(() => {
+    doFetch(postalCode.replace(/\D/g, ""));
+  }, [postalCode, doFetch]);
 
   useEffect(() => {
     const code = postalCode.replace(/\D/g, "");
     if (code.length !== 5) return;
     if (lastFetchedRef.current === code) return;
-
-    const controller = new AbortController();
-    lastFetchedRef.current = code;
-    setIsLoading(true);
-
-    fetch(`/api/geocode/postal-code?code=${encodeURIComponent(code)}`, {
-      signal: controller.signal,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.city) onCityFoundRef.current(data.city);
-      })
-      .catch(() => {
-        lastFetchedRef.current = "";
-      })
-      .finally(() => setIsLoading(false));
-
-    return () => controller.abort();
-  }, [postalCode]);
+    doFetch(code);
+  }, [postalCode, doFetch]);
 
   return { fetchCity, isLoading };
 }

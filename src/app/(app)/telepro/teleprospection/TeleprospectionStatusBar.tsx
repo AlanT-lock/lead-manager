@@ -1,11 +1,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LEAD_STATUS_LABELS, LEAD_STATUSES_TELEPRO, type LeadStatus } from "@/lib/types";
+import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, type LeadStatus } from "@/lib/types";
 import {
   toDatetimeLocalValueParis,
   fromDatetimeLocalValueParis,
 } from "@/lib/date";
+
+function formatPhoneDisplay(phone: string): string {
+  const digits = String(phone ?? "").replace(/\D/g, "");
+  if (digits.length === 0) return "";
+  if (digits.startsWith("33") && digits.length >= 11) {
+    return `+33 ${digits.slice(2, 3)} ${digits.slice(3, 5)} ${digits.slice(5, 7)} ${digits.slice(7, 9)} ${digits.slice(9, 11)}`;
+  }
+  if (digits.length === 10 && digits.startsWith("0")) {
+    return `+33 ${digits.slice(1, 2)} ${digits.slice(2, 4)} ${digits.slice(4, 6)} ${digits.slice(6, 8)} ${digits.slice(8, 10)}`;
+  }
+  return String(phone ?? "");
+}
 
 function getStatusButtonClass(status: LeadStatus, isSelected: boolean): string {
   if (!isSelected) return "bg-slate-100 hover:bg-slate-200";
@@ -193,27 +205,21 @@ export function TeleprospectionStatusBar({
           <p className="text-xl font-semibold text-slate-800">
             {String(lead.first_name ?? "")} {String(lead.last_name ?? "")}
           </p>
-          <p className="text-lg text-slate-600 mt-1">
-            {String(lead.phone ?? "")}
+          <p className="text-2xl font-bold text-slate-800 mt-2">
+            {formatPhoneDisplay(lead.phone as string)}
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          {(lead.status as string) === "ancien_documents_recus" ? (
-            <span className="inline-flex px-5 py-3 rounded-lg text-base font-medium bg-slate-500 text-white">
-              {LEAD_STATUS_LABELS.ancien_documents_recus}
-            </span>
-          ) : (
-            LEAD_STATUSES_TELEPRO.map((s) => (
-              <StatusButton
-                key={s}
-                status={s}
-                currentStatus={lead.status as LeadStatus}
-                initialCallbackAt={lead.callback_at as string | null | undefined}
-                onSelect={(callbackAt) => handleStatusChange(s, callbackAt)}
-                disabled={saving}
-              />
-            ))
-          )}
+          {LEAD_STATUSES_ADMIN.map((s) => (
+            <StatusButton
+              key={s}
+              status={s}
+              currentStatus={lead.status as LeadStatus}
+              initialCallbackAt={lead.callback_at as string | null | undefined}
+              onSelect={(callbackAt) => handleStatusChange(s, callbackAt)}
+              disabled={saving}
+            />
+          ))}
         </div>
         {(lead.status as string) === "nrp" && (
           <button

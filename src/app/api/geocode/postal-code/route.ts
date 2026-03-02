@@ -61,7 +61,15 @@ export async function GET(request: NextRequest) {
         return match ? match[1].trim() : null;
       })();
 
-    return NextResponse.json({ city: city || null });
+    return NextResponse.json(
+      { city: city || null },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+          Pragma: "no-cache",
+        },
+      }
+    );
   } catch (err) {
     console.error("[geocode/postal-code]", err);
     return NextResponse.json(
