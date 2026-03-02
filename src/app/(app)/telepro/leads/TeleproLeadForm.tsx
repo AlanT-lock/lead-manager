@@ -69,13 +69,9 @@ export function TeleproLeadForm({
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const leadRef = useRef(lead);
   const lastSavedRef = useRef<string>("");
-
-  useEffect(() => {
-    if (String(initialLead?.id) === leadId) {
-      setLead(initialLead);
-      lastSavedRef.current = JSON.stringify(pickLeadFields(initialLead));
-    }
-  }, [leadId, initialLead]);
+  const pendingSaveRef = useRef(false);
+  const savingRef = useRef(false);
+  const scheduleAutoSaveRef = useRef<() => void>(() => {});
 
   const pickLeadFields = (l: Record<string, unknown>) => ({
     first_name: l.first_name,
@@ -99,11 +95,21 @@ export function TeleproLeadForm({
   });
 
   useEffect(() => {
+    if (String(initialLead?.id) === leadId) {
+      setLead(initialLead);
+      leadRef.current = initialLead;
+      lastSavedRef.current = JSON.stringify(pickLeadFields(initialLead));
+    }
+  }, [leadId, initialLead]);
+
+  useEffect(() => {
     leadRef.current = lead;
   }, [lead]);
 
   const handleFieldChange = (field: string, value: unknown) => {
-    setLead((l) => ({ ...l, [field]: value }));
+    const newLead = { ...leadRef.current, [field]: value };
+    leadRef.current = newLead;
+    setLead(newLead);
     scheduleAutoSave();
   };
 
@@ -113,35 +119,59 @@ export function TeleproLeadForm({
   );
 
   const performSave = useCallback(async (data: Record<string, unknown>, redirectAfter: boolean) => {
-    if (saving) return;
+    if (savingRef.current) {
+      pendingSaveRef.current = true;
+      return;
+    }
+    savingRef.current = true;
     setSaving(true);
+    const dataToSave = JSON.stringify(data);
     const res = await fetch(`/api/telepro/lead/${leadId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify(data),
     });
+    savingRef.current = false;
     setSaving(false);
     if (res.ok) {
-      lastSavedRef.current = JSON.stringify(data);
+      lastSavedRef.current = dataToSave;
       if (redirectAfter) {
         router.push("/telepro/leads");
-      } else {
+      } else if (!pendingSaveRef.current) {
         router.refresh();
       }
+      if (pendingSaveRef.current) {
+        pendingSaveRef.current = false;
+        const latestData = pickLeadFields(leadRef.current);
+        const latestStr = JSON.stringify(latestData);
+        if (latestStr !== lastSavedRef.current) {
+          performSave(latestData, false);
+        } else {
+          router.refresh();
+        }
+      }
+    } else if (pendingSaveRef.current) {
+      pendingSaveRef.current = false;
+      scheduleAutoSaveRef.current();
     }
-  }, [leadId, saving, router]);
+  }, [leadId, router]);
 
   const scheduleAutoSave = useCallback(() => {
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = setTimeout(() => {
       saveTimeoutRef.current = null;
       const data = pickLeadFields(leadRef.current);
-      if (JSON.stringify(data) !== lastSavedRef.current) {
+      const dataStr = JSON.stringify(data);
+      if (dataStr !== lastSavedRef.current) {
         performSave(data, false);
       }
-    }, 500);
+    }, 2000);
   }, [performSave]);
+
+  useEffect(() => {
+    scheduleAutoSaveRef.current = scheduleAutoSave;
+  }, [scheduleAutoSave]);
 
   useEffect(() => {
     lastSavedRef.current = JSON.stringify(pickLeadFields(initialLead));

@@ -51,20 +51,13 @@ export function TeleprospectionClient({
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [preloaded, setPreloaded] = useState<{ id: string; data: PreloadedData } | null>(null);
-  const [excludedLeadIds, setExcludedLeadIds] = useState<Set<string>>(new Set());
   const router = useRouter();
 
-  const activeLeadIds = leadIds.filter((id) => !excludedLeadIds.has(id));
-
-  useEffect(() => {
-    setLeadId(initialLeadId);
-  }, [initialLeadId]);
-
-  const currentIndex = leadId ? activeLeadIds.indexOf(leadId) : -1;
+  const currentIndex = leadId ? leadIds.indexOf(leadId) : -1;
   const hasPrev = currentIndex > 0;
-  const hasNext = currentIndex >= 0 && currentIndex < activeLeadIds.length - 1;
-  const prevId = hasPrev ? activeLeadIds[currentIndex - 1] : null;
-  const nextId = hasNext ? activeLeadIds[currentIndex + 1] : null;
+  const hasNext = currentIndex >= 0 && currentIndex < leadIds.length - 1;
+  const prevId = hasPrev ? leadIds[currentIndex - 1] : null;
+  const nextId = hasNext ? leadIds[currentIndex + 1] : null;
 
   const preloadNext = useCallback((nextLeadId: string) => {
     fetchLeadData(nextLeadId).then((data) => {
@@ -84,35 +77,6 @@ export function TeleprospectionClient({
     }
 
     if (preloaded?.id === leadId) {
-      if ((preloaded.data.lead.status as string) === "annule") {
-        setExcludedLeadIds((prev) => new Set([...prev, leadId]));
-        setPreloaded(null);
-        const idx = leadIds.indexOf(leadId);
-        let next: string | null = null;
-        for (let i = idx + 1; i < leadIds.length; i++) {
-          if (!excludedLeadIds.has(leadIds[i])) {
-            next = leadIds[i];
-            break;
-          }
-        }
-        if (!next) {
-          for (let i = 0; i < idx; i++) {
-            if (!excludedLeadIds.has(leadIds[i])) {
-              next = leadIds[i];
-              break;
-            }
-          }
-        }
-        if (next) {
-          router.push(`/telepro/teleprospection?lead=${next}`);
-          setLeadId(next);
-        } else {
-          router.push("/telepro/teleprospection");
-          setLeadId(null);
-        }
-        setLoading(false);
-        return;
-      }
       setLead(preloaded.data.lead);
       setLogs(preloaded.data.logs);
       setTeleproDocuments(preloaded.data.teleproDocuments);
@@ -132,34 +96,6 @@ export function TeleprospectionClient({
     fetchLeadData(leadId)
       .then((data) => {
         if (!data) throw new Error("Lead non trouvé");
-        if ((data.lead.status as string) === "annule") {
-          setExcludedLeadIds((prev) => new Set([...prev, leadId]));
-          const idx = leadIds.indexOf(leadId);
-          let next: string | null = null;
-          for (let i = idx + 1; i < leadIds.length; i++) {
-            if (!excludedLeadIds.has(leadIds[i])) {
-              next = leadIds[i];
-              break;
-            }
-          }
-          if (!next) {
-            for (let i = 0; i < idx; i++) {
-              if (!excludedLeadIds.has(leadIds[i])) {
-                next = leadIds[i];
-                break;
-              }
-            }
-          }
-          if (next) {
-            router.push(`/telepro/teleprospection?lead=${next}`);
-            setLeadId(next);
-          } else {
-            router.push("/telepro/teleprospection");
-            setLeadId(null);
-          }
-          setLoading(false);
-          return;
-        }
         setLead(data.lead);
         setLogs(data.logs);
         setTeleproDocuments(data.teleproDocuments);
@@ -174,12 +110,9 @@ export function TeleprospectionClient({
         setLoadError(true);
         setLoading(false);
       });
-  }, [leadId, nextId, preloadNext, excludedLeadIds, leadIds, router]);
+  }, [leadId, nextId, preloadNext]);
 
-  const handleStatusChangeSuccess = (nextIdToGo: string | null, removedLeadId?: string) => {
-    if (removedLeadId) {
-      setExcludedLeadIds((prev) => new Set([...prev, removedLeadId]));
-    }
+  const handleStatusChangeSuccess = (nextIdToGo: string | null) => {
     if (nextIdToGo) {
       router.push(`/telepro/teleprospection?lead=${nextIdToGo}`);
       setLeadId(nextIdToGo);
@@ -199,7 +132,7 @@ export function TeleprospectionClient({
     }
   };
 
-  if (!initialLeadId && activeLeadIds.length === 0) {
+  if (!initialLeadId && leadIds.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <h1 className="text-2xl font-bold text-slate-800 mb-2">
@@ -243,7 +176,7 @@ export function TeleprospectionClient({
                 <ChevronLeft className="w-5 h-5" />
               </button>
               <span className="px-3 py-1 text-sm text-slate-600">
-                {currentIndex + 1} sur {activeLeadIds.length}
+                {currentIndex + 1} sur {leadIds.length}
               </span>
               <button
                 onClick={() =>
