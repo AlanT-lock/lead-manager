@@ -18,6 +18,7 @@ Copiez `.env.example` vers `.env.local` et remplissez :
 NEXT_PUBLIC_SUPABASE_URL=votre_url_supabase
 NEXT_PUBLIC_SUPABASE_ANON_KEY=votre_cle_anon
 SUPABASE_SERVICE_ROLE_KEY=votre_cle_service_role
+NEXT_PUBLIC_SITE_URL=https://crm-rs-ecologie.netlify.app
 ```
 
 ### 2. Supabase
@@ -26,6 +27,9 @@ SUPABASE_SERVICE_ROLE_KEY=votre_cle_service_role
 2. Exécutez la migration SQL dans `supabase/migrations/001_initial_schema.sql` via le SQL Editor de Supabase
 3. Créez manuellement le bucket de stockage "documents" dans Storage (paramètres : privé)
 4. Les policies de stockage sont dans la migration
+5. **Réinitialisation mot de passe** : Dans Authentication > URL Configuration, ajoutez :
+   - **Site URL** : `https://crm-rs-ecologie.netlify.app` (ou votre URL de production)
+   - **Redirect URLs** : `https://crm-rs-ecologie.netlify.app/reset-password`
 
 ### 3. Premier lancement
 
@@ -41,6 +45,8 @@ SUPABASE_SERVICE_ROLE_KEY=votre_cle_service_role
 
 - `/` - Page d'accueil
 - `/login` - Connexion
+- `/forgot-password` - Mot de passe oublié (envoi du lien par email)
+- `/reset-password` - Réinitialisation du mot de passe (depuis le lien email)
 - `/setup` - Première configuration (création admin)
 - `/telepro` - Espace télépro (dashboard, leads, téléprospection)
 - `/admin` - Espace admin (dashboard, import CSV, utilisateurs, leads, documents reçus, stats)

@@ -9,6 +9,7 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
   const supabase = createClient();
@@ -17,6 +18,10 @@ function LoginForm() {
     const msg = searchParams.get("message");
     if (msg === "Compte désactivé") {
       setError("Votre compte a été désactivé. Contactez l'administrateur.");
+      setSuccess(null);
+    } else if (msg === "Mot de passe modifié") {
+      setError(null);
+      setSuccess("Votre mot de passe a été modifié. Vous pouvez vous connecter.");
     }
   }, [searchParams]);
 
@@ -55,6 +60,11 @@ function LoginForm() {
                 {error}
               </div>
             )}
+            {success && (
+              <div className="p-3 bg-green-50 text-green-700 rounded-lg text-sm">
+                {success}
+              </div>
+            )}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">
                 Email
@@ -69,9 +79,17 @@ function LoginForm() {
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1">
-                Mot de passe
-              </label>
+              <div className="flex justify-between items-center mb-1">
+                <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+                  Mot de passe
+                </label>
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  Mot de passe oublié ?
+                </Link>
+              </div>
               <input
                 id="password"
                 type="password"

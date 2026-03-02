@@ -2,7 +2,9 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function updateSession(request: NextRequest) {
-  const isAuthPage = request.nextUrl.pathname.startsWith('/login');
+  const isAuthPage = request.nextUrl.pathname.startsWith('/login')
+    || request.nextUrl.pathname.startsWith('/forgot-password')
+    || request.nextUrl.pathname.startsWith('/reset-password');
   const isSetupPage = request.nextUrl.pathname.startsWith('/setup');
   const isSetupApi = request.nextUrl.pathname.startsWith('/api/setup');
 
@@ -42,7 +44,8 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    if (user && (isAuthPage || isSetupPage)) {
+    const isResetPassword = request.nextUrl.pathname.startsWith('/reset-password');
+    if (user && (isAuthPage || isSetupPage) && !isResetPassword) {
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
