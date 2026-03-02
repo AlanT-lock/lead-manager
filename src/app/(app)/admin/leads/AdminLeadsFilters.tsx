@@ -29,6 +29,16 @@ export function AdminLeadsFilters({ basePath = "/admin/leads", telepros = [] }: 
   const [from, setFrom] = useState(searchParams.get("from") || "");
   const [to, setTo] = useState(searchParams.get("to") || "");
 
+  // Synchroniser les états locaux avec l'URL quand les params changent (ex: clic sur sous-catégorie dans le menu)
+  const urlQ = searchParams.get("q") || "";
+  const urlFrom = searchParams.get("from") || "";
+  const urlTo = searchParams.get("to") || "";
+  useEffect(() => {
+    setSearch(urlQ);
+    setFrom(urlFrom);
+    setTo(urlTo);
+  }, [urlQ, urlFrom, urlTo]);
+
   const buildParams = useCallback((overrides?: { status?: string; telepro?: string; chantier?: string; delegataire?: string; q?: string; from?: string; to?: string }) => {
     const params = new URLSearchParams();
     const s = overrides?.status ?? currentStatus;

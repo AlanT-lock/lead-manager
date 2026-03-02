@@ -17,49 +17,46 @@ export default async function TeleprospectionPage({
   const params = await searchParams;
   const leadId = params.lead;
 
-  let initialLeadId = leadId;
-  let leadIds: string[] = [];
+  const now = new Date().toISOString();
 
-  if (!leadId) {
-    const now = new Date().toISOString();
-    const { data: callbackLeads } = await adminClient
+  // Ordre : 1) Rappels dus (priorité), 2) Nouveau, 3) NRP, 4) En attente doc. Jamais : annulé, documents reçus.
+  const [callbackDue, nouveau, nrp, enAttenteDoc] = await Promise.all([
+    adminClient
       .from("leads")
       .select("id")
       .eq("assigned_to", user.id)
       .eq("status", "a_rappeler")
+      .not("callback_at", "is", null)
       .lte("callback_at", now)
-      .order("callback_at", { ascending: true })
-      .limit(1);
+      .order("callback_at", { ascending: true }),
+    adminClient
+      .from("leads")
+      .select("id")
+      .eq("assigned_to", user.id)
+      .eq("status", "nouveau")
+      .order("created_at", { ascending: false }),
+    adminClient
+      .from("leads")
+      .select("id")
+      .eq("assigned_to", user.id)
+      .eq("status", "nrp")
+      .order("created_at", { ascending: false }),
+    adminClient
+      .from("leads")
+      .select("id")
+      .eq("assigned_to", user.id)
+      .eq("status", "en_attente_doc")
+      .order("created_at", { ascending: false }),
+  ]);
 
-    if (callbackLeads?.length) {
-      initialLeadId = callbackLeads[0].id;
-    } else {
-      const statusOrder = ["nouveau", "nrp", "en_attente_doc"];
-      for (const status of statusOrder) {
-        const { data } = await adminClient
-          .from("leads")
-          .select("id")
-          .eq("assigned_to", user.id)
-          .eq("status", status)
-          .neq("status", "documents_recus")
-          .neq("status", "annule")
-          .order("created_at", { ascending: false }); // Dernier arrivé, premier affiché
-        if (data?.length) {
-          initialLeadId = initialLeadId || data[0].id;
-          break;
-        }
-      }
-    }
-  }
+  const leadIds: string[] = [
+    ...(callbackDue.data?.map((l) => l.id) || []),
+    ...(nouveau.data?.map((l) => l.id) || []),
+    ...(nrp.data?.map((l) => l.id) || []),
+    ...(enAttenteDoc.data?.map((l) => l.id) || []),
+  ];
 
-  const { data: allLeads } = await adminClient
-    .from("leads")
-    .select("id")
-    .eq("assigned_to", user.id)
-    .in("status", ["nouveau", "nrp", "a_rappeler", "en_attente_doc"])
-    .order("created_at", { ascending: false }); // Dernier arrivé, premier affiché
-
-  leadIds = allLeads?.map((l) => l.id) || [];
+  let initialLeadId = leadId || leadIds[0] || null;
 
   return (
     <TeleprospectionClient

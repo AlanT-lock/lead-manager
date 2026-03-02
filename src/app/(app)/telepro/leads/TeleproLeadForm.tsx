@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -64,9 +64,76 @@ export function TeleproLeadForm({
   const [lead, setLead] = useState<Record<string, unknown>>(initialLead);
   const [saving, setSaving] = useState(false);
   const router = useRouter();
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const leadRef = useRef(lead);
+  const lastSavedRef = useRef<string>("");
+
+  const pickLeadFields = (l: Record<string, unknown>) => ({
+    first_name: l.first_name,
+    last_name: l.last_name,
+    phone: l.phone,
+    email: l.email,
+    surface_m2: l.surface_m2,
+    revenu_fiscal_ref: l.revenu_fiscal_ref,
+    numero_fiscal: l.numero_fiscal,
+    date_of_birth: l.date_of_birth,
+    address: l.address,
+    postal_code: l.postal_code,
+    city: l.city,
+    heating_mode: l.heating_mode,
+    radiator_type: l.radiator_type,
+    color: l.color,
+    is_owner: l.is_owner,
+    installation_type: l.installation_type,
+    electricity_type: l.electricity_type,
+    commentaire: l.commentaire,
+  });
+
+  useEffect(() => {
+    leadRef.current = lead;
+  }, [lead]);
+
+  const performSave = useCallback(async (data: Record<string, unknown>, redirectAfter: boolean) => {
+    if (saving) return;
+    setSaving(true);
+    const res = await fetch(`/api/telepro/lead/${leadId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(data),
+    });
+    setSaving(false);
+    if (res.ok) {
+      lastSavedRef.current = JSON.stringify(data);
+      if (redirectAfter) {
+        router.push("/telepro/leads");
+      } else {
+        router.refresh();
+      }
+    }
+  }, [leadId, saving, router]);
+
+  const scheduleAutoSave = useCallback(() => {
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    saveTimeoutRef.current = setTimeout(() => {
+      saveTimeoutRef.current = null;
+      const data = pickLeadFields(leadRef.current);
+      if (JSON.stringify(data) !== lastSavedRef.current) {
+        performSave(data, false);
+      }
+    }, 500);
+  }, [performSave]);
+
+  useEffect(() => {
+    lastSavedRef.current = JSON.stringify(pickLeadFields(initialLead));
+    return () => {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    };
+  }, []);
 
   const handleFieldChange = (field: string, value: unknown) => {
     setLead((l) => ({ ...l, [field]: value }));
+    scheduleAutoSave();
   };
 
   const handleStatusChange = async (newStatus: LeadStatus, callbackAt?: string) => {
@@ -131,36 +198,8 @@ export function TeleproLeadForm({
 
   const handleSave = async () => {
     if (!lead || saving) return;
-    setSaving(true);
-
-    const res = await fetch(`/api/telepro/lead/${leadId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        first_name: lead.first_name,
-        last_name: lead.last_name,
-        phone: lead.phone,
-        email: lead.email,
-        surface_m2: lead.surface_m2,
-        revenu_fiscal_ref: lead.revenu_fiscal_ref,
-        numero_fiscal: lead.numero_fiscal,
-        date_of_birth: lead.date_of_birth,
-        address: lead.address,
-        postal_code: lead.postal_code,
-        city: lead.city,
-        heating_mode: lead.heating_mode,
-        radiator_type: lead.radiator_type,
-        color: lead.color,
-        is_owner: lead.is_owner,
-        installation_type: lead.installation_type,
-        electricity_type: lead.electricity_type,
-        commentaire: lead.commentaire,
-      }),
-    });
-
-    setSaving(false);
-    if (res.ok) router.refresh();
+    const data = pickLeadFields(lead);
+    await performSave(data, true);
   };
 
   return (
@@ -535,11 +574,12 @@ export function TeleproLeadForm({
 
         <div className="flex gap-4">
               <button
+                type="button"
                 onClick={handleSave}
                 disabled={saving}
                 className="px-6 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 disabled:opacity-50"
               >
-                {saving ? "Enregistrement..." : "Enregistrer les modifications"}
+                {saving ? "Enregistrement..." : "Enregistrer et retour aux leads"}
               </button>
         </div>
       </div>

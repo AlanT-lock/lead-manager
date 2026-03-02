@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   LEAD_STATUS_LABELS,
@@ -28,14 +28,104 @@ interface AdminLeadFormProps {
   lead: Record<string, unknown>;
 }
 
+function buildUpdates(lead: Record<string, unknown>) {
+  return {
+    first_name: lead.first_name,
+    last_name: lead.last_name,
+    phone: lead.phone,
+    email: lead.email,
+    status: lead.status,
+    callback_at: lead.status === "a_rappeler" && lead.callback_at ? lead.callback_at : null,
+    surface_m2: lead.surface_m2 ? Number(lead.surface_m2) : null,
+    revenu_fiscal_ref: lead.revenu_fiscal_ref ? Number(lead.revenu_fiscal_ref) : null,
+    numero_fiscal: lead.numero_fiscal || null,
+    date_of_birth: lead.date_of_birth || null,
+    address: lead.address,
+    postal_code: lead.postal_code,
+    city: lead.city,
+    heating_mode: lead.heating_mode,
+    radiator_type: lead.radiator_type,
+    color: lead.color,
+    is_owner: lead.is_owner,
+    installation_type: lead.installation_type,
+    electricity_type: lead.electricity_type,
+    commentaire: lead.commentaire,
+    doc_status: lead.doc_status,
+    is_installe: lead.is_installe,
+    is_depot_mpr: lead.is_depot_mpr,
+    is_cee_paye: lead.is_cee_paye,
+    is_mpe_paye: lead.is_mpe_paye,
+    is_ssc_cee: lead.is_ssc_cee,
+    is_pac_cee: lead.is_pac_cee,
+    is_code_envoye: lead.is_code_envoye,
+    is_depose: lead.is_depose,
+    is_controle_veritas: lead.is_controle_veritas,
+    is_paye: lead.is_paye,
+    is_compte_bloque: lead.is_compte_bloque,
+    is_rejete: lead.is_rejete,
+    installation_cost: lead.installation_cost ? Number(lead.installation_cost) : null,
+    material_cost: lead.material_cost ? Number(lead.material_cost) : null,
+    material_cost_comment: lead.material_cost_comment,
+    regie_cost: lead.regie_cost ? Number(lead.regie_cost) : 0,
+    benefit_cee: lead.benefit_cee ? Number(lead.benefit_cee) : null,
+    benefit_mpr: lead.benefit_mpr ? Number(lead.benefit_mpr) : null,
+    benefit_apporteur_affaires: lead.benefit_apporteur_affaires ? Number(lead.benefit_apporteur_affaires) : null,
+    profitability: lead.profitability ? Number(lead.profitability) : null,
+    chantier_comment: lead.chantier_comment,
+    delegataire_group: lead.delegataire_group,
+    updated_at: new Date().toISOString(),
+  };
+}
+
 export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
   const [lead, setLead] = useState(initialLead);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const leadRef = useRef(lead);
+  const lastSavedRef = useRef<string>("");
 
   useEffect(() => {
     setLead(initialLead);
   }, [initialLead]);
+
+  useEffect(() => {
+    leadRef.current = lead;
+  }, [lead]);
+
+  const performSave = useCallback(async () => {
+    const updates = buildUpdates(leadRef.current);
+    setLoading(true);
+    const res = await fetch(`/api/admin/lead/${leadRef.current.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(updates),
+    });
+    setLoading(false);
+    if (res.ok) {
+      lastSavedRef.current = JSON.stringify(updates);
+      router.refresh();
+    }
+  }, [router]);
+
+  const scheduleAutoSave = useCallback(() => {
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    saveTimeoutRef.current = setTimeout(() => {
+      saveTimeoutRef.current = null;
+      const updates = buildUpdates(leadRef.current);
+      if (JSON.stringify(updates) !== lastSavedRef.current) {
+        performSave();
+      }
+    }, 500);
+  }, [performSave]);
+
+  useEffect(() => {
+    lastSavedRef.current = JSON.stringify(buildUpdates(initialLead));
+    return () => {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    };
+  }, []);
 
   const updateField = (field: string, value: unknown) => {
     setLead((l) => ({ ...l, [field]: value }));
@@ -45,6 +135,7 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
         setLead((l) => ({ ...l, benefit_mpr: mpr }));
       }
     }
+    scheduleAutoSave();
   };
 
   useEffect(() => {
@@ -65,55 +156,12 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    }
+    const updates = buildUpdates(lead);
     setLoading(true);
-
-    const       updates = {
-      first_name: lead.first_name,
-      last_name: lead.last_name,
-      phone: lead.phone,
-      email: lead.email,
-      status: lead.status,
-      callback_at: lead.status === "a_rappeler" && lead.callback_at ? lead.callback_at : null,
-      surface_m2: lead.surface_m2 ? Number(lead.surface_m2) : null,
-      revenu_fiscal_ref: lead.revenu_fiscal_ref ? Number(lead.revenu_fiscal_ref) : null,
-      numero_fiscal: lead.numero_fiscal || null,
-      date_of_birth: lead.date_of_birth || null,
-      address: lead.address,
-      postal_code: lead.postal_code,
-      city: lead.city,
-      heating_mode: lead.heating_mode,
-      radiator_type: lead.radiator_type,
-      color: lead.color,
-      is_owner: lead.is_owner,
-      installation_type: lead.installation_type,
-      electricity_type: lead.electricity_type,
-      commentaire: lead.commentaire,
-      doc_status: lead.doc_status,
-      is_installe: lead.is_installe,
-      is_depot_mpr: lead.is_depot_mpr,
-      is_cee_paye: lead.is_cee_paye,
-      is_mpe_paye: lead.is_mpe_paye,
-      is_ssc_cee: lead.is_ssc_cee,
-      is_pac_cee: lead.is_pac_cee,
-      is_code_envoye: lead.is_code_envoye,
-      is_depose: lead.is_depose,
-      is_controle_veritas: lead.is_controle_veritas,
-      is_paye: lead.is_paye,
-      is_compte_bloque: lead.is_compte_bloque,
-      is_rejete: lead.is_rejete,
-      installation_cost: lead.installation_cost ? Number(lead.installation_cost) : null,
-      material_cost: lead.material_cost ? Number(lead.material_cost) : null,
-      material_cost_comment: lead.material_cost_comment,
-      regie_cost: lead.regie_cost ? Number(lead.regie_cost) : 0,
-      benefit_cee: lead.benefit_cee ? Number(lead.benefit_cee) : null,
-      benefit_mpr: lead.benefit_mpr ? Number(lead.benefit_mpr) : null,
-      benefit_apporteur_affaires: lead.benefit_apporteur_affaires ? Number(lead.benefit_apporteur_affaires) : null,
-      profitability: lead.profitability ? Number(lead.profitability) : null,
-      chantier_comment: lead.chantier_comment,
-      delegataire_group: lead.delegataire_group,
-      updated_at: new Date().toISOString(),
-    };
-
     const res = await fetch(`/api/admin/lead/${lead.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -121,7 +169,10 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
       body: JSON.stringify(updates),
     });
     setLoading(false);
-    if (res.ok) router.refresh();
+    if (res.ok) {
+      lastSavedRef.current = JSON.stringify(updates);
+      router.refresh();
+    }
   };
 
   const isDocumentsRecus = lead.status === "documents_recus" || lead.status === "ancien_documents_recus";
