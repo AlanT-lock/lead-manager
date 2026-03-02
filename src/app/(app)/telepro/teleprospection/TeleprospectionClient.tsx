@@ -117,7 +117,7 @@ export function TeleprospectionClient({
       router.push(`/telepro/teleprospection?lead=${nextIdToGo}`);
       setLeadId(nextIdToGo);
     } else {
-      router.push("/telepro/teleprospection");
+      router.push("/telepro/teleprospection?done=1");
       setLeadId(null);
     }
   };
@@ -127,12 +127,12 @@ export function TeleprospectionClient({
       router.push(`/telepro/teleprospection?lead=${nextIdToGo}`);
       setLeadId(nextIdToGo);
     } else {
-      router.push("/telepro/teleprospection");
+      router.push("/telepro/teleprospection?done=1");
       setLeadId(null);
     }
   };
 
-  if (!initialLeadId && leadIds.length === 0) {
+  if (!initialLeadId) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <h1 className="text-2xl font-bold text-slate-800 mb-2">

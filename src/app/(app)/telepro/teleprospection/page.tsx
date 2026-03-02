@@ -6,7 +6,7 @@ import { TeleprospectionClient } from "./TeleprospectionClient";
 export default async function TeleprospectionPage({
   searchParams,
 }: {
-  searchParams: Promise<{ lead?: string }>;
+  searchParams: Promise<{ lead?: string; done?: string }>;
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -16,6 +16,7 @@ export default async function TeleprospectionPage({
 
   const params = await searchParams;
   const leadId = params.lead;
+  const isDone = params.done === "1";
 
   const now = new Date().toISOString();
 
@@ -56,7 +57,12 @@ export default async function TeleprospectionPage({
     ...(enAttenteDoc.data?.map((l) => l.id) || []),
   ];
 
-  let initialLeadId = leadId || leadIds[0] || null;
+  let initialLeadId: string | null = null;
+  if (isDone) {
+    initialLeadId = null;
+  } else {
+    initialLeadId = leadId || leadIds[0] || null;
+  }
 
   return (
     <TeleprospectionClient
