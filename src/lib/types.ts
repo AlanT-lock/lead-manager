@@ -44,6 +44,8 @@ export const CHANTIER_STATUS_FIELDS = [
   { field: 'is_depot_mpr', label: 'Dépôt MPR' },
   { field: 'is_cee_paye', label: 'CEE payé' },
   { field: 'is_mpe_paye', label: 'MPR payé' },
+  { field: 'is_ssc_cee', label: 'SSC CEE' },
+  { field: 'is_pac_cee', label: 'PAC CEE' },
   { field: 'is_code_envoye', label: 'Code envoyé' },
   { field: 'is_depose', label: 'Déposé' },
   { field: 'is_controle_veritas', label: 'Contrôle Veritas' },
@@ -191,6 +193,7 @@ export interface Lead {
   nrp_count: number;
   surface_m2: number | null;
   revenu_fiscal_ref: number | null;
+  numero_fiscal: string | null;
   department: string | null;
   address: string | null;
   postal_code: string | null;
@@ -207,6 +210,8 @@ export interface Lead {
   is_depot_mpr: boolean;
   is_cee_paye: boolean;
   is_mpe_paye: boolean;
+  is_ssc_cee?: boolean;
+  is_pac_cee?: boolean;
   is_code_envoye?: boolean;
   is_depose?: boolean;
   is_controle_veritas?: boolean;

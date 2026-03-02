@@ -38,11 +38,11 @@ export async function PATCH(
 
   const allowedFields = [
     "first_name", "last_name", "phone", "email", "status", "callback_at", "nrp_count",
-    "surface_m2", "revenu_fiscal_ref", "department", "address", "postal_code", "city",
+    "surface_m2", "revenu_fiscal_ref", "numero_fiscal", "department", "address", "postal_code", "city",
     "heating_mode", "radiator_type", "color",
     "is_owner", "installation_type", "electricity_type", "commentaire",
     "doc_status", "is_installe", "is_depot_mpr",
-    "is_cee_paye", "is_mpe_paye", "installation_cost", "material_cost",
+    "is_cee_paye", "is_mpe_paye", "is_ssc_cee", "is_pac_cee", "installation_cost", "material_cost",
     "is_code_envoye", "is_depose", "is_controle_veritas",
     "is_paye", "is_compte_bloque", "is_rejete",
     "material_cost_comment", "regie_cost", "benefit_cee", "benefit_mpr",

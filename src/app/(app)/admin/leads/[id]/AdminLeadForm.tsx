@@ -76,6 +76,7 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
       callback_at: lead.status === "a_rappeler" && lead.callback_at ? lead.callback_at : null,
       surface_m2: lead.surface_m2 ? Number(lead.surface_m2) : null,
       revenu_fiscal_ref: lead.revenu_fiscal_ref ? Number(lead.revenu_fiscal_ref) : null,
+      numero_fiscal: lead.numero_fiscal || null,
       address: lead.address,
       postal_code: lead.postal_code,
       city: lead.city,
@@ -91,6 +92,8 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
       is_depot_mpr: lead.is_depot_mpr,
       is_cee_paye: lead.is_cee_paye,
       is_mpe_paye: lead.is_mpe_paye,
+      is_ssc_cee: lead.is_ssc_cee,
+      is_pac_cee: lead.is_pac_cee,
       is_code_envoye: lead.is_code_envoye,
       is_depose: lead.is_depose,
       is_controle_veritas: lead.is_controle_veritas,
@@ -233,6 +236,16 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
                   e.target.value ? parseFloat(e.target.value) : null
                 )
               }
+              className="w-full px-4 py-2 border rounded-lg"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-slate-600 mb-1">Numéro fiscal</label>
+            <input
+              type="text"
+              value={(lead.numero_fiscal as string) || ""}
+              onChange={(e) => updateField("numero_fiscal", e.target.value || null)}
+              placeholder="13 chiffres"
               className="w-full px-4 py-2 border rounded-lg"
             />
           </div>
