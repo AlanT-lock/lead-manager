@@ -41,6 +41,8 @@ export function StockageClient({
   const [editName, setEditName] = useState("");
   const [editPrice, setEditPrice] = useState("");
   const [editTypeId, setEditTypeId] = useState("");
+  const [editingType, setEditingType] = useState<ProductType | null>(null);
+  const [editTypeName, setEditTypeName] = useState("");
   const quantitySaveTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const refreshData = useCallback(async () => {
@@ -118,6 +120,59 @@ export function StockageClient({
     }
   };
 
+  const handleUpdateType = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingType) return;
+    if (!editTypeName.trim()) return;
+
+    setLoading(true);
+    const res = await fetch(`/api/admin/product-types/${editingType.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: editTypeName.trim() }),
+    });
+    setLoading(false);
+
+    if (res.ok) {
+      const updated = await res.json();
+      setProductTypes((prev) =>
+        prev.map((t) => (t.id === editingType.id ? updated : t))
+      );
+      setEditingType(null);
+      router.refresh();
+    }
+  };
+
+  const handleDeleteType = async (type: ProductType, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const typeProducts = productsByType[type.id] || [];
+    if (typeProducts.length > 0) {
+      const ok = confirm(
+        `Le type « ${type.name} » contient ${typeProducts.length} produit(s). Les supprimer aussi ?`
+      );
+      if (!ok) return;
+    } else if (!confirm(`Supprimer le type « ${type.name} » ?`)) {
+      return;
+    }
+
+    setLoading(true);
+    const res = await fetch(`/api/admin/product-types/${type.id}`, {
+      method: "DELETE",
+    });
+    setLoading(false);
+
+    if (res.ok) {
+      setProductTypes((prev) => prev.filter((t) => t.id !== type.id));
+      setProducts((prev) => prev.filter((p) => p.product_type_id !== type.id));
+      if (editingType?.id === type.id) setEditingType(null);
+      if (newProductTypeId === type.id) {
+        const remaining = productTypes.filter((t) => t.id !== type.id);
+        setNewProductTypeId(remaining[0]?.id || "");
+      }
+      router.refresh();
+    }
+  };
+
   const handleUpdateQuantity = async (productId: string, quantity: number) => {
     const res = await fetch(`/api/admin/products/${productId}`, {
       method: "PATCH",
@@ -185,6 +240,11 @@ export function StockageClient({
       if (editingProduct?.id === product.id) setEditingProduct(null);
       router.refresh();
     }
+  };
+
+  const openEditTypeModal = (type: ProductType) => {
+    setEditingType(type);
+    setEditTypeName(type.name);
   };
 
   const productsByType = productTypes.reduce<Record<string, Product[]>>(
@@ -309,8 +369,29 @@ export function StockageClient({
                 key={type.id}
                 className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
               >
-                <h2 className="font-medium text-slate-800 mb-4">{type.name}</h2>
-                <p className="text-sm text-slate-500 mb-4">
+                <div className="flex justify-between items-start mb-4">
+                  <h2 className="font-medium text-slate-800">{type.name}</h2>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => openEditTypeModal(type)}
+                      className="p-2 rounded-lg hover:bg-slate-200"
+                      title="Modifier le type"
+                    >
+                      <Pencil className="w-4 h-4 text-slate-600" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => handleDeleteType(type, e)}
+                      disabled={loading}
+                      className="p-2 rounded-lg hover:bg-red-50"
+                      title="Supprimer le type"
+                    >
+                      <Trash2 className="w-4 h-4 text-red-600" />
+                    </button>
+                  </div>
+                </div>
+                <p className="text-sm text-slate-500 mb-4 -mt-2">
                   {typeProducts.length} produit(s)
                 </p>
                 <div className="space-y-0">
@@ -438,6 +519,48 @@ export function StockageClient({
                 <button
                   type="button"
                   onClick={() => setEditingProduct(null)}
+                  className="px-4 py-2 border rounded-lg hover:bg-slate-50"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                >
+                  Enregistrer
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {editingType && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={() => setEditingType(null)}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl p-6 max-w-md w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="font-medium text-slate-800 mb-4">Modifier le type</h3>
+            <form onSubmit={handleUpdateType} className="space-y-4">
+              <div>
+                <label className="block text-sm text-slate-600 mb-1">Nom du type</label>
+                <input
+                  type="text"
+                  value={editTypeName}
+                  onChange={(e) => setEditTypeName(e.target.value)}
+                  className="w-full px-4 py-2 border rounded-lg"
+                  required
+                />
+              </div>
+              <div className="flex gap-2 justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingType(null)}
                   className="px-4 py-2 border rounded-lg hover:bg-slate-50"
                 >
                   Annuler

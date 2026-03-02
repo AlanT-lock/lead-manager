@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -16,9 +16,28 @@ interface TeleproDoc {
   created_at: string;
 }
 
+interface PreloadedData {
+  lead: Record<string, unknown>;
+  logs: LogEntry[];
+  teleproDocuments: TeleproDoc[];
+}
+
 interface TeleprospectionClientProps {
   initialLeadId: string | null;
   leadIds: string[];
+}
+
+async function fetchLeadData(id: string): Promise<PreloadedData | null> {
+  const [leadRes, logsRes, docsRes] = await Promise.all([
+    fetch(`/api/telepro/lead/${id}`, { credentials: "include" }),
+    fetch(`/api/telepro/lead/${id}/logs`, { credentials: "include" }),
+    fetch(`/api/telepro/lead/${id}/documents`, { credentials: "include" }),
+  ]);
+  if (!leadRes.ok) return null;
+  const leadData = await leadRes.json();
+  const logsData = logsRes.ok ? await logsRes.json() : [];
+  const docsData = docsRes.ok ? await docsRes.json() : [];
+  return { lead: leadData, logs: logsData, teleproDocuments: docsData };
 }
 
 export function TeleprospectionClient({
@@ -31,6 +50,7 @@ export function TeleprospectionClient({
   const [teleproDocuments, setTeleproDocuments] = useState<TeleproDoc[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const [preloaded, setPreloaded] = useState<{ id: string; data: PreloadedData } | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -43,6 +63,12 @@ export function TeleprospectionClient({
   const prevId = hasPrev ? leadIds[currentIndex - 1] : null;
   const nextId = hasNext ? leadIds[currentIndex + 1] : null;
 
+  const preloadNext = useCallback((nextLeadId: string) => {
+    fetchLeadData(nextLeadId).then((data) => {
+      if (data) setPreloaded({ id: nextLeadId, data });
+    });
+  }, []);
+
   useEffect(() => {
     if (!leadId) {
       setLead(null);
@@ -50,25 +76,33 @@ export function TeleprospectionClient({
       setTeleproDocuments([]);
       setLoadError(false);
       setLoading(false);
+      setPreloaded(null);
       return;
     }
+
+    if (preloaded?.id === leadId) {
+      setLead(preloaded.data.lead);
+      setLogs(preloaded.data.logs);
+      setTeleproDocuments(preloaded.data.teleproDocuments);
+      setLoadError(false);
+      setLoading(false);
+      setPreloaded(null);
+      if (nextId) preloadNext(nextId);
+      return;
+    }
+
     setLoading(true);
     setLoadError(false);
-    Promise.all([
-      fetch(`/api/telepro/lead/${leadId}`, { credentials: "include" }),
-      fetch(`/api/telepro/lead/${leadId}/logs`, { credentials: "include" }),
-      fetch(`/api/telepro/lead/${leadId}/documents`, { credentials: "include" }),
-    ])
-      .then(async ([leadRes, logsRes, docsRes]) => {
-        if (!leadRes.ok) throw new Error("Lead non trouvé");
-        const leadData = await leadRes.json();
-        const logsData = logsRes.ok ? await logsRes.json() : [];
-        const docsData = docsRes.ok ? await docsRes.json() : [];
-        setLead(leadData);
-        setLogs(logsData);
-        setTeleproDocuments(docsData);
+    setPreloaded(null);
+    fetchLeadData(leadId)
+      .then((data) => {
+        if (!data) throw new Error("Lead non trouvé");
+        setLead(data.lead);
+        setLogs(data.logs);
+        setTeleproDocuments(data.teleproDocuments);
         setLoadError(false);
         setLoading(false);
+        if (nextId) preloadNext(nextId);
       })
       .catch(() => {
         setLead(null);
@@ -77,7 +111,7 @@ export function TeleprospectionClient({
         setLoadError(true);
         setLoading(false);
       });
-  }, [leadId]);
+  }, [leadId, nextId, preloadNext]);
 
   const handleStatusChangeSuccess = (nextIdToGo: string | null) => {
     if (nextIdToGo) {
