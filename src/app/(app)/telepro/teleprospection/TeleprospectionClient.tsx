@@ -94,6 +94,9 @@ export function TeleprospectionClient({
     setLoading(true);
     setLoadError(false);
     setPreloaded(null);
+    setLead(null);
+    setLogs([]);
+    setTeleproDocuments([]);
     fetchLeadData(leadId)
       .then((data) => {
         if (!data) throw new Error("Lead non trouvé");
@@ -204,8 +207,8 @@ export function TeleprospectionClient({
               Vérifiez qu&apos;il vous est bien assigné.
             </p>
           </div>
-        ) : lead && leadId ? (
-          <div className="flex gap-6 items-start">
+        ) : lead && leadId && String(lead.id) === leadId ? (
+          <div className="flex gap-6 items-start" key={leadId}>
             <div className="flex-1 min-w-0">
               <TeleproLeadForm
                 lead={lead}
@@ -231,7 +234,11 @@ export function TeleprospectionClient({
               />
             </div>
           </div>
-        ) : null}
+        ) : (
+          <div className="bg-white rounded-xl border p-12 text-center text-slate-500">
+            Chargement...
+          </div>
+        )}
       </div>
   );
 }

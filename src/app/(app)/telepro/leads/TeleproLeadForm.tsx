@@ -70,6 +70,13 @@ export function TeleproLeadForm({
   const leadRef = useRef(lead);
   const lastSavedRef = useRef<string>("");
 
+  useEffect(() => {
+    if (String(initialLead?.id) === leadId) {
+      setLead(initialLead);
+      lastSavedRef.current = JSON.stringify(pickLeadFields(initialLead));
+    }
+  }, [leadId, initialLead]);
+
   const pickLeadFields = (l: Record<string, unknown>) => ({
     first_name: l.first_name,
     last_name: l.last_name,
