@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import { Search } from "lucide-react";
-import { LEAD_STATUS_LABELS, LEAD_STATUSES_TELEPRO, type LeadStatus } from "@/lib/types";
+import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, type LeadStatus } from "@/lib/types";
 
 export function LeadsFilters() {
   const router = useRouter();
@@ -90,8 +90,7 @@ export function LeadsFilters() {
             className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Tous les statuts</option>
-            <option value="ancien_documents_recus">{LEAD_STATUS_LABELS.ancien_documents_recus}</option>
-            {LEAD_STATUSES_TELEPRO.map((s) => (
+            {LEAD_STATUSES_ADMIN.map((s) => (
               <option key={s} value={s}>
                 {LEAD_STATUS_LABELS[s]}
               </option>

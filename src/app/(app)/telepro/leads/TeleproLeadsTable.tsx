@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { LEAD_STATUS_LABELS, LEAD_STATUSES_TELEPRO, type LeadStatus } from "@/lib/types";
+import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, type LeadStatus } from "@/lib/types";
 import { formatDateParis, formatFullDateTimeParis } from "@/lib/date";
 
 function getRowStatusClass(status: string): string {
@@ -174,7 +174,7 @@ export function TeleproLeadsTable({ leads }: TeleproLeadsTableProps) {
                             {LEAD_STATUS_LABELS.ancien_documents_recus}
                           </option>
                         )}
-                        {LEAD_STATUSES_TELEPRO.map((s) => (
+                        {LEAD_STATUSES_ADMIN.map((s) => (
                           <option key={s} value={s}>
                             {LEAD_STATUS_LABELS[s]}
                             {s === "nrp" && lead.nrp_count > 0

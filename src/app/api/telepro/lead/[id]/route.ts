@@ -62,13 +62,6 @@ export async function PATCH(
   const body = await request.json();
   const { status, callback_at, nrp_count, logAction, logOldStatus, logNewStatus, ...rest } = body;
 
-  if (status === "ancien_documents_recus") {
-    return NextResponse.json(
-      { error: "Ce statut n'est pas sélectionnable par les télépros" },
-      { status: 403 }
-    );
-  }
-
   const updates: Record<string, unknown> = {
     updated_at: new Date().toISOString(),
   };

@@ -77,10 +77,10 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed top-4 left-4 z-40 p-2 rounded-lg bg-white border border-slate-200 shadow-sm hover:bg-slate-50 lg:hidden"
+        className="fixed top-4 left-4 z-40 p-2 rounded-lg bg-[#2d4a6d] border border-white/20 shadow-sm hover:bg-[#3d5a80] lg:hidden"
         aria-label="Ouvrir le menu"
       >
-        <Menu className="w-6 h-6 text-slate-700" />
+        <Menu className="w-6 h-6 text-white" />
       </button>
 
       {open && (
@@ -92,12 +92,12 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
       )}
 
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-white border-r border-slate-200 z-50 transform transition-transform duration-200 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-0 left-0 h-full w-64 bg-[#2d4a6d] border-r border-white/20 z-50 transform transition-transform duration-200 ease-in-out lg:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex flex-col h-full">
-          <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+          <div className="p-4 border-b border-white/20 flex items-center justify-between">
             <div className="flex flex-col gap-1">
               <Link href={isAdminSpace ? (role === "secretaire" ? "/admin/documents-recus" : "/admin") : "/telepro"} className="block">
                 <Image
@@ -109,13 +109,13 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
                   priority
                 />
               </Link>
-              <span className={`text-xs font-medium ${isAdminSpace ? "text-blue-600" : "text-slate-500"}`}>
+              <span className="text-xs font-medium text-white">
                 {isAdminSpace ? (role === "secretaire" ? "Espace secrétaire" : "Espace administrateur") : "Espace télépro"}
               </span>
             </div>
             <button
               onClick={() => setOpen(false)}
-              className="p-2 rounded-lg hover:bg-slate-100 lg:hidden"
+              className="p-2 rounded-lg hover:bg-white/20 lg:hidden text-white"
               aria-label="Fermer le menu"
             >
               <X className="w-5 h-5" />
@@ -139,8 +139,8 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
                     onClick={() => setOpen(false)}
                     className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                       isActive
-                        ? "bg-blue-50 text-blue-700 font-medium"
-                        : "text-slate-700 hover:bg-slate-100"
+                        ? "bg-white/25 text-white font-medium"
+                        : "text-white hover:bg-white/20"
                     }`}
                   >
                     <item.icon className="w-5 h-5 shrink-0" />
@@ -153,12 +153,12 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
                         onClick={() => setOpen(false)}
                         className={`flex items-center justify-between w-full px-3 py-2 text-sm rounded-md transition-colors ${
                           !currentStatus
-                            ? "bg-blue-100 text-blue-700 font-medium"
-                            : "text-slate-600 hover:bg-slate-100"
+                            ? "bg-white/25 text-white font-medium"
+                            : "text-white/90 hover:bg-white/20"
                         }`}
                       >
                         <span>Tous</span>
-                        <span className="text-slate-500 tabular-nums">
+                        <span className="text-white/70 tabular-nums">
                           {Object.values(statusCounts).reduce((a, b) => a + b, 0)}
                         </span>
                       </Link>
@@ -169,12 +169,12 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
                           onClick={() => setOpen(false)}
                           className={`flex items-center justify-between w-full px-3 py-2 text-sm rounded-md transition-colors ${
                             currentStatus === s
-                              ? "bg-blue-100 text-blue-700 font-medium"
-                              : "text-slate-600 hover:bg-slate-100"
+                              ? "bg-white/25 text-white font-medium"
+                              : "text-white/90 hover:bg-white/20"
                           }`}
                         >
                           <span>{LEAD_STATUS_LABELS[s as LeadStatus]}</span>
-                          <span className="text-slate-500 tabular-nums">
+                          <span className="text-white/70 tabular-nums">
                             {statusCounts[s] ?? 0}
                           </span>
                         </Link>
@@ -186,28 +186,28 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
             })}
           </nav>
 
-          <div className="p-4 border-t border-slate-200 space-y-2">
+          <div className="p-4 border-t border-white/20 space-y-2">
             {unreadNotifications > 0 && (
               <Link
                 href={isAdminSpace ? "/admin/notifications" : "/telepro/notifications"}
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-white/20"
               >
                 <Bell className="w-5 h-5 shrink-0" />
                 <span>Notifications</span>
-                <span className="ml-auto bg-blue-600 text-white text-xs font-medium px-2 py-0.5 rounded-full">
+                <span className="ml-auto bg-white/30 text-white text-xs font-medium px-2 py-0.5 rounded-full">
                   {unreadNotifications}
                 </span>
               </Link>
             )}
             {userName && (
-              <div className="px-4 py-2 text-sm text-slate-500 truncate">
+              <div className="px-4 py-2 text-sm text-white/80 truncate">
                 {userName}
               </div>
             )}
             <button
               onClick={handleLogout}
-              className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-slate-700 hover:bg-red-50 hover:text-red-700 transition-colors"
+              className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-white hover:bg-red-500/30 hover:text-white transition-colors"
             >
               <LogOut className="w-5 h-5 shrink-0" />
               Déconnexion

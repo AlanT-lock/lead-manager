@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, X } from "lucide-react";
+import { Plus, Pencil, Trash2, X } from "lucide-react";
 
 interface ProductType {
   id: string;
@@ -41,6 +41,7 @@ export function StockageClient({
   const [editName, setEditName] = useState("");
   const [editPrice, setEditPrice] = useState("");
   const [editTypeId, setEditTypeId] = useState("");
+  const quantitySaveTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const refreshData = useCallback(async () => {
     const [productsRes, typesRes] = await Promise.all([
@@ -56,6 +57,13 @@ export function StockageClient({
       setNewProductTypeId(productTypes[0].id);
     }
   }, [productTypes, newProductTypeId]);
+
+  useEffect(() => {
+    return () => {
+      Object.values(quantitySaveTimeoutsRef.current).forEach(clearTimeout);
+      quantitySaveTimeoutsRef.current = {};
+    };
+  }, []);
 
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,6 +168,23 @@ export function StockageClient({
     setEditName(product.name);
     setEditPrice(String(product.price));
     setEditTypeId(product.product_type_id);
+  };
+
+  const handleDeleteProduct = async (product: Product, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm(`Supprimer le produit « ${product.name} » ?`)) return;
+
+    setLoading(true);
+    const res = await fetch(`/api/admin/products/${product.id}`, {
+      method: "DELETE",
+    });
+    setLoading(false);
+
+    if (res.ok) {
+      setProducts((prev) => prev.filter((p) => p.id !== product.id));
+      if (editingProduct?.id === product.id) setEditingProduct(null);
+      router.refresh();
+    }
   };
 
   const productsByType = productTypes.reduce<Record<string, Product[]>>(
@@ -322,12 +347,13 @@ export function StockageClient({
                                         : p
                                     )
                                   );
-                                }
-                              }}
-                              onBlur={(e) => {
-                                const v = parseInt(e.target.value, 10);
-                                if (!isNaN(v) && v >= 0 && v !== product.quantity) {
-                                  handleUpdateQuantity(product.id, v);
+                                  const pid = product.id;
+                                  if (quantitySaveTimeoutsRef.current[pid])
+                                    clearTimeout(quantitySaveTimeoutsRef.current[pid]);
+                                  quantitySaveTimeoutsRef.current[pid] = setTimeout(() => {
+                                    delete quantitySaveTimeoutsRef.current[pid];
+                                    handleUpdateQuantity(pid, v);
+                                  }, 500);
                                 }
                               }}
                               className="w-16 px-2 py-1 border rounded text-center"
@@ -340,6 +366,15 @@ export function StockageClient({
                             title="Modifier"
                           >
                             <Pencil className="w-4 h-4 text-slate-600" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => handleDeleteProduct(product, e)}
+                            disabled={loading}
+                            className="p-2 rounded-lg hover:bg-red-50"
+                            title="Supprimer"
+                          >
+                            <Trash2 className="w-4 h-4 text-red-600" />
                           </button>
                         </div>
                       </div>
