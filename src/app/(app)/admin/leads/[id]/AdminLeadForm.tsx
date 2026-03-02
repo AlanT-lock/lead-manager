@@ -23,6 +23,7 @@ import {
   toDatetimeLocalValueParis,
   fromDatetimeLocalValueParis,
 } from "@/lib/date";
+import { MaterialCostSection } from "./MaterialCostSection";
 
 interface AdminLeadFormProps {
   lead: Record<string, unknown>;
@@ -77,13 +78,25 @@ function buildUpdates(lead: Record<string, unknown>) {
   };
 }
 
+interface SelectedMaterial {
+  product_id: string;
+  quantity: number;
+  product?: { id: string; name: string; price: number };
+}
+
 export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
   const [lead, setLead] = useState(initialLead);
+  const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterial[]>([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const leadRef = useRef(lead);
+  const materialsRef = useRef<SelectedMaterial[]>([]);
   const lastSavedRef = useRef<string>("");
+
+  useEffect(() => {
+    materialsRef.current = selectedMaterials;
+  }, [selectedMaterials]);
 
   useEffect(() => {
     setLead(initialLead);
@@ -102,11 +115,27 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
       credentials: "include",
       body: JSON.stringify(updates),
     });
-    setLoading(false);
     if (res.ok) {
       lastSavedRef.current = JSON.stringify(updates);
+      const materials = materialsRef.current;
+      if (materials.length > 0) {
+        await fetch(`/api/admin/leads/${leadRef.current.id}/materials`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ materials }),
+        });
+      } else {
+        await fetch(`/api/admin/leads/${leadRef.current.id}/materials`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ materials: [] }),
+        });
+      }
       router.refresh();
     }
+    setLoading(false);
   }, [router]);
 
   const scheduleAutoSave = useCallback(() => {
@@ -516,30 +545,17 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
                   className="w-full px-4 py-2 border rounded-lg"
                 />
               </div>
-              <div>
-                <label className="block text-sm text-slate-600 mb-1">
-                  Coût matériel (€)
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={(lead.material_cost as number) || ""}
-                  onChange={(e) =>
-                    updateField(
-                      "material_cost",
-                      e.target.value ? parseFloat(e.target.value) : null
-                    )
+              <div className="md:col-span-2">
+                <MaterialCostSection
+                  leadId={lead.id as string}
+                  materialCost={(lead.material_cost as number) ?? null}
+                  materialCostComment={(lead.material_cost_comment as string) || ""}
+                  onMaterialCostChange={(v) => updateField("material_cost", v)}
+                  onMaterialCostCommentChange={(v) =>
+                    updateField("material_cost_comment", v)
                   }
-                  className="w-full px-4 py-2 border rounded-lg"
-                />
-                <input
-                  type="text"
-                  placeholder="Commentaire"
-                  value={(lead.material_cost_comment as string) || ""}
-                  onChange={(e) =>
-                    updateField("material_cost_comment", e.target.value)
-                  }
-                  className="w-full px-4 py-2 border rounded-lg mt-1"
+                  onMaterialsChange={setSelectedMaterials}
+                  selectedMaterials={selectedMaterials}
                 />
               </div>
               <div>

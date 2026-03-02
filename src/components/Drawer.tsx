@@ -19,6 +19,7 @@ import {
   FileCheck,
   BarChart3,
   TrendingUp,
+  Package,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -35,6 +36,7 @@ const adminNav = [
   { href: "/admin", label: "Statistique télépro", icon: TrendingUp },
   { href: "/admin/leads", label: "Tous les leads", icon: List, hasStatusSubmenu: true },
   { href: "/admin/documents-recus", label: "Documents reçus", icon: FileCheck },
+  { href: "/admin/stockage", label: "Stockage", icon: Package },
   { href: "/admin/import", label: "Import CSV", icon: FileUp },
   { href: "/admin/users", label: "Utilisateurs", icon: UserPlus },
   { href: "/admin/stats", label: "Statistiques", icon: BarChart3 },
