@@ -11,21 +11,21 @@ Vercel ne fonctionne pas pour ce projet (erreur interne persistante). Utilisez N
    - Choisissez **GitHub** et connectez votre compte
    - Sélectionnez le dépôt `AlanT-lock/lead-manager`
 
-3. **Configuration du build** (auto-détectée) :
+3. **Configuration du build** :
    - Build command : `npm run build`
-   - Publish directory : `.next` (Netlify le gère automatiquement pour Next.js)
-   - Base directory : `./` (laisser vide)
+   - **Publish directory : LAISSER VIDE** (le plugin Next.js gère tout)
+   - Base directory : laisser vide
 
-4. **Variables d'environnement** :
-   - Allez dans **Site settings** → **Environment variables**
-   - Ajoutez les mêmes variables que celles de `.env.local` :
+4. **Variables d'environnement (OBLIGATOIRES)** :
+   - Allez dans **Site settings** → **Environment variables** → **Add a variable**
+   - Ajoutez ces 3 variables (les mêmes que dans `.env.local`) :
      - `NEXT_PUBLIC_SUPABASE_URL`
      - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
      - `SUPABASE_SERVICE_ROLE_KEY`
+   - Sans ces variables, l'app ne fonctionnera pas (404 ou erreurs).
 
-5. **Déployer** :
-   - Cliquez sur **Deploy site**
-   - Netlify va builder et déployer automatiquement
+5. **Redéployer** après avoir ajouté les variables :
+   - **Deploys** → **Trigger deploy** → **Deploy site**
 
 ## Déploiements futurs
 
