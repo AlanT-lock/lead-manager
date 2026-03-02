@@ -52,7 +52,9 @@ export default async function TeleproDashboard() {
     {} as Record<LeadStatus, number>
   );
 
-  const documentsRecus = statusCounts.documents_recus || 0;
+  const documentsRecus =
+    (statusCounts.documents_recus || 0) +
+    (statusCounts.ancien_documents_recus || 0);
   const conversionRate =
     (total || 0) > 0
       ? ((documentsRecus / (total || 1)) * 100).toFixed(1)
@@ -120,7 +122,7 @@ export default async function TeleproDashboard() {
             {conversionRate} %
           </p>
           <p className="text-sm text-slate-500 mt-1">
-            Leads en &quot;Documents reçus&quot; / Total
+            Leads &quot;Documents reçus&quot; + &quot;Ancien documents reçus&quot; / Total
           </p>
         </div>
       </div>
