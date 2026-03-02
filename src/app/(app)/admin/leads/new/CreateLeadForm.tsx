@@ -15,6 +15,7 @@ import {
   type ElectricityType,
   type HeatingMode,
 } from "@/lib/types";
+import { usePostalCodeToCity } from "@/hooks/usePostalCodeToCity";
 
 interface Telepro {
   id: string;
@@ -56,6 +57,8 @@ export function CreateLeadForm({ telepros }: CreateLeadFormProps) {
     setForm((f) => ({ ...f, [field]: value }));
     setError(null);
   };
+
+  usePostalCodeToCity(form.postal_code, (city) => update("city", city));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

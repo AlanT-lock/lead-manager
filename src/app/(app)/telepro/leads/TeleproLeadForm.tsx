@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   LEAD_STATUS_LABELS,
+  LEAD_STATUSES_ADMIN,
   LEAD_COLOR_LABELS_SIMPLE,
   INSTALLATION_TYPE_LABELS,
   ELECTRICITY_TYPE_LABELS,
@@ -21,6 +22,7 @@ import {
   toDatetimeLocalValueParis,
   fromDatetimeLocalValueParis,
 } from "@/lib/date";
+import { usePostalCodeToCity } from "@/hooks/usePostalCodeToCity";
 import { TeleproDocumentsSection } from "./TeleproDocumentsSection";
 
 interface TeleproDoc {
@@ -93,6 +95,15 @@ export function TeleproLeadForm({
     leadRef.current = lead;
   }, [lead]);
 
+  const handleFieldChange = (field: string, value: unknown) => {
+    setLead((l) => ({ ...l, [field]: value }));
+    scheduleAutoSave();
+  };
+
+  usePostalCodeToCity((lead.postal_code as string) || "", (city) =>
+    handleFieldChange("city", city)
+  );
+
   const performSave = useCallback(async (data: Record<string, unknown>, redirectAfter: boolean) => {
     if (saving) return;
     setSaving(true);
@@ -130,11 +141,6 @@ export function TeleproLeadForm({
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     };
   }, []);
-
-  const handleFieldChange = (field: string, value: unknown) => {
-    setLead((l) => ({ ...l, [field]: value }));
-    scheduleAutoSave();
-  };
 
   const handleStatusChange = async (newStatus: LeadStatus, callbackAt?: string) => {
     if (!lead || saving) return;
@@ -527,21 +533,7 @@ export function TeleproLeadForm({
           <div className="border-t pt-6">
             <h3 className="font-medium text-slate-800 mb-3">Statut</h3>
             <div className="flex flex-wrap gap-2">
-                  {(lead.status as string) === "ancien_documents_recus" && (
-                    <span className="inline-flex px-4 py-2 rounded-lg text-sm font-medium bg-slate-500 text-white">
-                      {LEAD_STATUS_LABELS.ancien_documents_recus}
-                    </span>
-                  )}
-                  {((
-                    [
-                      "nouveau",
-                      "nrp",
-                      "a_rappeler",
-                      "en_attente_doc",
-                      "documents_recus",
-                      "annule",
-                    ] as LeadStatus[]
-                  ).filter((s) => s !== "ancien_documents_recus")).map((s) => (
+                  {LEAD_STATUSES_ADMIN.map((s) => (
                     <StatusButton
                       key={s}
                       status={s}

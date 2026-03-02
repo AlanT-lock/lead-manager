@@ -19,6 +19,7 @@ import {
   type ElectricityType,
   type HeatingMode,
 } from "@/lib/types";
+import { usePostalCodeToCity } from "@/hooks/usePostalCodeToCity";
 import {
   toDatetimeLocalValueParis,
   fromDatetimeLocalValueParis,
@@ -160,6 +161,10 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
     }
     scheduleAutoSave();
   };
+
+  usePostalCodeToCity((lead.postal_code as string) || "", (city) =>
+    updateField("city", city)
+  );
 
   useEffect(() => {
     const inst = (lead.installation_cost as number) || 0;
