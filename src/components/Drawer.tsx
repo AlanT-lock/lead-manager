@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, LEAD_STATUSES_TELEPRO, type LeadStatus } from "@/lib/types";
 
 interface DrawerProps {
   role: "admin" | "telepro" | "secretaire";
@@ -31,7 +32,7 @@ interface DrawerProps {
 
 const adminNav = [
   { href: "/admin", label: "Statistique télépro", icon: TrendingUp },
-  { href: "/admin/leads", label: "Tous les leads", icon: List },
+  { href: "/admin/leads", label: "Tous les leads", icon: List, hasStatusSubmenu: true },
   { href: "/admin/documents-recus", label: "Documents reçus", icon: FileCheck },
   { href: "/admin/import", label: "Import CSV", icon: FileUp },
   { href: "/admin/users", label: "Utilisateurs", icon: UserPlus },
@@ -40,7 +41,7 @@ const adminNav = [
 
 const secretaireNav = [
   { href: "/admin/documents-recus", label: "Documents reçus", icon: FileCheck },
-  { href: "/admin/leads", label: "Tous les leads", icon: List },
+  { href: "/admin/leads", label: "Tous les leads", icon: List, hasStatusSubmenu: true },
   { href: "/admin/import", label: "Import CSV", icon: FileUp },
   { href: "/admin/stats-secretaire", label: "Statistiques", icon: BarChart3 },
   { href: "/admin", label: "Statistique télépro", icon: TrendingUp },
@@ -48,7 +49,7 @@ const secretaireNav = [
 
 const teleproNav = [
   { href: "/telepro", label: "Tableau de bord", icon: LayoutDashboard },
-  { href: "/telepro/leads", label: "Mes leads", icon: Users },
+  { href: "/telepro/leads", label: "Mes leads", icon: Users, hasStatusSubmenu: true },
   { href: "/telepro/teleprospection", label: "Téléprospection", icon: Phone },
   { href: "/telepro/agenda", label: "Agenda", icon: Calendar },
 ];
@@ -56,6 +57,7 @@ const teleproNav = [
 export function Drawer({ role, userName, unreadNotifications = 0 }: DrawerProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   // Le menu suit l'URL : /admin → menu admin/secretaire, /telepro → menu télépro
   const isAdminSpace = pathname.startsWith("/admin");
@@ -120,23 +122,57 @@ export function Drawer({ role, userName, unreadNotifications = 0 }: DrawerProps)
           <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
             {nav.map((item) => {
               const homeHref = isAdminSpace ? (role === "secretaire" ? "/admin/documents-recus" : "/admin") : "/telepro";
+              const isLeadsPage = pathname.startsWith(item.href) && (item.href === "/admin/leads" || item.href === "/telepro/leads");
               const isActive =
                 pathname === item.href ||
                 (item.href !== homeHref && pathname.startsWith(item.href));
+              const statuses = item.href === "/telepro/leads" ? LEAD_STATUSES_TELEPRO : LEAD_STATUSES_ADMIN;
+              const currentStatus = isLeadsPage ? searchParams.get("status") : null;
+
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                    isActive
-                      ? "bg-blue-50 text-blue-700 font-medium"
-                      : "text-slate-700 hover:bg-slate-100"
-                  }`}
-                >
-                  <item.icon className="w-5 h-5 shrink-0" />
-                  {item.label}
-                </Link>
+                <div key={item.href} className="space-y-1">
+                  <Link
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                      isActive
+                        ? "bg-blue-50 text-blue-700 font-medium"
+                        : "text-slate-700 hover:bg-slate-100"
+                    }`}
+                  >
+                    <item.icon className="w-5 h-5 shrink-0" />
+                    {item.label}
+                  </Link>
+                  {"hasStatusSubmenu" in item && item.hasStatusSubmenu && (
+                    <div className="pl-4 pr-2 py-1 flex flex-wrap gap-1.5">
+                      <Link
+                        href={item.href}
+                        onClick={() => setOpen(false)}
+                        className={`px-2.5 py-1 text-xs rounded-md transition-colors ${
+                          !currentStatus
+                            ? "bg-blue-100 text-blue-700 font-medium"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
+                        Tous
+                      </Link>
+                      {statuses.map((s) => (
+                        <Link
+                          key={s}
+                          href={`${item.href}?status=${s}`}
+                          onClick={() => setOpen(false)}
+                          className={`px-2.5 py-1 text-xs rounded-md transition-colors ${
+                            currentStatus === s
+                              ? "bg-blue-100 text-blue-700 font-medium"
+                              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                          }`}
+                        >
+                          {LEAD_STATUS_LABELS[s as LeadStatus]}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               );
             })}
           </nav>

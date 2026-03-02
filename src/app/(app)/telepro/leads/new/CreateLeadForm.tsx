@@ -31,6 +31,7 @@ export function CreateLeadForm() {
     surface_m2: "",
     revenu_fiscal_ref: "",
     numero_fiscal: "",
+    date_of_birth: "",
     heating_mode: "",
     color: "",
     is_owner: "",
@@ -62,6 +63,7 @@ export function CreateLeadForm() {
         surface_m2: form.surface_m2 ? parseFloat(form.surface_m2) : null,
         revenu_fiscal_ref: form.revenu_fiscal_ref ? parseFloat(form.revenu_fiscal_ref) : null,
         numero_fiscal: form.numero_fiscal?.trim() || null,
+        date_of_birth: form.date_of_birth?.trim() || null,
         is_owner: form.is_owner === "" ? null : form.is_owner === "owner",
         radiator_type: Array.isArray(form.radiator_type) && form.radiator_type.length > 0 ? form.radiator_type : null,
       }),
@@ -173,6 +175,15 @@ export function CreateLeadForm() {
                 value={form.numero_fiscal}
                 onChange={(e) => update("numero_fiscal", e.target.value)}
                 placeholder="13 chiffres"
+                className="w-full px-4 py-2 border rounded-lg"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-slate-600 mb-1">Date de naissance</label>
+              <input
+                type="date"
+                value={form.date_of_birth}
+                onChange={(e) => update("date_of_birth", e.target.value)}
                 className="w-full px-4 py-2 border rounded-lg"
               />
             </div>

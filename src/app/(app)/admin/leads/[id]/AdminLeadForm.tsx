@@ -77,6 +77,7 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
       surface_m2: lead.surface_m2 ? Number(lead.surface_m2) : null,
       revenu_fiscal_ref: lead.revenu_fiscal_ref ? Number(lead.revenu_fiscal_ref) : null,
       numero_fiscal: lead.numero_fiscal || null,
+      date_of_birth: lead.date_of_birth || null,
       address: lead.address,
       postal_code: lead.postal_code,
       city: lead.city,
@@ -246,6 +247,15 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
               value={(lead.numero_fiscal as string) || ""}
               onChange={(e) => updateField("numero_fiscal", e.target.value || null)}
               placeholder="13 chiffres"
+              className="w-full px-4 py-2 border rounded-lg"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-slate-600 mb-1">Date de naissance</label>
+            <input
+              type="date"
+              value={(lead.date_of_birth as string) || ""}
+              onChange={(e) => updateField("date_of_birth", e.target.value || null)}
               className="w-full px-4 py-2 border rounded-lg"
             />
           </div>

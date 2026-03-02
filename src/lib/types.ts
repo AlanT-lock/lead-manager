@@ -194,6 +194,7 @@ export interface Lead {
   surface_m2: number | null;
   revenu_fiscal_ref: number | null;
   numero_fiscal: string | null;
+  date_of_birth: string | null;
   department: string | null;
   address: string | null;
   postal_code: string | null;

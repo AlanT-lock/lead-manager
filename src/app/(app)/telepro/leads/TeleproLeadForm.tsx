@@ -145,6 +145,7 @@ export function TeleproLeadForm({
         surface_m2: lead.surface_m2,
         revenu_fiscal_ref: lead.revenu_fiscal_ref,
         numero_fiscal: lead.numero_fiscal,
+        date_of_birth: lead.date_of_birth,
         address: lead.address,
         postal_code: lead.postal_code,
         city: lead.city,
@@ -288,6 +289,17 @@ export function TeleproLeadForm({
               value={(lead.numero_fiscal as string) || ""}
               onChange={(e) => handleFieldChange("numero_fiscal", e.target.value || null)}
               placeholder="13 chiffres"
+              className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Date de naissance
+            </label>
+            <input
+              type="date"
+              value={(lead.date_of_birth as string) || ""}
+              onChange={(e) => handleFieldChange("date_of_birth", e.target.value || null)}
               className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
             />
           </div>
