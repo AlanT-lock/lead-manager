@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lead Manager
 
-## Getting Started
+Plateforme de gestion des leads pour téléprospection - PAC, systèmes solaires, ballons électriques.
 
-First, run the development server:
+## Stack technique
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Frontend** : Next.js 16, React 19, TypeScript, Tailwind CSS
+- **Backend** : Supabase (Auth, PostgreSQL, Storage)
+- **Déploiement** : Vercel
+
+## Configuration
+
+### 1. Variables d'environnement
+
+Copiez `.env.example` vers `.env.local` et remplissez :
+
+```
+NEXT_PUBLIC_SUPABASE_URL=votre_url_supabase
+NEXT_PUBLIC_SUPABASE_ANON_KEY=votre_cle_anon
+SUPABASE_SERVICE_ROLE_KEY=votre_cle_service_role
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Supabase
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Créez un projet sur [supabase.com](https://supabase.com)
+2. Exécutez la migration SQL dans `supabase/migrations/001_initial_schema.sql` via le SQL Editor de Supabase
+3. Créez manuellement le bucket de stockage "documents" dans Storage (paramètres : privé)
+4. Les policies de stockage sont dans la migration
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Premier lancement
 
-## Learn More
+1. `npm install`
+2. Copiez `.env.example` vers `.env.local` et remplissez avec vos clés Supabase
+3. `npm run dev`
+4. Accédez à `/setup` pour créer le premier compte administrateur
+5. Connectez-vous puis créez des télépros depuis Admin > Utilisateurs
 
-To learn more about Next.js, take a look at the following resources:
+> **Note** : Pour que le build Vercel réussisse, les variables d'environnement doivent être configurées dans les paramètres du projet.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `/` - Page d'accueil
+- `/login` - Connexion
+- `/setup` - Première configuration (création admin)
+- `/telepro` - Espace télépro (dashboard, leads, téléprospection)
+- `/admin` - Espace admin (dashboard, import CSV, utilisateurs, leads, documents reçus, stats)
 
-## Deploy on Vercel
+## Import CSV
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Format attendu (Meta Ads) : colonnes `first_name`, `last_name`, `phone_number`, `email` (ou variantes françaises). Détection automatique des colonnes.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Déploiement Vercel
+
+1. Connectez le repo GitHub à Vercel
+2. Ajoutez les variables d'environnement
+3. Déployez
