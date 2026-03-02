@@ -23,7 +23,7 @@ import {
   toDatetimeLocalValueParis,
   fromDatetimeLocalValueParis,
 } from "@/lib/date";
-import { MaterialCostSection } from "./MaterialCostSection";
+import { MaterialCostSection, type SelectedMaterial } from "./MaterialCostSection";
 
 interface AdminLeadFormProps {
   lead: Record<string, unknown>;
@@ -78,12 +78,6 @@ function buildUpdates(lead: Record<string, unknown>) {
   };
 }
 
-interface SelectedMaterial {
-  product_id: string;
-  quantity: number;
-  product?: { id: string; name: string; price: number };
-}
-
 export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
   const [lead, setLead] = useState(initialLead);
   const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterial[]>([]);
@@ -133,10 +127,10 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
           body: JSON.stringify({ materials: [] }),
         });
       }
-      router.refresh();
+      // Ne pas refresh : évite d'écraser les modifications en cours de saisie
     }
     setLoading(false);
-  }, [router]);
+  }, []);
 
   const scheduleAutoSave = useCallback(() => {
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
@@ -146,7 +140,7 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
       if (JSON.stringify(updates) !== lastSavedRef.current) {
         performSave();
       }
-    }, 500);
+    }, 1500);
   }, [performSave]);
 
   useEffect(() => {

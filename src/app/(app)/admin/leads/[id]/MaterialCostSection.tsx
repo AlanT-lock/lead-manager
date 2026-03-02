@@ -12,7 +12,7 @@ interface Product {
   id: string;
   name: string;
   price: number;
-  product_types: ProductType | null;
+  product_types?: ProductType | null;
 }
 
 interface LeadMaterial {
@@ -22,10 +22,10 @@ interface LeadMaterial {
   products: Product;
 }
 
-interface SelectedMaterial {
+export interface SelectedMaterial {
   product_id: string;
   quantity: number;
-  product?: Product;
+  product?: { id: string; name: string; price: number };
 }
 
 interface MaterialCostSectionProps {
