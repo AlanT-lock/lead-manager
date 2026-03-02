@@ -162,8 +162,9 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
     scheduleAutoSave();
   };
 
-  usePostalCodeToCity((lead.postal_code as string) || "", (city) =>
-    updateField("city", city)
+  const { fetchCity, isLoading: cityLoading } = usePostalCodeToCity(
+    (lead.postal_code as string) || "",
+    (city) => updateField("city", city)
   );
 
   useEffect(() => {
@@ -344,6 +345,8 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
               type="text"
               value={(lead.postal_code as string) || ""}
               onChange={(e) => updateField("postal_code", e.target.value)}
+              onBlur={fetchCity}
+              placeholder="75001"
               className="w-full px-4 py-2 border rounded-lg"
             />
           </div>
@@ -353,6 +356,8 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
               type="text"
               value={(lead.city as string) || ""}
               onChange={(e) => updateField("city", e.target.value)}
+              placeholder={cityLoading ? "Chargement…" : undefined}
+              readOnly={cityLoading}
               className="w-full px-4 py-2 border rounded-lg"
             />
           </div>

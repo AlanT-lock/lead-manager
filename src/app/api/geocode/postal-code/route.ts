@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
   try {
     const url = new URL("https://maps.googleapis.com/maps/api/geocode/json");
     url.searchParams.set("address", `${code}, France`);
+    url.searchParams.set("components", "country:FR");
     url.searchParams.set("key", apiKey);
     url.searchParams.set("language", "fr");
 
@@ -41,17 +42,26 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ city: null });
     }
 
-    const components = data.results[0].address_components || [];
-    const locality =
-      components.find((c: { types: string[] }) =>
-        c.types.includes("locality")
-      )?.long_name ??
-      components.find((c: { types: string[] }) =>
-        c.types.includes("administrative_area_level_2")
-      )?.long_name ??
-      null;
+    const result = data.results[0];
+    const components = result.address_components || [];
 
-    return NextResponse.json({ city: locality });
+    const getComponent = (types: string[]) =>
+      components.find((c: { types: string[] }) =>
+        types.some((t) => c.types.includes(t))
+      )?.long_name;
+
+    const city =
+      getComponent(["locality"]) ??
+      getComponent(["postal_town"]) ??
+      getComponent(["sublocality", "sublocality_level_1"]) ??
+      getComponent(["administrative_area_level_2"]) ??
+      (() => {
+        const addr = result.formatted_address || "";
+        const match = addr.match(/^\d{5}\s+(.+?)(?:\s|,|$)/);
+        return match ? match[1].trim() : null;
+      })();
+
+    return NextResponse.json({ city: city || null });
   } catch (err) {
     console.error("[geocode/postal-code]", err);
     return NextResponse.json(

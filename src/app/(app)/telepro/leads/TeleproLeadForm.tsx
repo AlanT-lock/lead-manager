@@ -100,8 +100,9 @@ export function TeleproLeadForm({
     scheduleAutoSave();
   };
 
-  usePostalCodeToCity((lead.postal_code as string) || "", (city) =>
-    handleFieldChange("city", city)
+  const { fetchCity, isLoading: cityLoading } = usePostalCodeToCity(
+    (lead.postal_code as string) || "",
+    (city) => handleFieldChange("city", city)
   );
 
   const performSave = useCallback(async (data: Record<string, unknown>, redirectAfter: boolean) => {
@@ -356,6 +357,8 @@ export function TeleproLeadForm({
               type="text"
               value={(lead.postal_code as string) || ""}
               onChange={(e) => handleFieldChange("postal_code", e.target.value)}
+              onBlur={fetchCity}
+              placeholder="75001"
               className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
             />
           </div>
@@ -367,6 +370,8 @@ export function TeleproLeadForm({
               type="text"
               value={(lead.city as string) || ""}
               onChange={(e) => handleFieldChange("city", e.target.value)}
+              placeholder={cityLoading ? "Chargement…" : undefined}
+              readOnly={cityLoading}
               className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
             />
           </div>

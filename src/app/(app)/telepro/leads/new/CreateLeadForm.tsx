@@ -47,7 +47,10 @@ export function CreateLeadForm() {
     setError(null);
   };
 
-  usePostalCodeToCity(form.postal_code, (city) => update("city", city));
+  const { fetchCity, isLoading: cityLoading } = usePostalCodeToCity(
+    form.postal_code,
+    (city) => update("city", city)
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -196,6 +199,8 @@ export function CreateLeadForm() {
                 type="text"
                 value={form.postal_code}
                 onChange={(e) => update("postal_code", e.target.value)}
+                onBlur={fetchCity}
+                placeholder="75001"
                 className="w-full px-4 py-2 border rounded-lg"
               />
             </div>
@@ -205,6 +210,8 @@ export function CreateLeadForm() {
                 type="text"
                 value={form.city}
                 onChange={(e) => update("city", e.target.value)}
+                placeholder={cityLoading ? "Chargement…" : undefined}
+                readOnly={cityLoading}
                 className="w-full px-4 py-2 border rounded-lg"
               />
             </div>
