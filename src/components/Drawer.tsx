@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, LEAD_STATUSES_TELEPRO, type LeadStatus } from "@/lib/types";
+import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, type LeadStatus } from "@/lib/types";
 
 interface DrawerProps {
   role: "admin" | "telepro" | "secretaire";
@@ -127,7 +127,7 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
               const isActive =
                 pathname === item.href ||
                 (item.href !== homeHref && pathname.startsWith(item.href));
-              const statuses = item.href === "/telepro/leads" ? LEAD_STATUSES_TELEPRO : LEAD_STATUSES_ADMIN;
+              const statuses = LEAD_STATUSES_ADMIN;
               const currentStatus = isLeadsPage ? searchParams.get("status") : null;
 
               return (

@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { Drawer } from "@/components/Drawer";
+import { LEAD_STATUSES_ADMIN } from "@/lib/types";
 
 export default async function AppLayout({
   children,
@@ -50,15 +51,17 @@ export default async function AppLayout({
   const isAdminOrSecretaire = role === "admin" || role === "secretaire";
   let statusCounts: Record<string, number> = {};
   try {
-    let query = adminClient.from("leads").select("status");
-    if (!isAdminOrSecretaire) {
-      query = query.eq("assigned_to", user.id);
-    }
-    const { data: leads } = await query;
-    statusCounts = (leads || []).reduce<Record<string, number>>((acc, { status }) => {
-      if (status) acc[status] = (acc[status] || 0) + 1;
-      return acc;
-    }, {});
+    const counts = await Promise.all(
+      LEAD_STATUSES_ADMIN.map(async (s) => {
+        let q = adminClient.from("leads").select("*", { count: "exact", head: true }).eq("status", s);
+        if (!isAdminOrSecretaire) {
+          q = q.eq("assigned_to", user.id);
+        }
+        const { count } = await q;
+        return [s, count ?? 0] as const;
+      })
+    );
+    statusCounts = Object.fromEntries(counts);
   } catch {
     // Ignore errors, counts will be empty
   }

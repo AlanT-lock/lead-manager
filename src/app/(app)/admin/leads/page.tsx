@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { CHANTIER_STATUS_FIELDS, type LeadStatus } from "@/lib/types";
 import { AdminLeadsFilters } from "./AdminLeadsFilters";
 import { AdminLeadsTable } from "./AdminLeadsTable";
+import { DocumentsRecusTable } from "../documents-recus/DocumentsRecusTable";
 
 const CHANTIER_FIELDS = CHANTIER_STATUS_FIELDS.map((f) => f.field);
 
@@ -109,7 +110,11 @@ export default async function AdminLeadsPage({
 
       <AdminLeadsFilters telepros={teleprosForFilter} />
 
-      <AdminLeadsTable leads={leads || []} telepros={activeTelepros || []} />
+      {status === "documents_recus" ? (
+        <DocumentsRecusTable leads={leads || []} />
+      ) : (
+        <AdminLeadsTable leads={leads || []} telepros={activeTelepros || []} />
+      )}
     </div>
   );
 }
