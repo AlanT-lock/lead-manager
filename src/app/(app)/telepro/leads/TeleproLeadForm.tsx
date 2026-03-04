@@ -95,7 +95,17 @@ export function TeleproLeadForm({
   });
 
   useEffect(() => {
-    if (String(initialLead?.id) === leadId) {
+    if (String(initialLead?.id) !== leadId) return;
+    // Navigation vers un autre lead : toujours synchroniser
+    if (String(leadRef.current?.id) !== leadId) {
+      setLead(initialLead);
+      leadRef.current = initialLead;
+      lastSavedRef.current = JSON.stringify(pickLeadFields(initialLead));
+      return;
+    }
+    // Même lead : ne pas écraser si l'utilisateur a des modifications non sauvegardées
+    const currentStr = JSON.stringify(pickLeadFields(leadRef.current));
+    if (currentStr === lastSavedRef.current) {
       setLead(initialLead);
       leadRef.current = initialLead;
       lastSavedRef.current = JSON.stringify(pickLeadFields(initialLead));
@@ -138,16 +148,16 @@ export function TeleproLeadForm({
       lastSavedRef.current = dataToSave;
       if (redirectAfter) {
         router.push("/telepro/leads");
-      } else if (!pendingSaveRef.current) {
-        router.refresh();
-      }
-      if (pendingSaveRef.current) {
-        pendingSaveRef.current = false;
+      } else {
+        // Vérifier s'il y a des modifications saisies pendant l'enregistrement
         const latestData = pickLeadFields(leadRef.current);
         const latestStr = JSON.stringify(latestData);
         if (latestStr !== lastSavedRef.current) {
+          // Re-sauvegarder les modifications sans refresh (évite d'écraser la saisie)
+          pendingSaveRef.current = false;
           performSave(latestData, false);
         } else {
+          pendingSaveRef.current = false;
           router.refresh();
         }
       }

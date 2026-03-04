@@ -94,7 +94,18 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
   }, [selectedMaterials]);
 
   useEffect(() => {
-    setLead(initialLead);
+    // Navigation vers un autre lead : toujours synchroniser
+    if (String(leadRef.current?.id) !== String(initialLead?.id)) {
+      setLead(initialLead);
+      lastSavedRef.current = JSON.stringify(buildUpdates(initialLead));
+      return;
+    }
+    // Même lead : ne pas écraser si l'utilisateur a des modifications non sauvegardées
+    const currentStr = JSON.stringify(buildUpdates(leadRef.current));
+    if (currentStr === lastSavedRef.current) {
+      setLead(initialLead);
+      lastSavedRef.current = JSON.stringify(buildUpdates(initialLead));
+    }
   }, [initialLead]);
 
   useEffect(() => {
@@ -128,7 +139,11 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
           body: JSON.stringify({ materials: [] }),
         });
       }
-      // Ne pas refresh : évite d'écraser les modifications en cours de saisie
+      // Vérifier s'il y a des modifications saisies pendant l'enregistrement
+      const latestUpdates = buildUpdates(leadRef.current);
+      if (JSON.stringify(latestUpdates) !== lastSavedRef.current) {
+        performSave();
+      }
     }
     setLoading(false);
   }, []);
