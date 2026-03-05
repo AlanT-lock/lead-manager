@@ -327,46 +327,46 @@ export function StockageClient({
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
             {products.map((product) => {
               const typeName = product.product_types?.name || productTypes.find((t) => t.id === product.product_type_id)?.name || "";
               return (
                 <div
                   key={product.id}
-                  className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col min-w-0"
+                  className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm hover:shadow-md transition-shadow flex flex-col min-w-0"
                 >
                   {typeName && (
-                    <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md w-fit mb-2">
+                    <span className="text-[10px] font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded w-fit mb-1.5 truncate max-w-full">
                       {typeName}
                     </span>
                   )}
-                  <div className="flex justify-between items-start gap-2 mb-2">
-                    <h4 className="font-medium text-slate-800 line-clamp-2 text-sm flex-1 min-w-0">{product.name}</h4>
-                    <div className="flex items-center gap-0.5 shrink-0">
+                  <div className="flex justify-between items-start gap-1 mb-1.5">
+                    <h4 className="font-medium text-slate-800 line-clamp-2 text-xs flex-1 min-w-0">{product.name}</h4>
+                    <div className="flex items-center shrink-0">
                       <button
                         type="button"
                         onClick={() => openEditModal(product)}
-                        className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-700"
+                        className="p-1 rounded hover:bg-slate-100 text-slate-500 hover:text-slate-700"
                         title="Modifier"
                       >
-                        <Pencil className="w-4 h-4" />
+                        <Pencil className="w-3 h-3" />
                       </button>
                       <button
                         type="button"
                         onClick={(e) => handleDeleteProduct(product, e)}
                         disabled={loading}
-                        className="p-1.5 rounded-lg hover:bg-red-50 text-slate-500 hover:text-red-600 disabled:opacity-50"
+                        className="p-1 rounded hover:bg-red-50 text-slate-500 hover:text-red-600 disabled:opacity-50"
                         title="Supprimer"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3 h-3" />
                       </button>
                     </div>
                   </div>
-                  <p className="text-base font-semibold text-slate-700 mb-3">
+                  <p className="text-sm font-semibold text-slate-700 mb-2">
                     {Number(product.price).toFixed(2)} €
                   </p>
-                  <div className="flex items-center gap-2 mt-auto">
-                    <label className="text-sm text-slate-500">Qté :</label>
+                  <div className="flex items-center gap-1 mt-auto">
+                    <label className="text-[10px] text-slate-500">Qté</label>
                     <input
                       type="number"
                       min="0"
@@ -388,7 +388,7 @@ export function StockageClient({
                           }, 500);
                         }
                       }}
-                      className="w-16 px-2 py-1.5 border border-slate-200 rounded-lg text-center text-sm font-medium focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                      className="w-12 px-1 py-1 border border-slate-200 rounded text-center text-xs font-medium focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
                     />
                   </div>
                 </div>
