@@ -1,13 +1,18 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Trash2, X, Package, Layers, Euro } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Package, Layers, Euro, GripVertical, Truck } from "lucide-react";
 
 interface ProductType {
   id: string;
   name: string;
   display_order?: number;
+}
+
+interface Supplier {
+  id: string;
+  name: string;
 }
 
 interface Product {
@@ -17,23 +22,32 @@ interface Product {
   quantity: number;
   product_type_id: string;
   product_types: ProductType | null;
+  color: string | null;
+  supplier_id: string | null;
+  suppliers: Supplier | null;
+  display_order: number;
 }
 
 interface StockageClientProps {
   initialProducts: Product[];
   initialProductTypes: ProductType[];
+  initialSuppliers: Supplier[];
 }
 
 export function StockageClient({
   initialProducts,
   initialProductTypes,
+  initialSuppliers,
 }: StockageClientProps) {
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [productTypes, setProductTypes] = useState<ProductType[]>(initialProductTypes);
+  const [suppliers, setSuppliers] = useState<Supplier[]>(initialSuppliers);
   const [newProductName, setNewProductName] = useState("");
   const [newProductPrice, setNewProductPrice] = useState("");
   const [newProductTypeId, setNewProductTypeId] = useState("");
+  const [newProductColor, setNewProductColor] = useState("");
+  const [newProductSupplierId, setNewProductSupplierId] = useState("");
   const [newTypeName, setNewTypeName] = useState("");
   const [showNewTypeInput, setShowNewTypeInput] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -42,8 +56,13 @@ export function StockageClient({
   const [editName, setEditName] = useState("");
   const [editPrice, setEditPrice] = useState("");
   const [editTypeId, setEditTypeId] = useState("");
+  const [editColor, setEditColor] = useState("");
+  const [editSupplierId, setEditSupplierId] = useState("");
   const [editingType, setEditingType] = useState<ProductType | null>(null);
   const [editTypeName, setEditTypeName] = useState("");
+  const [showSuppliersModal, setShowSuppliersModal] = useState(false);
+  const [newSupplierName, setNewSupplierName] = useState("");
+  const [draggedProductId, setDraggedProductId] = useState<string | null>(null);
   const quantitySaveTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   useEffect(() => {
@@ -74,6 +93,8 @@ export function StockageClient({
         price,
         product_type_id: newProductTypeId,
         quantity: 0,
+        color: newProductColor || null,
+        supplier_id: newProductSupplierId || null,
       }),
     });
     setLoading(false);
@@ -83,6 +104,8 @@ export function StockageClient({
       setProducts((prev) => [...prev, created]);
       setNewProductName("");
       setNewProductPrice("");
+      setNewProductColor("");
+      setNewProductSupplierId("");
       setNewProductTypeId(productTypes[0]?.id || "");
       setShowAddModal(false);
       router.refresh();
@@ -197,6 +220,8 @@ export function StockageClient({
         name: editName.trim(),
         price,
         product_type_id: editTypeId,
+        color: editColor || null,
+        supplier_id: editSupplierId || null,
       }),
     });
     setLoading(false);
@@ -216,6 +241,8 @@ export function StockageClient({
     setEditName(product.name);
     setEditPrice(String(product.price));
     setEditTypeId(product.product_type_id);
+    setEditColor(product.color || "");
+    setEditSupplierId(product.supplier_id || "");
   };
 
   const handleDeleteProduct = async (product: Product, e: React.MouseEvent) => {
@@ -240,6 +267,84 @@ export function StockageClient({
     setEditTypeName(type.name);
   };
 
+  // Suppliers
+  const handleCreateSupplier = async () => {
+    if (!newSupplierName.trim()) return;
+    setLoading(true);
+    const res = await fetch("/api/admin/suppliers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newSupplierName.trim() }),
+    });
+    setLoading(false);
+    if (res.ok) {
+      const created = await res.json();
+      setSuppliers((prev) => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)));
+      setNewSupplierName("");
+    }
+  };
+
+  const handleDeleteSupplier = async (supplier: Supplier) => {
+    if (!confirm(`Supprimer le fournisseur « ${supplier.name} » ?`)) return;
+    setLoading(true);
+    const res = await fetch(`/api/admin/suppliers/${supplier.id}`, { method: "DELETE" });
+    setLoading(false);
+    if (res.ok) {
+      setSuppliers((prev) => prev.filter((s) => s.id !== supplier.id));
+      setProducts((prev) =>
+        prev.map((p) => p.supplier_id === supplier.id ? { ...p, supplier_id: null, suppliers: null } : p)
+      );
+    }
+  };
+
+  // Drag and drop
+  const handleDragStart = useCallback((e: React.DragEvent, productId: string) => {
+    setDraggedProductId(productId);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", productId);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  }, []);
+
+  const handleDrop = useCallback(async (e: React.DragEvent, targetProductId: string) => {
+    e.preventDefault();
+    if (!draggedProductId || draggedProductId === targetProductId) {
+      setDraggedProductId(null);
+      return;
+    }
+
+    const newProducts = [...products];
+    const draggedIndex = newProducts.findIndex((p) => p.id === draggedProductId);
+    const targetIndex = newProducts.findIndex((p) => p.id === targetProductId);
+
+    if (draggedIndex === -1 || targetIndex === -1) {
+      setDraggedProductId(null);
+      return;
+    }
+
+    const [removed] = newProducts.splice(draggedIndex, 1);
+    newProducts.splice(targetIndex, 0, removed);
+
+    const reordered = newProducts.map((p, i) => ({ ...p, display_order: i }));
+    setProducts(reordered);
+    setDraggedProductId(null);
+
+    await fetch("/api/admin/products/reorder", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        items: reordered.map((p) => ({ id: p.id, display_order: p.display_order })),
+      }),
+    });
+  }, [draggedProductId, products]);
+
+  const handleDragEnd = useCallback(() => {
+    setDraggedProductId(null);
+  }, []);
+
   const productsByType = productTypes.reduce<Record<string, Product[]>>(
     (acc, type) => {
       acc[type.id] = products.filter((p) => p.product_type_id === type.id);
@@ -248,7 +353,6 @@ export function StockageClient({
     {}
   );
 
-  // Stats
   const totalQuantity = products.reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
   const totalAmount = products.reduce(
     (sum, p) => sum + (Number(p.quantity) || 0) * (Number(p.price) || 0),
@@ -296,20 +400,30 @@ export function StockageClient({
         </div>
       </div>
 
-      {/* Header + bouton ajouter */}
+      {/* Header + boutons */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h2 className="text-lg font-semibold text-slate-800">Catalogue des produits</h2>
-        <button
-          type="button"
-          onClick={() => setShowAddModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors shadow-sm font-medium"
-        >
-          <Plus className="w-5 h-5" />
-          Ajouter un produit
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowSuppliersModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-sm font-medium"
+          >
+            <Truck className="w-5 h-5" />
+            Fournisseurs
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowAddModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors shadow-sm font-medium"
+          >
+            <Plus className="w-5 h-5" />
+            Ajouter un produit
+          </button>
+        </div>
       </div>
 
-      {/* Grille unique : 3 produits par ligne */}
+      {/* Grille produits */}
       <div>
         {products.length === 0 ? (
           <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-12 text-center">
@@ -330,14 +444,32 @@ export function StockageClient({
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
             {products.map((product) => {
               const typeName = product.product_types?.name || productTypes.find((t) => t.id === product.product_type_id)?.name || "";
+              const supplierName = product.suppliers?.name || suppliers.find((s) => s.id === product.supplier_id)?.name || "";
+              const isDragging = draggedProductId === product.id;
               return (
                 <div
                   key={product.id}
-                  className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm hover:shadow-md transition-shadow flex flex-col min-w-0"
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, product.id)}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, product.id)}
+                  onDragEnd={handleDragEnd}
+                  className={`rounded-lg border bg-white p-3 shadow-sm hover:shadow-md transition-all flex flex-col min-w-0 relative ${
+                    isDragging ? "opacity-40 border-blue-400" : "border-slate-200"
+                  }`}
+                  style={product.color ? { borderLeftWidth: "4px", borderLeftColor: product.color } : undefined}
                 >
+                  <div className="absolute top-1 left-1 cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500">
+                    <GripVertical className="w-3.5 h-3.5" />
+                  </div>
                   {typeName && (
-                    <span className="text-[10px] font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded w-fit mb-1.5 truncate max-w-full">
+                    <span className="text-[10px] font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded w-fit mb-1.5 truncate max-w-full ml-3">
                       {typeName}
+                    </span>
+                  )}
+                  {supplierName && (
+                    <span className="text-[10px] font-medium text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded w-fit mb-1.5 truncate max-w-full">
+                      {supplierName}
                     </span>
                   )}
                   <div className="flex justify-between items-start gap-1 mb-1.5">
@@ -398,7 +530,7 @@ export function StockageClient({
         )}
       </div>
 
-      {/* Section types (pour gérer les types) */}
+      {/* Section types */}
       {productTypes.length > 0 && (
         <details className="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
           <summary className="cursor-pointer font-medium text-slate-600 text-sm">
@@ -441,7 +573,7 @@ export function StockageClient({
           onClick={() => setShowAddModal(false)}
         >
           <div
-            className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full"
+            className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
@@ -539,6 +671,52 @@ export function StockageClient({
                   </div>
                 )}
               </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                  Fournisseur
+                </label>
+                <select
+                  value={newProductSupplierId}
+                  onChange={(e) => setNewProductSupplierId(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                >
+                  <option value="">— Aucun —</option>
+                  {suppliers.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                  Couleur du produit
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={newProductColor || "#000000"}
+                    onChange={(e) => setNewProductColor(e.target.value)}
+                    className="w-10 h-10 rounded-lg border border-slate-200 cursor-pointer p-0.5"
+                  />
+                  <input
+                    type="text"
+                    value={newProductColor}
+                    onChange={(e) => setNewProductColor(e.target.value)}
+                    placeholder="#000000"
+                    className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                  />
+                  {newProductColor && (
+                    <button
+                      type="button"
+                      onClick={() => setNewProductColor("")}
+                      className="text-sm text-slate-500 hover:text-slate-700"
+                    >
+                      Effacer
+                    </button>
+                  )}
+                </div>
+              </div>
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
@@ -567,7 +745,7 @@ export function StockageClient({
           onClick={() => setEditingProduct(null)}
         >
           <div
-            className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full"
+            className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
@@ -616,6 +794,52 @@ export function StockageClient({
                     </option>
                   ))}
                 </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                  Fournisseur
+                </label>
+                <select
+                  value={editSupplierId}
+                  onChange={(e) => setEditSupplierId(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                >
+                  <option value="">— Aucun —</option>
+                  {suppliers.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                  Couleur du produit
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={editColor || "#000000"}
+                    onChange={(e) => setEditColor(e.target.value)}
+                    className="w-10 h-10 rounded-lg border border-slate-200 cursor-pointer p-0.5"
+                  />
+                  <input
+                    type="text"
+                    value={editColor}
+                    onChange={(e) => setEditColor(e.target.value)}
+                    placeholder="#000000"
+                    className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                  />
+                  {editColor && (
+                    <button
+                      type="button"
+                      onClick={() => setEditColor("")}
+                      className="text-sm text-slate-500 hover:text-slate-700"
+                    >
+                      Effacer
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="flex gap-3 pt-2">
                 <button
@@ -686,6 +910,78 @@ export function StockageClient({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal : Gestion des fournisseurs */}
+      {showSuppliersModal && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowSuppliersModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full max-h-[80vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-semibold text-slate-800">Fournisseurs</h3>
+              <button
+                type="button"
+                onClick={() => setShowSuppliersModal(false)}
+                className="p-2 rounded-lg hover:bg-slate-100 text-slate-500"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex gap-2 mb-4">
+              <input
+                type="text"
+                value={newSupplierName}
+                onChange={(e) => setNewSupplierName(e.target.value)}
+                placeholder="Nom du fournisseur..."
+                className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleCreateSupplier();
+                  }
+                }}
+              />
+              <button
+                type="button"
+                onClick={handleCreateSupplier}
+                disabled={!newSupplierName.trim() || loading}
+                className="px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 font-medium"
+              >
+                Ajouter
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto space-y-2">
+              {suppliers.length === 0 ? (
+                <p className="text-sm text-slate-500 text-center py-4">
+                  Aucun fournisseur. Ajoutez-en un ci-dessus.
+                </p>
+              ) : (
+                suppliers.map((supplier) => (
+                  <div
+                    key={supplier.id}
+                    className="flex items-center justify-between px-4 py-3 bg-slate-50 rounded-xl border border-slate-200"
+                  >
+                    <span className="text-sm font-medium text-slate-700">{supplier.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteSupplier(supplier)}
+                      disabled={loading}
+                      className="p-1.5 rounded-lg hover:bg-red-50 text-red-500 disabled:opacity-50"
+                      title="Supprimer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       )}

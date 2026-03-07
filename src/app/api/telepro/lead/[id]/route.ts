@@ -47,7 +47,7 @@ export async function PATCH(
   const adminClient = createAdminClient();
   const { data: lead, error: fetchError } = await adminClient
     .from("leads")
-    .select("id")
+    .select("id, status")
     .eq("id", id)
     .eq("assigned_to", user.id)
     .single();
@@ -66,7 +66,12 @@ export async function PATCH(
     updated_at: new Date().toISOString(),
   };
 
-  if (status !== undefined) updates.status = status;
+  if (status !== undefined) {
+    updates.status = status;
+    if (lead && lead.status !== status) {
+      updates.status_changed_at = new Date().toISOString();
+    }
+  }
   if (callback_at !== undefined) updates.callback_at = callback_at;
   if (nrp_count !== undefined) updates.nrp_count = nrp_count;
 

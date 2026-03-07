@@ -9,17 +9,18 @@ export type LeadStatus =
   | 'incomplet'
   | 'bloque_mpr'
   | 'valide'
+  | 'installe'
   | 'ancien_documents_recus'
   | 'annule';
 
-/** Statuts sélectionnables par les télépros (exclut ancien_documents_recus, incomplet, bloque_mpr, valide) */
+/** Statuts sélectionnables par les télépros (exclut ancien_documents_recus, incomplet, bloque_mpr, valide, installe) */
 export const LEAD_STATUSES_TELEPRO: LeadStatus[] = [
   'nouveau', 'nrp', 'a_rappeler', 'en_attente_doc', 'documents_recus', 'annule',
 ];
 
 /** Tous les statuts (admin) */
 export const LEAD_STATUSES_ADMIN: LeadStatus[] = [
-  'nouveau', 'nrp', 'a_rappeler', 'en_attente_doc', 'documents_recus', 'incomplet', 'bloque_mpr', 'valide', 'ancien_documents_recus', 'annule',
+  'nouveau', 'nrp', 'a_rappeler', 'en_attente_doc', 'documents_recus', 'incomplet', 'bloque_mpr', 'valide', 'installe', 'ancien_documents_recus', 'annule',
 ];
 
 export type LeadColor = 'bleu' | 'jaune' | 'violet' | 'rose';
@@ -65,6 +66,7 @@ export const LEAD_STATUS_LABELS: Record<LeadStatus, string> = {
   incomplet: 'Incomplet',
   bloque_mpr: 'Bloqué MPR',
   valide: 'Validé',
+  installe: 'Installé',
   ancien_documents_recus: 'Ancien documents reçus',
   annule: 'Annulé',
 };
@@ -80,6 +82,7 @@ export const STATUS_CHART_COLORS: Record<LeadStatus, string> = {
   incomplet: '#f59e0b',     // amber
   bloque_mpr: '#dc2626',    // red-600
   valide: '#10b981',        // emerald-500
+  installe: '#0ABAB5',      // Bleu Tiffany
   ancien_documents_recus: '#64748b', // slate (archivé)
 };
 
@@ -170,6 +173,8 @@ export const DELEGATAIRE_GROUPS = [
   'Eco Green',
 ] as const;
 
+export const INSTALLATEUR_OPTIONS = ['Eco Klim', 'Davitech', 'Shlomo'] as const;
+
 export interface Profile {
   id: string;
   email: string;
@@ -229,6 +234,8 @@ export interface Lead {
   profitability: number | null;
   chantier_comment: string | null;
   delegataire_group: string | null;
+  installateur: string | null;
+  status_changed_at: string | null;
   created_at: string;
   updated_at: string;
   added_at: string | null;

@@ -79,17 +79,9 @@ function LoginForm() {
               />
             </div>
             <div>
-              <div className="flex justify-between items-center mb-1">
-                <label htmlFor="password" className="block text-sm font-medium text-slate-700">
-                  Mot de passe
-                </label>
-                <Link
-                  href="/forgot-password"
-                  className="text-sm text-blue-600 hover:underline"
-                >
-                  Mot de passe oublié ?
-                </Link>
-              </div>
+              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1">
+                Mot de passe
+              </label>
               <input
                 id="password"
                 type="password"
@@ -106,6 +98,14 @@ function LoginForm() {
             >
               {loading ? "Connexion..." : "Se connecter"}
             </button>
+            <p className="text-center">
+              <Link
+                href="/forgot-password"
+                className="text-sm text-blue-600 hover:underline font-medium"
+              >
+                Mot de passe oublié ?
+              </Link>
+            </p>
           </form>
 
           <p className="mt-6 text-center text-sm text-slate-500">

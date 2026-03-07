@@ -13,6 +13,7 @@ import {
   LEAD_COLOR_MPR,
   DELEGATAIRE_GROUPS,
   CHANTIER_STATUS_FIELDS,
+  INSTALLATEUR_OPTIONS,
   type LeadStatus,
   type LeadColor,
   type InstallationType,
@@ -75,6 +76,7 @@ function buildUpdates(lead: Record<string, unknown>) {
     profitability: lead.profitability ? Number(lead.profitability) : null,
     chantier_comment: lead.chantier_comment,
     delegataire_group: lead.delegataire_group,
+    installateur: lead.installateur,
     updated_at: new Date().toISOString(),
   };
 }
@@ -219,7 +221,7 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
     }
   };
 
-  const isDocumentsRecus = lead.status === "documents_recus" || lead.status === "ancien_documents_recus";
+  const isDocumentsRecus = lead.status === "documents_recus" || lead.status === "ancien_documents_recus" || lead.status === "installe";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -547,6 +549,23 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
           <div>
             <h2 className="font-medium text-slate-800 mb-4">Finances</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-slate-600 mb-1">
+                  Installateur
+                </label>
+                <select
+                  value={(lead.installateur as string) || ""}
+                  onChange={(e) => updateField("installateur", e.target.value || null)}
+                  className="w-full px-4 py-2 border rounded-lg"
+                >
+                  <option value="">—</option>
+                  {INSTALLATEUR_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div>
                 <label className="block text-sm text-slate-600 mb-1">
                   Coût installation (€)

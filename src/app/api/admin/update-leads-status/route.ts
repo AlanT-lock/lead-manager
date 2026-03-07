@@ -61,6 +61,7 @@ export async function POST(request: NextRequest) {
   const updates: Record<string, unknown> = {
     status,
     updated_at: now,
+    status_changed_at: now,
   };
   if (status === "a_rappeler") {
     updates.callback_at = null;

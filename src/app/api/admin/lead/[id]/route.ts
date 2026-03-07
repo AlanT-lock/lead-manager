@@ -28,11 +28,22 @@ export async function PATCH(
 
   const body = await request.json();
   const { status, logAction, logOldStatus, logNewStatus, ...rest } = body;
+  const now = new Date().toISOString();
   const updates: Record<string, unknown> = {
-    updated_at: new Date().toISOString(),
+    updated_at: now,
   };
 
-  if (status !== undefined) updates.status = status;
+  if (status !== undefined) {
+    updates.status = status;
+    const { data: currentLead } = await adminClient
+      .from("leads")
+      .select("status")
+      .eq("id", id)
+      .single();
+    if (currentLead && currentLead.status !== status) {
+      updates.status_changed_at = now;
+    }
+  }
   if (body.callback_at !== undefined) updates.callback_at = body.callback_at;
   if (body.nrp_count !== undefined) updates.nrp_count = body.nrp_count;
 
@@ -47,6 +58,7 @@ export async function PATCH(
     "is_paye", "is_compte_bloque", "is_rejete",
     "material_cost_comment", "regie_cost", "benefit_cee", "benefit_mpr",
     "benefit_apporteur_affaires", "profitability", "chantier_comment", "delegataire_group",
+    "installateur",
   ];
 
   for (const key of allowedFields) {

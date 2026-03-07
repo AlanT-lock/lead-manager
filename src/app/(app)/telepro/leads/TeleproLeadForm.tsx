@@ -649,6 +649,7 @@ function getStatusButtonClass(status: LeadStatus, isSelected: boolean): string {
     case "incomplet": return "bg-amber-100 text-amber-800";
     case "bloque_mpr": return "bg-red-800 text-white";
     case "valide": return "bg-emerald-700 text-white";
+    case "installe": return "bg-teal-200 text-teal-900";
     case "ancien_documents_recus": return "bg-slate-500 text-white";
     case "annule": return "bg-red-100 text-red-800";
     default: return "bg-slate-100 text-slate-700";

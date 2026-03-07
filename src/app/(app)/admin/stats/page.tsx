@@ -14,6 +14,7 @@ const STATUSES: LeadStatus[] = [
   "incomplet",
   "bloque_mpr",
   "valide",
+  "installe",
   "ancien_documents_recus",
   "annule",
 ];
@@ -48,7 +49,7 @@ export default async function AdminStatsPage({
   let docRecusQuery = adminClient
     .from("leads")
     .select("benefit_cee, benefit_mpr, benefit_apporteur_affaires, installation_cost, material_cost, regie_cost, profitability, status, delegataire_group, installation_type, is_installe, is_depot_mpr, is_cee_paye, is_mpe_paye, is_code_envoye, is_depose, is_controle_veritas, is_paye, is_compte_bloque, is_rejete")
-    .in("status", ["documents_recus", "ancien_documents_recus"])
+    .eq("status", "installe")
     .gte("updated_at", fromDate.toISOString())
     .lte("updated_at", toDate.toISOString());
 
@@ -75,7 +76,7 @@ export default async function AdminStatsPage({
   ]);
 
   const leads = docRecusLeads || [];
-  const leadsDocRecusOnly = leads.filter((l) => l.status === "documents_recus");
+  const leadsDocRecusOnly = leads;
   const totalBenefitCee = leads.reduce((s, l) => s + (Number(l.benefit_cee) || 0), 0);
   const totalBenefitMpr = leads.reduce((s, l) => s + (Number(l.benefit_mpr) || 0), 0);
   const totalApporteurAffaires = leads.reduce((s, l) => s + (Number(l.benefit_apporteur_affaires) || 0), 0);
@@ -150,7 +151,7 @@ export default async function AdminStatsPage({
       )}
 
       <div>
-        <h2 className="font-medium text-slate-800 mb-3">Types d&apos;installation (documents reçus)</h2>
+        <h2 className="font-medium text-slate-800 mb-3">Types d&apos;installation (installés)</h2>
         <p className="text-sm text-slate-500 mb-3">
           Nombre de dossiers par type d&apos;installation
         </p>
@@ -172,7 +173,7 @@ export default async function AdminStatsPage({
       </div>
 
       <div>
-        <h2 className="font-medium text-slate-800 mb-3">Indicateurs financiers (documents reçus)</h2>
+        <h2 className="font-medium text-slate-800 mb-3">Indicateurs financiers (installés)</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {financialStats.map((stat) => (
             <StatCard
@@ -187,7 +188,7 @@ export default async function AdminStatsPage({
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="font-medium text-slate-800 mb-4">Dossiers par mandataire (documents reçus)</h2>
+        <h2 className="font-medium text-slate-800 mb-4">Dossiers par mandataire (installés)</h2>
         <p className="text-sm text-slate-500 mb-4">Cliquez sur une ligne pour voir les dossiers filtrés</p>
         <div className="space-y-0">
           {DELEGATAIRE_GROUPS.map((d) => (
@@ -208,7 +209,7 @@ export default async function AdminStatsPage({
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="font-medium text-slate-800 mb-4">Dossiers par statut chantier (documents reçus)</h2>
+        <h2 className="font-medium text-slate-800 mb-4">Dossiers par statut chantier (installés)</h2>
         <p className="text-sm text-slate-500 mb-4">
           Nombre de dossiers ayant chaque statut (cumulables). Cliquez pour filtrer.
         </p>

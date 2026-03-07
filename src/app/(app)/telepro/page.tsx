@@ -102,6 +102,7 @@ export default async function TeleproDashboard() {
                 "incomplet",
                 "bloque_mpr",
                 "valide",
+                "installe",
                 "ancien_documents_recus",
                 "annule",
               ] as LeadStatus[]

@@ -21,7 +21,7 @@ export default async function AdminStockagePage() {
     redirect("/admin");
   }
 
-  const [productsRes, typesRes] = await Promise.all([
+  const [productsRes, typesRes, suppliersRes] = await Promise.all([
     adminClient
       .from("products")
       .select(`
@@ -30,18 +30,28 @@ export default async function AdminStockagePage() {
           id,
           name,
           display_order
+        ),
+        suppliers (
+          id,
+          name
         )
       `)
+      .order("display_order", { ascending: true })
       .order("name", { ascending: true }),
     adminClient
       .from("product_types")
       .select("*")
       .order("display_order", { ascending: true })
       .order("name", { ascending: true }),
+    adminClient
+      .from("suppliers")
+      .select("*")
+      .order("name", { ascending: true }),
   ]);
 
   const products = productsRes.data || [];
   const productTypes = typesRes.data || [];
+  const suppliersList = suppliersRes.data || [];
 
   return (
     <div className="space-y-6">
@@ -55,6 +65,7 @@ export default async function AdminStockagePage() {
       <StockageClient
         initialProducts={products}
         initialProductTypes={productTypes}
+        initialSuppliers={suppliersList}
       />
     </div>
   );

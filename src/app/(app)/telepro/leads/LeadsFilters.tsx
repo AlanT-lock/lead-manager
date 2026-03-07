@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Search } from "lucide-react";
 import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, type LeadStatus } from "@/lib/types";
 
@@ -12,17 +12,22 @@ export function LeadsFilters() {
   const currentStatus = searchParams.get("status") || "";
   const [from, setFrom] = useState(searchParams.get("from") || "");
   const [to, setTo] = useState(searchParams.get("to") || "");
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Synchroniser les états locaux avec l'URL quand les params changent (ex: clic sur sous-catégorie dans le menu)
-  // Évite qu'un ancien terme de recherche soit réinjecté et vide la liste
   const urlQ = searchParams.get("q") || "";
   const urlFrom = searchParams.get("from") || "";
   const urlTo = searchParams.get("to") || "";
+
   useEffect(() => {
-    setSearch(urlQ);
+    if (document.activeElement !== searchInputRef.current) {
+      setSearch(urlQ);
+    }
+  }, [urlQ]);
+
+  useEffect(() => {
     setFrom(urlFrom);
     setTo(urlTo);
-  }, [urlQ, urlFrom, urlTo]);
+  }, [urlFrom, urlTo]);
 
   const buildParams = useCallback((overrides?: { status?: string; q?: string; from?: string; to?: string }) => {
     const params = new URLSearchParams();
@@ -68,6 +73,7 @@ export function LeadsFilters() {
         <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <input
+            ref={searchInputRef}
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}

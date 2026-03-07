@@ -47,6 +47,18 @@ export async function PATCH(
       updates.quantity = qty;
     }
   }
+  if (body.color !== undefined) {
+    updates.color = body.color || null;
+  }
+  if (body.supplier_id !== undefined) {
+    updates.supplier_id = body.supplier_id || null;
+  }
+  if (body.display_order !== undefined) {
+    const order = typeof body.display_order === "number" ? body.display_order : parseInt(String(body.display_order), 10);
+    if (!isNaN(order) && order >= 0) {
+      updates.display_order = order;
+    }
+  }
 
   const { data, error } = await adminClient
     .from("products")
@@ -58,6 +70,10 @@ export async function PATCH(
         id,
         name,
         display_order
+      ),
+      suppliers (
+        id,
+        name
       )
     `)
     .single();

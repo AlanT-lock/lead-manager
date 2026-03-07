@@ -11,32 +11,9 @@ export async function GET(request: NextRequest) {
   }
 
   const adminClient = createAdminClient();
-  const { data: profile } = await adminClient
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  const role = profile?.role?.toString().trim().toLowerCase();
-  if (role !== "admin" && role !== "secretaire") {
-    return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
-  }
-
   const { data, error } = await adminClient
-    .from("products")
-    .select(`
-      *,
-      product_types (
-        id,
-        name,
-        display_order
-      ),
-      suppliers (
-        id,
-        name
-      )
-    `)
-    .order("display_order", { ascending: true })
+    .from("suppliers")
+    .select("*")
     .order("name", { ascending: true });
 
   if (error) {
@@ -67,49 +44,16 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { name, price, product_type_id, quantity, color, supplier_id } = body;
+  const { name } = body;
 
   if (!name || typeof name !== "string" || !name.trim()) {
     return NextResponse.json({ error: "Le nom est requis" }, { status: 400 });
   }
 
-  if (product_type_id == null || product_type_id === "") {
-    return NextResponse.json({ error: "Le type de produit est requis" }, { status: 400 });
-  }
-
-  const priceNum = typeof price === "number" ? price : parseFloat(price);
-  if (isNaN(priceNum) || priceNum < 0) {
-    return NextResponse.json({ error: "Le prix doit être un nombre positif" }, { status: 400 });
-  }
-
-  const { count } = await adminClient
-    .from("products")
-    .select("*", { count: "exact", head: true });
-
   const { data, error } = await adminClient
-    .from("products")
-    .insert({
-      name: name.trim(),
-      price: priceNum,
-      product_type_id,
-      quantity: typeof quantity === "number" ? Math.max(0, quantity) : 0,
-      color: color || null,
-      supplier_id: supplier_id || null,
-      display_order: (count ?? 0),
-      updated_at: new Date().toISOString(),
-    })
-    .select(`
-      *,
-      product_types (
-        id,
-        name,
-        display_order
-      ),
-      suppliers (
-        id,
-        name
-      )
-    `)
+    .from("suppliers")
+    .insert({ name: name.trim() })
+    .select("*")
     .single();
 
   if (error) {

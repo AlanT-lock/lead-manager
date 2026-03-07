@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, type LeadStatus } from "@/lib/types";
 import { formatDateParis } from "@/lib/date";
+import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 
 function getStatusSelectClass(status: string): string {
   switch (status) {
@@ -15,6 +16,7 @@ function getStatusSelectClass(status: string): string {
     case "incomplet": return "bg-amber-100 text-amber-800 border-amber-200";
     case "bloque_mpr": return "bg-red-800 text-white border-red-900";
     case "valide": return "bg-emerald-700 text-white border-emerald-800";
+    case "installe": return "bg-teal-200 text-teal-900 border-teal-300";
     case "ancien_documents_recus": return "bg-slate-500 text-white border-slate-600";
     case "annule": return "bg-red-100 text-red-800 border-red-200";
     default: return "bg-slate-100 text-slate-700 border-slate-200";
@@ -31,11 +33,14 @@ function getRowStatusClass(status: string): string {
     case "incomplet": return "bg-amber-50 hover:bg-amber-100";
     case "bloque_mpr": return "bg-red-100 hover:bg-red-200";
     case "valide": return "bg-emerald-100 hover:bg-emerald-200";
+    case "installe": return "bg-teal-50 hover:bg-teal-100";
     case "ancien_documents_recus": return "bg-slate-100 hover:bg-slate-200";
     case "annule": return "bg-red-50 hover:bg-red-100";
     default: return "hover:bg-slate-50";
   }
 }
+
+type StatusSortDirection = "none" | "desc" | "asc";
 
 interface Lead {
   id: string;
@@ -48,6 +53,7 @@ interface Lead {
   profile: { full_name: string; email: string } | null;
   added_at: string | null;
   commentaire: string | null;
+  status_changed_at: string | null;
 }
 
 interface AdminLeadsTableProps {
@@ -65,7 +71,25 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
+  const [statusSort, setStatusSort] = useState<StatusSortDirection>("none");
   const router = useRouter();
+
+  const sortedLeads = useMemo(() => {
+    if (statusSort === "none") return leads;
+    return [...leads].sort((a, b) => {
+      const dateA = a.status_changed_at ? new Date(a.status_changed_at).getTime() : 0;
+      const dateB = b.status_changed_at ? new Date(b.status_changed_at).getTime() : 0;
+      return statusSort === "desc" ? dateB - dateA : dateA - dateB;
+    });
+  }, [leads, statusSort]);
+
+  const toggleStatusSort = () => {
+    setStatusSort((prev) => {
+      if (prev === "none") return "desc";
+      if (prev === "desc") return "asc";
+      return "none";
+    });
+  };
 
   const handleStatusChange = useCallback(async (leadId: string, newStatus: LeadStatus, oldStatus: string) => {
     if (newStatus === oldStatus) return;
@@ -334,7 +358,16 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
                   Téléphone
                 </th>
                 <th className="text-left py-4 px-4 text-sm font-medium text-slate-700">
-                  Statut
+                  <button
+                    type="button"
+                    onClick={toggleStatusSort}
+                    className="inline-flex items-center gap-1 hover:text-slate-900 transition-colors"
+                  >
+                    Statut
+                    {statusSort === "none" && <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />}
+                    {statusSort === "desc" && <ArrowDown className="w-3.5 h-3.5 text-blue-600" />}
+                    {statusSort === "asc" && <ArrowUp className="w-3.5 h-3.5 text-blue-600" />}
+                  </button>
                 </th>
                 <th className="text-left py-4 px-4 text-sm font-medium text-slate-700">
                   Télépro
@@ -348,14 +381,14 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
               </tr>
             </thead>
             <tbody>
-              {leads.length === 0 ? (
+              {sortedLeads.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="py-12 text-center text-slate-500">
                     Aucun lead trouvé
                   </td>
                 </tr>
               ) : (
-                leads.map((lead) => (
+                sortedLeads.map((lead) => (
                   <tr
                     key={lead.id}
                     onClick={() => router.push(`/admin/leads/${lead.id}`)}
