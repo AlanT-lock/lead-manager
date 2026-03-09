@@ -20,6 +20,8 @@ import {
   BarChart3,
   TrendingUp,
   Package,
+  ChevronRight,
+  ChevronDown,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -59,6 +61,8 @@ const teleproNav = [
 
 export function Drawer({ role, userName, unreadNotifications = 0, statusCounts = {} }: DrawerProps) {
   const [open, setOpen] = useState(false);
+  // Sous-menu des statuts : fermé par défaut, ne se ferme que au clic sur la flèche (persiste à la navigation)
+  const [statusSubmenuExpanded, setStatusSubmenuExpanded] = useState(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -138,52 +142,89 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
 
               return (
                 <div key={item.href} className="space-y-1">
-                  <Link
-                    href={item.href}
-                    onClick={() => setOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                      isActive
-                        ? "bg-white/25 text-white font-medium"
-                        : "text-white hover:bg-white/20"
-                    }`}
-                  >
-                    <item.icon className="w-5 h-5 shrink-0" />
-                    {item.label}
-                  </Link>
-                  {"hasStatusSubmenu" in item && item.hasStatusSubmenu && (
-                    <div className="pl-4 pr-2 py-1 space-y-1">
-                      <Link
-                        href={item.href}
-                        onClick={() => setOpen(false)}
-                        className={`flex items-center justify-between w-full px-3 py-2 text-sm rounded-md transition-colors ${
-                          !currentStatus
+                  {"hasStatusSubmenu" in item && item.hasStatusSubmenu ? (
+                    <>
+                      <div
+                        className={`flex items-center gap-1 px-4 py-3 rounded-lg transition-colors ${
+                          isActive
                             ? "bg-white/25 text-white font-medium"
-                            : "text-white/90 hover:bg-white/20"
+                            : "text-white hover:bg-white/20"
                         }`}
                       >
-                        <span>Tous</span>
-                        <span className="text-white/70 tabular-nums">
-                          {Object.values(statusCounts).reduce((a, b) => a + b, 0)}
-                        </span>
-                      </Link>
-                      {statuses.map((s) => (
                         <Link
-                          key={s}
-                          href={`${item.href}?status=${s}`}
+                          href={item.href}
                           onClick={() => setOpen(false)}
-                          className={`flex items-center justify-between w-full px-3 py-2 text-sm rounded-md transition-colors ${
-                            currentStatus === s
-                              ? "bg-white/25 text-white font-medium"
-                              : "text-white/90 hover:bg-white/20"
-                          }`}
+                          className="flex items-center gap-3 flex-1 min-w-0"
                         >
-                          <span>{LEAD_STATUS_LABELS[s as LeadStatus]}</span>
-                          <span className="text-white/70 tabular-nums">
-                            {statusCounts[s] ?? 0}
-                          </span>
+                          <item.icon className="w-5 h-5 shrink-0" />
+                          {item.label}
                         </Link>
-                      ))}
-                    </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setStatusSubmenuExpanded((v) => !v);
+                          }}
+                          className="p-1.5 rounded-md hover:bg-white/20 text-white shrink-0"
+                          aria-label={statusSubmenuExpanded ? "Replier le sous-menu" : "Déplier le sous-menu des statuts"}
+                          aria-expanded={statusSubmenuExpanded}
+                        >
+                          {statusSubmenuExpanded ? (
+                            <ChevronDown className="w-5 h-5" />
+                          ) : (
+                            <ChevronRight className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
+                      {statusSubmenuExpanded && (
+                        <div className="pl-4 pr-2 py-1 space-y-1">
+                          <Link
+                            href={item.href}
+                            onClick={() => setOpen(false)}
+                            className={`flex items-center justify-between w-full px-3 py-2 text-sm rounded-md transition-colors ${
+                              !currentStatus
+                                ? "bg-white/25 text-white font-medium"
+                                : "text-white/90 hover:bg-white/20"
+                            }`}
+                          >
+                            <span>Tous</span>
+                            <span className="text-white/70 tabular-nums">
+                              {Object.values(statusCounts).reduce((a, b) => a + b, 0)}
+                            </span>
+                          </Link>
+                          {statuses.map((s) => (
+                            <Link
+                              key={s}
+                              href={`${item.href}?status=${s}`}
+                              onClick={() => setOpen(false)}
+                              className={`flex items-center justify-between w-full px-3 py-2 text-sm rounded-md transition-colors ${
+                                currentStatus === s
+                                  ? "bg-white/25 text-white font-medium"
+                                  : "text-white/90 hover:bg-white/20"
+                              }`}
+                            >
+                              <span>{LEAD_STATUS_LABELS[s as LeadStatus]}</span>
+                              <span className="text-white/70 tabular-nums">
+                                {statusCounts[s] ?? 0}
+                              </span>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Link
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                        isActive
+                          ? "bg-white/25 text-white font-medium"
+                          : "text-white hover:bg-white/20"
+                      }`}
+                    >
+                      <item.icon className="w-5 h-5 shrink-0" />
+                      {item.label}
+                    </Link>
                   )}
                 </div>
               );
