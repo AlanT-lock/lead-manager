@@ -39,7 +39,7 @@ export default async function AdminLeadsPage({
   if (toDate) query = query.lte("created_at", toDate.toISOString());
 
   if (chantier && (CHANTIER_FIELDS as readonly string[]).includes(chantier)) {
-    query = query.eq("status", "documents_recus").eq(chantier, true);
+    query = query.eq("status", status ?? "documents_recus").eq(chantier, true);
   } else if (status) {
     query = query.eq("status", status);
   }

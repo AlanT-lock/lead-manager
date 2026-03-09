@@ -34,8 +34,8 @@ interface DrawerProps {
 
 const adminNav = [
   { href: "/admin", label: "Statistique télépro", icon: TrendingUp },
+  { href: "/admin/leads?status=installe", label: "Dossiers Installés", icon: FileCheck, statusParam: "installe" },
   { href: "/admin/leads", label: "Tous les leads", icon: List, hasStatusSubmenu: true },
-  { href: "/admin/documents-recus", label: "Documents reçus", icon: FileCheck },
   { href: "/admin/stockage", label: "Stockage", icon: Package },
   { href: "/admin/import", label: "Import CSV", icon: FileUp },
   { href: "/admin/users", label: "Utilisateurs", icon: UserPlus },
@@ -125,10 +125,14 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
           <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
             {nav.map((item) => {
               const homeHref = isAdminSpace ? (role === "secretaire" ? "/admin/documents-recus" : "/admin") : "/telepro";
-              const isLeadsPage = pathname.startsWith(item.href) && (item.href === "/admin/leads" || item.href === "/telepro/leads");
+              const isLeadsPage = pathname.startsWith("/admin/leads") && (item.href === "/admin/leads" || item.href.startsWith("/admin/leads?")) || (pathname.startsWith("/telepro/leads") && item.href === "/telepro/leads");
               const isActive =
-                pathname === item.href ||
-                (item.href !== homeHref && pathname.startsWith(item.href));
+                "statusParam" in item && item.statusParam
+                  ? pathname === "/admin/leads" && searchParams.get("status") === item.statusParam
+                  : item.href === "/admin/leads"
+                    ? pathname === "/admin/leads" && searchParams.get("status") !== "installe"
+                    : pathname === item.href ||
+                      (item.href !== homeHref && pathname.startsWith(item.href.split("?")[0]));
               const statuses = LEAD_STATUSES_ADMIN;
               const currentStatus = isLeadsPage ? searchParams.get("status") : null;
 

@@ -43,7 +43,7 @@ export default async function AdminStatsPage({
   const delegataireUrlPart = selectedDelegataires.length > 0
     ? selectedDelegataires.map((d) => `delegataire=${encodeURIComponent(d)}`).join("&")
     : "";
-  const baseDocRecusUrl = `/admin/documents-recus?from=${from}&to=${to}${delegataireUrlPart ? `&${delegataireUrlPart}` : ""}`;
+  const baseInstalleUrl = `/admin/leads?status=installe&from=${from}&to=${to}${delegataireUrlPart ? `&${delegataireUrlPart}` : ""}`;
   const baseLeadsUrl = `/admin/leads?from=${from}&to=${to}${delegataireUrlPart ? `&${delegataireUrlPart}` : ""}`;
 
   let docRecusQuery = adminClient
@@ -123,14 +123,14 @@ export default async function AdminStatsPage({
   const benefitCeeNet = totalBenefitCee - totalCosts;
 
   const financialStats = [
-    { label: "Total apporteur d'affaires", value: `${totalApporteurAffaires.toFixed(2)} €`, href: baseDocRecusUrl },
-    { label: "Total bénéfices (CEE + MPR)", value: `${(totalBenefitCee + totalBenefitMpr).toFixed(2)} €`, href: baseDocRecusUrl },
-    { label: "Bénéfice CEE (CEE - coûts)", value: `${benefitCeeNet.toFixed(2)} €`, href: baseDocRecusUrl },
-    { label: "Bénéfice MPR", value: `${totalBenefitMpr.toFixed(2)} €`, href: baseDocRecusUrl },
-    { label: "Total à payer (coûts)", value: `${totalCosts.toFixed(2)} €`, href: baseDocRecusUrl },
-    { label: "Rentabilité totale", value: `${totalProfitability.toFixed(2)} €`, href: baseDocRecusUrl, highlight: true },
-    { label: "Rentabilité moyenne/dossier", value: `${avgProfitability.toFixed(2)} €`, href: baseDocRecusUrl },
-    { label: "Bénéfice moyen/dossier", value: `${avgBenefit.toFixed(2)} €`, href: baseDocRecusUrl },
+    { label: "Total apporteur d'affaires", value: `${totalApporteurAffaires.toFixed(2)} €`, href: baseInstalleUrl },
+    { label: "Total bénéfices (CEE + MPR)", value: `${(totalBenefitCee + totalBenefitMpr).toFixed(2)} €`, href: baseInstalleUrl },
+    { label: "Bénéfice CEE (CEE - coûts)", value: `${benefitCeeNet.toFixed(2)} €`, href: baseInstalleUrl },
+    { label: "Bénéfice MPR", value: `${totalBenefitMpr.toFixed(2)} €`, href: baseInstalleUrl },
+    { label: "Total à payer (coûts)", value: `${totalCosts.toFixed(2)} €`, href: baseInstalleUrl },
+    { label: "Rentabilité totale", value: `${totalProfitability.toFixed(2)} €`, href: baseInstalleUrl, highlight: true },
+    { label: "Rentabilité moyenne/dossier", value: `${avgProfitability.toFixed(2)} €`, href: baseInstalleUrl },
+    { label: "Bénéfice moyen/dossier", value: `${avgBenefit.toFixed(2)} €`, href: baseInstalleUrl },
   ];
 
   return (
@@ -161,13 +161,13 @@ export default async function AdminStatsPage({
               key={type}
               label={INSTALLATION_TYPE_LABELS[type]}
               value={installationTypeCounts[type] ?? 0}
-              href={`/admin/documents-recus?from=${from}&to=${to}${delegataireUrlPart ? `&${delegataireUrlPart}` : ""}`}
+              href={baseInstalleUrl}
             />
           ))}
           <StatCard
             label="Non renseigné"
             value={installationTypeCounts["non_renseigne"] ?? 0}
-            href={`/admin/documents-recus?from=${from}&to=${to}${delegataireParam}`}
+            href={baseInstalleUrl}
           />
         </div>
       </div>
@@ -196,13 +196,13 @@ export default async function AdminStatsPage({
               key={d}
               label={d}
               count={delegataireCounts[d] ?? 0}
-              href={`/admin/documents-recus?delegataire=${encodeURIComponent(d)}&from=${from}&to=${to}`}
+              href={`/admin/leads?status=installe&delegataire=${encodeURIComponent(d)}&from=${from}&to=${to}`}
             />
           ))}
           <DelegataireRow
             label="Non assigné"
             count={delegataireCounts["Non assigné"] ?? 0}
-            href={`/admin/documents-recus?delegataire=__non_assigne__&from=${from}&to=${to}`}
+            href={`/admin/leads?status=installe&delegataire=__non_assigne__&from=${from}&to=${to}`}
             isLast
           />
         </div>
@@ -219,7 +219,7 @@ export default async function AdminStatsPage({
               key={field}
               label={label}
               count={chantierCounts[field] ?? 0}
-              href={`/admin/documents-recus?chantier=${field}&from=${from}&to=${to}`}
+              href={`/admin/leads?status=installe&chantier=${field}&from=${from}&to=${to}`}
               isLast={i === CHANTIER_STATUS_FIELDS.length - 1}
             />
           ))}
