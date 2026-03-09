@@ -18,7 +18,7 @@ import {
 } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { formatTimeParis, formatDateParis, fromDatetimeLocalValueParis } from "@/lib/date";
+import { formatTimeParis, formatDateParis, fromDatetimeLocalValueParis, toDatetimeLocalValueParis } from "@/lib/date";
 
 interface AgendaEvent {
   id: string;
@@ -252,7 +252,11 @@ export function AgendaCourrierClient({ events }: AgendaCourrierClientProps) {
                   value={followUpAction}
                   onChange={(e) => {
                     setFollowUpAction(e.target.value);
-                    if (e.target.value !== "a_rappeler") setCallbackDate("");
+                    if (e.target.value === "a_rappeler") {
+                      setCallbackDate(toDatetimeLocalValueParis(new Date().toISOString()));
+                    } else {
+                      setCallbackDate("");
+                    }
                   }}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >

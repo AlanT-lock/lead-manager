@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, X, Calendar as CalendarIcon } from "lucide-react";
-import { formatDateParis, fromDatetimeLocalValueParis } from "@/lib/date";
+import { formatDateParis, fromDatetimeLocalValueParis, toDatetimeLocalValueParis } from "@/lib/date";
 
 interface CodeCourrier {
   id: string;
@@ -322,7 +322,11 @@ export function CodeCourrierClient({ codeCourriers }: CodeCourrierClientProps) {
                   value={followUpAction}
                   onChange={(e) => {
                     setFollowUpAction(e.target.value);
-                    if (e.target.value !== "a_rappeler") setCallbackDate("");
+                    if (e.target.value === "a_rappeler") {
+                      setCallbackDate(toDatetimeLocalValueParis(new Date().toISOString()));
+                    } else {
+                      setCallbackDate("");
+                    }
                   }}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
