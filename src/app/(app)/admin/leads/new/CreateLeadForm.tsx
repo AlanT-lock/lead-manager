@@ -133,6 +133,8 @@ export function CreateLeadForm({ telepros }: CreateLeadFormProps) {
                 {t.full_name || t.email}
               </option>
             ))}
+            <option value="__manual_roy">Roy</option>
+            <option value="__manual_noemie">Noémie</option>
           </select>
         </div>
 

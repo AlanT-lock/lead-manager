@@ -59,12 +59,19 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const MANUAL_TELEPROS: Record<string, string> = {
+    __manual_roy: "Roy",
+    __manual_noemie: "Noémie",
+  };
+  const isManual = assigned_to in MANUAL_TELEPROS;
+  const manualName = isManual ? MANUAL_TELEPROS[assigned_to] : null;
+
   const leadData = {
     first_name: String(first_name).trim(),
     last_name: String(last_name).trim(),
     phone: String(phone).trim(),
     email: email ? String(email).trim() || null : null,
-    assigned_to,
+    assigned_to: isManual ? null : assigned_to,
     status: "nouveau",
     address: address ? String(address).trim() || null : null,
     postal_code: postal_code ? String(postal_code).trim() || null : null,
@@ -95,7 +102,9 @@ export async function POST(request: NextRequest) {
   await adminClient.from("lead_logs").insert({
     lead_id: lead.id,
     user_id: user.id,
-    action: "Création manuelle",
+    action: manualName
+      ? `Création manuelle (assigné à ${manualName})`
+      : "Création manuelle",
     old_status: null,
     new_status: "nouveau",
   });
