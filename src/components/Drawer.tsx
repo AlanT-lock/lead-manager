@@ -22,6 +22,7 @@ import {
   Package,
   ChevronRight,
   ChevronDown,
+  Mail,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -38,6 +39,7 @@ const adminNav = [
   { href: "/admin", label: "Statistique télépro", icon: TrendingUp },
   { href: "/admin/leads?status=installe", label: "Dossiers Installés", icon: FileCheck, statusParam: "installe" },
   { href: "/admin/leads", label: "Tous les leads", icon: List, hasStatusSubmenu: true },
+  { href: "/admin/code-courrier", label: "Code courrier", icon: Mail },
   { href: "/admin/stockage", label: "Stockage", icon: Package },
   { href: "/admin/import", label: "Import CSV", icon: FileUp },
   { href: "/admin/users", label: "Utilisateurs", icon: UserPlus },
@@ -47,6 +49,7 @@ const adminNav = [
 const secretaireNav = [
   { href: "/admin/documents-recus", label: "Documents reçus", icon: FileCheck },
   { href: "/admin/leads", label: "Tous les leads", icon: List, hasStatusSubmenu: true },
+  { href: "/admin/code-courrier", label: "Code courrier", icon: Mail },
   { href: "/admin/import", label: "Import CSV", icon: FileUp },
   { href: "/admin/stats-secretaire", label: "Statistiques", icon: BarChart3 },
   { href: "/admin", label: "Statistique télépro", icon: TrendingUp },
