@@ -50,6 +50,7 @@ const secretaireNav = [
   { href: "/admin/documents-recus", label: "Documents reçus", icon: FileCheck },
   { href: "/admin/leads", label: "Tous les leads", icon: List, hasStatusSubmenu: true },
   { href: "/admin/code-courrier", label: "Code courrier", icon: Mail },
+  { href: "/admin/agenda-courrier", label: "Agenda", icon: Calendar },
   { href: "/admin/import", label: "Import CSV", icon: FileUp },
   { href: "/admin/stats-secretaire", label: "Statistiques", icon: BarChart3 },
   { href: "/admin", label: "Statistique télépro", icon: TrendingUp },

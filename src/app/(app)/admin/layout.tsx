@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
+import { CodeCourrierNotifications } from "./code-courrier/CodeCourrierNotifications";
 
 export default async function AdminLayout({
   children,
@@ -34,7 +35,11 @@ export default async function AdminLayout({
   if (role === "telepro") {
     redirect("/telepro");
   }
-  // admin et secretaire accèdent à l'espace admin
 
-  return <>{children}</>;
+  return (
+    <>
+      {role === "secretaire" && <CodeCourrierNotifications />}
+      {children}
+    </>
+  );
 }
