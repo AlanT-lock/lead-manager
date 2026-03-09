@@ -21,14 +21,21 @@ export default async function AgendaCourrierPage() {
   const role = profile?.role?.toString().trim().toLowerCase();
   if (role !== "secretaire") redirect("/admin");
 
-  const { data: codeCourriers } = await adminClient
-    .from("code_courrier")
-    .select("*")
-    .not("callback_at", "is", null)
-    .order("callback_at", { ascending: true });
+  const [{ data: codeCourriers }, { data: rappels }] = await Promise.all([
+    adminClient
+      .from("code_courrier")
+      .select("*")
+      .not("callback_at", "is", null)
+      .order("callback_at", { ascending: true }),
+    adminClient
+      .from("rappels")
+      .select("*")
+      .order("callback_at", { ascending: true }),
+  ]);
 
-  const events = (codeCourriers || []).map((cc) => ({
+  const courrierEvents = (codeCourriers || []).map((cc) => ({
     id: cc.id,
+    type: "courrier" as const,
     title: `${cc.first_name} ${cc.last_name}`,
     phone: cc.phone,
     callback_at: cc.callback_at!,
@@ -39,16 +46,18 @@ export default async function AgendaCourrierPage() {
     updated_at: cc.updated_at,
   }));
 
+  const rappelEvents = (rappels || []).map((r) => ({
+    id: r.id,
+    type: "rappel" as const,
+    title: r.name,
+    description: r.description as string | null,
+    callback_at: r.callback_at,
+    created_at: r.created_at,
+  }));
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Agenda</h1>
-        <p className="text-slate-600 mt-1">
-          Rappels des codes courrier
-        </p>
-      </div>
-
-      <AgendaCourrierClient events={events} />
+      <AgendaCourrierClient courrierEvents={courrierEvents} rappelEvents={rappelEvents} />
     </div>
   );
 }

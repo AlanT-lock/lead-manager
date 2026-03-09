@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { X, Calendar as CalendarIcon } from "lucide-react";
+import { X, Calendar as CalendarIcon, Plus, Trash2 } from "lucide-react";
 import {
   format,
   startOfMonth,
@@ -20,8 +20,9 @@ import { fr } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { formatTimeParis, formatDateParis, fromDatetimeLocalValueParis, toDatetimeLocalValueParis } from "@/lib/date";
 
-interface AgendaEvent {
+interface CourrierEvent {
   id: string;
+  type: "courrier";
   title: string;
   phone: string;
   callback_at: string;
@@ -32,8 +33,20 @@ interface AgendaEvent {
   updated_at: string;
 }
 
+interface RappelEvent {
+  id: string;
+  type: "rappel";
+  title: string;
+  description: string | null;
+  callback_at: string;
+  created_at: string;
+}
+
+type CalendarEvent = CourrierEvent | RappelEvent;
+
 interface AgendaCourrierClientProps {
-  events: AgendaEvent[];
+  courrierEvents: CourrierEvent[];
+  rappelEvents: RappelEvent[];
 }
 
 function getDaysSinceCreation(createdAt: string): number {
@@ -44,13 +57,21 @@ function getDaysSinceCreation(createdAt: string): number {
 
 const WEEKDAYS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
-export function AgendaCourrierClient({ events }: AgendaCourrierClientProps) {
+export function AgendaCourrierClient({ courrierEvents, rappelEvents }: AgendaCourrierClientProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [showDetailModal, setShowDetailModal] = useState<AgendaEvent | null>(null);
+  const [showCourrierModal, setShowCourrierModal] = useState<CourrierEvent | null>(null);
+  const [showRappelModal, setShowRappelModal] = useState<RappelEvent | null>(null);
+  const [showCreateRappel, setShowCreateRappel] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [followUpAction, setFollowUpAction] = useState("");
   const [callbackDate, setCallbackDate] = useState("");
+  const [newRappelName, setNewRappelName] = useState("");
+  const [newRappelDesc, setNewRappelDesc] = useState("");
+  const [newRappelDate, setNewRappelDate] = useState("");
+  const [creating, setCreating] = useState(false);
   const router = useRouter();
+
+  const allEvents: CalendarEvent[] = [...courrierEvents, ...rappelEvents];
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -69,33 +90,37 @@ export function AgendaCourrierClient({ events }: AgendaCourrierClientProps) {
     dayStart.setHours(0, 0, 0, 0);
     const dayEnd = new Date(date);
     dayEnd.setHours(23, 59, 59, 999);
-    return events.filter((e) => {
+    return allEvents.filter((e) => {
       const eventDate = new Date(e.callback_at);
       return isWithinInterval(eventDate, { start: dayStart, end: dayEnd });
     });
   };
 
-  const openDetail = (event: AgendaEvent) => {
-    setShowDetailModal(event);
-    setFollowUpAction("");
-    setCallbackDate("");
+  const handleEventClick = (event: CalendarEvent) => {
+    if (event.type === "courrier") {
+      setShowCourrierModal(event);
+      setFollowUpAction("");
+      setCallbackDate("");
+    } else {
+      setShowRappelModal(event);
+    }
   };
 
   const handleFollowUp = async () => {
-    if (!showDetailModal || !followUpAction) return;
+    if (!showCourrierModal || !followUpAction) return;
     setActionLoading(true);
     try {
       const body: Record<string, unknown> = { action: followUpAction };
       if (followUpAction === "a_rappeler" && callbackDate) {
         body.callback_at = fromDatetimeLocalValueParis(callbackDate);
       }
-      await fetch(`/api/admin/code-courrier/${showDetailModal.id}`, {
+      await fetch(`/api/admin/code-courrier/${showCourrierModal.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(body),
       });
-      setShowDetailModal(null);
+      setShowCourrierModal(null);
       setFollowUpAction("");
       setCallbackDate("");
       router.refresh();
@@ -104,8 +129,68 @@ export function AgendaCourrierClient({ events }: AgendaCourrierClientProps) {
     }
   };
 
+  const handleCreateRappel = async () => {
+    if (!newRappelName.trim() || !newRappelDate) return;
+    setCreating(true);
+    try {
+      const res = await fetch("/api/admin/rappels", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          name: newRappelName.trim(),
+          description: newRappelDesc.trim() || null,
+          callback_at: fromDatetimeLocalValueParis(newRappelDate),
+        }),
+      });
+      if (res.ok) {
+        setShowCreateRappel(false);
+        setNewRappelName("");
+        setNewRappelDesc("");
+        setNewRappelDate("");
+        router.refresh();
+      }
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleDeleteRappel = async () => {
+    if (!showRappelModal) return;
+    setActionLoading(true);
+    try {
+      await fetch(`/api/admin/rappels/${showRappelModal.id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      setShowRappelModal(null);
+      router.refresh();
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   return (
     <>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Agenda</h1>
+          <p className="text-slate-600 mt-1">Rappels des codes courrier et rappels personnels</p>
+        </div>
+        <button
+          onClick={() => {
+            setShowCreateRappel(true);
+            setNewRappelDate(toDatetimeLocalValueParis(new Date().toISOString()));
+          }}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
+        >
+          <Plus className="w-4 h-4" />
+          Nouveau rappel
+        </button>
+      </div>
+
+      {/* Calendrier */}
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
         <div className="p-4 border-b border-slate-200 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-slate-800">
@@ -138,10 +223,7 @@ export function AgendaCourrierClient({ events }: AgendaCourrierClientProps) {
         <div className="p-4">
           <div className="grid grid-cols-7 gap-px bg-slate-200 rounded-lg overflow-hidden">
             {WEEKDAYS.map((d) => (
-              <div
-                key={d}
-                className="bg-slate-50 py-2 text-center text-sm font-medium text-slate-600"
-              >
+              <div key={d} className="bg-slate-50 py-2 text-center text-sm font-medium text-slate-600">
                 {d}
               </div>
             ))}
@@ -170,9 +252,13 @@ export function AgendaCourrierClient({ events }: AgendaCourrierClientProps) {
                     {dayEvents.map((event) => (
                       <button
                         key={event.id}
-                        onClick={() => openDetail(event)}
-                        className="w-full text-left px-2 py-1.5 rounded text-xs bg-rose-100 text-rose-800 hover:bg-rose-200 transition-colors truncate"
-                        title={`${event.title} - ${event.phone}`}
+                        onClick={() => handleEventClick(event)}
+                        className={`w-full text-left px-2 py-1.5 rounded text-xs transition-colors truncate ${
+                          event.type === "courrier"
+                            ? "bg-rose-100 text-rose-800 hover:bg-rose-200"
+                            : "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                        }`}
+                        title={event.type === "courrier" ? `${event.title} - ${(event as CourrierEvent).phone}` : event.title}
                       >
                         <span className="font-medium block truncate">
                           {formatTimeParis(event.callback_at)} - {event.title}
@@ -186,24 +272,87 @@ export function AgendaCourrierClient({ events }: AgendaCourrierClientProps) {
           </div>
         </div>
 
-        {events.length === 0 && (
+        {allEvents.length === 0 && (
           <div className="p-4 mx-4 mb-4 bg-slate-50 rounded-lg text-center text-slate-500">
             <p className="font-medium">Aucun rappel planifié</p>
             <p className="text-sm mt-1">
-              Les codes courrier avec une date de rappel apparaîtront ici.
+              Les rappels et codes courrier avec une date de rappel apparaîtront ici.
             </p>
           </div>
         )}
       </div>
 
-      {/* Modal détail / suivi */}
-      {showDetailModal && (
+      {/* Modal création rappel */}
+      {showCreateRappel && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200">
+              <h3 className="text-lg font-semibold text-slate-800">Nouveau rappel</h3>
+              <button
+                onClick={() => { setShowCreateRappel(false); setNewRappelName(""); setNewRappelDesc(""); setNewRappelDate(""); }}
+                className="p-1 rounded-lg hover:bg-slate-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Nom du rappel</label>
+                <input
+                  type="text"
+                  value={newRappelName}
+                  onChange={(e) => setNewRappelName(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Ex: Appeler M. Dupont"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                <textarea
+                  value={newRappelDesc}
+                  onChange={(e) => setNewRappelDesc(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  placeholder="Description optionnelle..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Date et heure du rappel</label>
+                <input
+                  type="datetime-local"
+                  value={newRappelDate}
+                  onChange={(e) => setNewRappelDate(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+            <div className="p-4 border-t border-slate-200 flex justify-end gap-3">
+              <button
+                onClick={() => { setShowCreateRappel(false); setNewRappelName(""); setNewRappelDesc(""); setNewRappelDate(""); }}
+                className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleCreateRappel}
+                disabled={creating || !newRappelName.trim() || !newRappelDate}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
+              >
+                {creating ? "Enregistrement..." : "Enregistrer"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal détail code courrier */}
+      {showCourrierModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
             <div className="flex items-center justify-between p-4 border-b border-slate-200">
               <h3 className="text-lg font-semibold text-slate-800">Code courrier</h3>
               <button
-                onClick={() => { setShowDetailModal(null); setFollowUpAction(""); setCallbackDate(""); }}
+                onClick={() => { setShowCourrierModal(null); setFollowUpAction(""); setCallbackDate(""); }}
                 className="p-1 rounded-lg hover:bg-slate-100"
               >
                 <X className="w-5 h-5" />
@@ -213,35 +362,35 @@ export function AgendaCourrierClient({ events }: AgendaCourrierClientProps) {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <p className="text-xs text-slate-500">Nom</p>
-                  <p className="font-medium text-slate-800">{showDetailModal.last_name}</p>
+                  <p className="font-medium text-slate-800">{showCourrierModal.last_name}</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Prénom</p>
-                  <p className="font-medium text-slate-800">{showDetailModal.first_name}</p>
+                  <p className="font-medium text-slate-800">{showCourrierModal.first_name}</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Téléphone</p>
-                  <p className="font-medium text-slate-800">{showDetailModal.phone}</p>
+                  <p className="font-medium text-slate-800">{showCourrierModal.phone}</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Date de création</p>
-                  <p className="font-medium text-slate-800">{formatDateParis(showDetailModal.created_at)}</p>
+                  <p className="font-medium text-slate-800">{formatDateParis(showCourrierModal.created_at)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Jours écoulés</p>
-                  <p className="font-medium text-slate-800">{getDaysSinceCreation(showDetailModal.created_at)} jour(s)</p>
+                  <p className="font-medium text-slate-800">{getDaysSinceCreation(showCourrierModal.created_at)} jour(s)</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">NRP</p>
-                  <p className="font-medium text-slate-800">{showDetailModal.nrp_count}</p>
+                  <p className="font-medium text-slate-800">{showCourrierModal.nrp_count}</p>
                 </div>
               </div>
 
-              {showDetailModal.callback_at && (
+              {showCourrierModal.callback_at && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                   <p className="text-sm text-blue-800">
                     <CalendarIcon className="w-4 h-4 inline mr-1" />
-                    Rappel prévu le {formatDateParis(showDetailModal.callback_at)}
+                    Rappel prévu le {formatDateParis(showCourrierModal.callback_at)}
                   </p>
                 </div>
               )}
@@ -281,7 +430,7 @@ export function AgendaCourrierClient({ events }: AgendaCourrierClientProps) {
             </div>
             <div className="p-4 border-t border-slate-200 flex justify-end gap-3">
               <button
-                onClick={() => { setShowDetailModal(null); setFollowUpAction(""); setCallbackDate(""); }}
+                onClick={() => { setShowCourrierModal(null); setFollowUpAction(""); setCallbackDate(""); }}
                 className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium"
               >
                 Fermer
@@ -292,6 +441,54 @@ export function AgendaCourrierClient({ events }: AgendaCourrierClientProps) {
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
               >
                 {actionLoading ? "En cours..." : "Valider"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal détail rappel libre */}
+      {showRappelModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200">
+              <h3 className="text-lg font-semibold text-slate-800">Rappel</h3>
+              <button onClick={() => setShowRappelModal(null)} className="p-1 rounded-lg hover:bg-slate-100">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 space-y-3">
+              <div>
+                <p className="text-xs text-slate-500">Nom</p>
+                <p className="font-medium text-slate-800">{showRappelModal.title}</p>
+              </div>
+              {showRappelModal.description && (
+                <div>
+                  <p className="text-xs text-slate-500">Description</p>
+                  <p className="text-slate-700 text-sm whitespace-pre-wrap">{showRappelModal.description}</p>
+                </div>
+              )}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-sm text-blue-800">
+                  <CalendarIcon className="w-4 h-4 inline mr-1" />
+                  {formatDateParis(showRappelModal.callback_at)} à {formatTimeParis(showRappelModal.callback_at)}
+                </p>
+              </div>
+            </div>
+            <div className="p-4 border-t border-slate-200 flex justify-between">
+              <button
+                onClick={handleDeleteRappel}
+                disabled={actionLoading}
+                className="inline-flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium"
+              >
+                <Trash2 className="w-4 h-4" />
+                {actionLoading ? "Suppression..." : "Supprimer"}
+              </button>
+              <button
+                onClick={() => setShowRappelModal(null)}
+                className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium"
+              >
+                Fermer
               </button>
             </div>
           </div>
