@@ -6,6 +6,28 @@ import Image from "next/image";
 import { X, Calendar as CalendarIcon } from "lucide-react";
 import { formatDateParis, fromDatetimeLocalValueParis, toDatetimeLocalValueParis } from "@/lib/date";
 
+const DISMISSED_STORAGE_KEY = "code-courrier-notifications-dismissed";
+
+function loadDismissedFromStorage(): Set<string> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = localStorage.getItem(DISMISSED_STORAGE_KEY);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw) as string[];
+    return Array.isArray(arr) ? new Set(arr) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+function saveDismissedToStorage(ids: Set<string>) {
+  try {
+    localStorage.setItem(DISMISSED_STORAGE_KEY, JSON.stringify([...ids]));
+  } catch {
+    // ignore
+  }
+}
+
 interface CodeCourrierDue {
   id: string;
   first_name: string;
@@ -24,6 +46,7 @@ function getDaysSinceCreation(createdAt: string): number {
 export function CodeCourrierNotifications() {
   const [entries, setEntries] = useState<CodeCourrierDue[]>([]);
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const [dismissedLoaded, setDismissedLoaded] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<CodeCourrierDue | null>(null);
   const [followUpAction, setFollowUpAction] = useState("");
   const [callbackDate, setCallbackDate] = useState("");
@@ -43,16 +66,25 @@ export function CodeCourrierNotifications() {
   }, []);
 
   useEffect(() => {
+    setDismissed(loadDismissedFromStorage());
+    setDismissedLoaded(true);
+  }, []);
+
+  useEffect(() => {
     fetchDue();
     const interval = setInterval(fetchDue, 60000);
     return () => clearInterval(interval);
   }, [fetchDue]);
 
-  const visible = entries.filter((e) => !dismissed.has(e.id));
+  const visible = dismissedLoaded ? entries.filter((e) => !dismissed.has(e.id)) : [];
 
   const handleDismiss = (ev: React.MouseEvent, id: string) => {
     ev.stopPropagation();
-    setDismissed((prev) => new Set(prev).add(id));
+    setDismissed((prev) => {
+      const next = new Set(prev).add(id);
+      saveDismissedToStorage(next);
+      return next;
+    });
   };
 
   const handleClick = (entry: CodeCourrierDue) => {
@@ -82,7 +114,11 @@ export function CodeCourrierNotifications() {
         body: JSON.stringify(body),
       });
       closeModal();
-      setDismissed((prev) => new Set(prev).add(selectedEntry.id));
+      setDismissed((prev) => {
+        const next = new Set(prev).add(selectedEntry.id);
+        saveDismissedToStorage(next);
+        return next;
+      });
       fetchDue();
       router.refresh();
     } finally {
@@ -93,8 +129,9 @@ export function CodeCourrierNotifications() {
   return (
     <>
       {visible.length > 0 && (
-        <div className="fixed top-4 right-4 z-50 flex flex-col items-end gap-2 max-w-sm">
-          <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-2xl">
+        <>
+          {/* Photo uniquement pour les rappels code courrier */}
+          <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-2xl shrink-0">
             <Image
               src="/code-courrier-avatar.png"
               alt="Rappels code courrier"
@@ -129,7 +166,7 @@ export function CodeCourrierNotifications() {
               </button>
             </div>
           ))}
-        </div>
+        </>
       )}
 
       {/* Modal suivi */}

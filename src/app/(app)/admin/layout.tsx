@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { CodeCourrierNotifications } from "./code-courrier/CodeCourrierNotifications";
+import { RappelsNotifications } from "./rappels-notifications/RappelsNotifications";
 
 export default async function AdminLayout({
   children,
@@ -38,7 +39,12 @@ export default async function AdminLayout({
 
   return (
     <>
-      {role === "secretaire" && <CodeCourrierNotifications />}
+      {role === "secretaire" && (
+        <div className="fixed top-4 right-4 z-50 flex flex-col items-end gap-2 max-w-sm">
+          <CodeCourrierNotifications />
+          <RappelsNotifications />
+        </div>
+      )}
       {children}
     </>
   );
