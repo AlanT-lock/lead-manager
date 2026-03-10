@@ -21,16 +21,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
 
   const body = await req.json();
-  const { first_name, last_name, phone } = body;
+  const { first_name, last_name, phone, assigned_to } = body;
 
   if (!first_name || !last_name || !phone)
     return NextResponse.json({ error: "Champs requis manquants" }, { status: 400 });
 
-  const { data, error } = await adminClient.from("code_courrier").insert({
+  const MANUAL_TELEPROS: Record<string, string> = {
+    __manual_roy: "Roy",
+    __manual_noemie: "Noémie",
+  };
+  const isManual = assigned_to && assigned_to in MANUAL_TELEPROS;
+  const manualName = isManual ? MANUAL_TELEPROS[assigned_to] : null;
+
+  const insertData: Record<string, unknown> = {
     first_name,
     last_name,
     phone,
-  }).select().single();
+    assigned_to: isManual || !assigned_to ? null : assigned_to,
+    assigned_to_manual: manualName || null,
+  };
+
+  const { data, error } = await adminClient.from("code_courrier").insert(insertData).select().single();
 
   if (error)
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -12,12 +12,27 @@ interface CodeCourrier {
   phone: string;
   nrp_count: number;
   callback_at: string | null;
+  assigned_to: string | null;
+  assigned_to_manual: string | null;
   created_at: string;
   updated_at: string;
+  profile: { full_name: string | null; email: string } | null;
+}
+
+interface Telepro {
+  id: string;
+  full_name: string | null;
+  email: string;
 }
 
 interface CodeCourrierClientProps {
   codeCourriers: CodeCourrier[];
+  telepros: Telepro[];
+}
+
+function getTeleproLabel(cc: CodeCourrier): string {
+  if (cc.assigned_to_manual) return cc.assigned_to_manual;
+  return cc.profile?.full_name || cc.profile?.email || "—";
 }
 
 function getDaysSinceCreation(createdAt: string): number {
@@ -36,13 +51,14 @@ function getDayCounterColor(days: number): string {
   return `rgb(${r}, ${g}, ${b})`;
 }
 
-export function CodeCourrierClient({ codeCourriers }: CodeCourrierClientProps) {
+export function CodeCourrierClient({ codeCourriers, telepros }: CodeCourrierClientProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState<CodeCourrier | null>(null);
   const [creating, setCreating] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
+  const [assignedTo, setAssignedTo] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [followUpAction, setFollowUpAction] = useState("");
   const [callbackDate, setCallbackDate] = useState("");
@@ -60,6 +76,7 @@ export function CodeCourrierClient({ codeCourriers }: CodeCourrierClientProps) {
           first_name: firstName.trim(),
           last_name: lastName.trim(),
           phone: phone.trim(),
+          assigned_to: assignedTo || undefined,
         }),
       });
       if (res.ok) {
@@ -67,6 +84,7 @@ export function CodeCourrierClient({ codeCourriers }: CodeCourrierClientProps) {
         setFirstName("");
         setLastName("");
         setPhone("");
+        setAssignedTo("");
         router.refresh();
       }
     } finally {
@@ -140,6 +158,7 @@ export function CodeCourrierClient({ codeCourriers }: CodeCourrierClientProps) {
                 <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">Nom</th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">Prénom</th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">N° de tél</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">Télépro</th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">Date de création</th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">Jours</th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">NRP / Rappel</th>
@@ -149,7 +168,7 @@ export function CodeCourrierClient({ codeCourriers }: CodeCourrierClientProps) {
             <tbody>
               {codeCourriers.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-500">
+                  <td colSpan={8} className="py-12 text-center text-slate-500">
                     Aucun code courrier
                   </td>
                 </tr>
@@ -166,6 +185,7 @@ export function CodeCourrierClient({ codeCourriers }: CodeCourrierClientProps) {
                       <td className="py-3 px-4 font-medium text-slate-800">{cc.last_name}</td>
                       <td className="py-3 px-4 text-slate-700">{cc.first_name}</td>
                       <td className="py-3 px-4 text-slate-700">{cc.phone}</td>
+                      <td className="py-3 px-4 text-slate-600 text-sm">{getTeleproLabel(cc)}</td>
                       <td className="py-3 px-4 text-slate-600 text-sm">{formatDateParis(cc.created_at)}</td>
                       <td className="py-3 px-4">
                         <span
@@ -216,6 +236,23 @@ export function CodeCourrierClient({ codeCourriers }: CodeCourrierClientProps) {
               </button>
             </div>
             <div className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Télépro assigné</label>
+                <select
+                  value={assignedTo}
+                  onChange={(e) => setAssignedTo(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">— Sélectionner —</option>
+                  {telepros.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.full_name || t.email}
+                    </option>
+                  ))}
+                  <option value="__manual_roy">Roy</option>
+                  <option value="__manual_noemie">Noémie</option>
+                </select>
+              </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Nom</label>
                 <input
@@ -292,6 +329,10 @@ export function CodeCourrierClient({ codeCourriers }: CodeCourrierClientProps) {
                 <div>
                   <p className="text-xs text-slate-500">Téléphone</p>
                   <p className="font-medium text-slate-800">{showDetailModal.phone}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500">Télépro</p>
+                  <p className="font-medium text-slate-800">{getTeleproLabel(showDetailModal)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Date de création</p>

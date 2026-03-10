@@ -12,14 +12,28 @@ export default async function CodeCourrierPage() {
 
   const adminClient = createAdminClient();
 
-  const { data: codeCourriers } = await adminClient
-    .from("code_courrier")
-    .select("*")
-    .order("created_at", { ascending: false });
+  const [
+    { data: codeCourriers },
+    { data: telepros },
+  ] = await Promise.all([
+    adminClient
+      .from("code_courrier")
+      .select(`
+        *,
+        profile:profiles!assigned_to(full_name, email)
+      `)
+      .order("created_at", { ascending: false }),
+    adminClient
+      .from("profiles")
+      .select("id, full_name, email")
+      .eq("role", "telepro")
+      .is("deleted_at", null)
+      .order("full_name"),
+  ]);
 
   return (
     <div className="space-y-6">
-      <CodeCourrierClient codeCourriers={codeCourriers || []} />
+      <CodeCourrierClient codeCourriers={codeCourriers || []} telepros={telepros || []} />
     </div>
   );
 }
