@@ -90,6 +90,8 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
   const leadRef = useRef(lead);
   const materialsRef = useRef<SelectedMaterial[]>([]);
   const lastSavedRef = useRef<string>("");
+  const pendingStatusLogRef = useRef<{ oldStatus: string; newStatus: string } | null>(null);
+  const lastKnownStatusRef = useRef<string>((initialLead.status as string) || "");
 
   useEffect(() => {
     materialsRef.current = selectedMaterials;
@@ -100,6 +102,8 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
     if (String(leadRef.current?.id) !== String(initialLead?.id)) {
       setLead(initialLead);
       lastSavedRef.current = JSON.stringify(buildUpdates(initialLead));
+      lastKnownStatusRef.current = (initialLead.status as string) || "";
+      pendingStatusLogRef.current = null;
       return;
     }
     // Même lead : ne pas écraser si l'utilisateur a des modifications non sauvegardées
@@ -107,6 +111,7 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
     if (currentStr === lastSavedRef.current) {
       setLead(initialLead);
       lastSavedRef.current = JSON.stringify(buildUpdates(initialLead));
+      lastKnownStatusRef.current = (initialLead.status as string) || "";
     }
   }, [initialLead]);
 
@@ -115,7 +120,14 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
   }, [lead]);
 
   const performSave = useCallback(async () => {
-    const updates = buildUpdates(leadRef.current);
+    const updates: Record<string, unknown> = buildUpdates(leadRef.current);
+    const statusLog = pendingStatusLogRef.current;
+    if (statusLog) {
+      updates.logAction = "Changement de statut";
+      updates.logOldStatus = statusLog.oldStatus;
+      updates.logNewStatus = statusLog.newStatus;
+      pendingStatusLogRef.current = null;
+    }
     setLoading(true);
     const res = await fetch(`/api/admin/lead/${leadRef.current.id}`, {
       method: "PATCH",
@@ -175,6 +187,13 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
       if (mpr > 0) {
         setLead((l) => ({ ...l, benefit_mpr: mpr }));
       }
+    }
+    if (field === "status" && value !== lastKnownStatusRef.current) {
+      pendingStatusLogRef.current = {
+        oldStatus: lastKnownStatusRef.current,
+        newStatus: value as string,
+      };
+      lastKnownStatusRef.current = value as string;
     }
     scheduleAutoSave();
   };
