@@ -190,9 +190,23 @@ export function TeleproLeadForm({
     };
   }, []);
 
+  const [statusSaving, setStatusSaving] = useState(false);
+
   const handleStatusChange = async (newStatus: LeadStatus, callbackAt?: string) => {
-    if (!lead || saving) return;
-    setSaving(true);
+    if (!lead || statusSaving) return;
+    setStatusSaving(true);
+
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    }
+
+    const data = pickLeadFields(leadRef.current);
+    const dataStr = JSON.stringify(data);
+    const needsFormSave = dataStr !== lastSavedRef.current;
+    if (needsFormSave && !savingRef.current) {
+      await performSave(data, false);
+    }
 
     const updates = {
       status: newStatus,
@@ -211,7 +225,7 @@ export function TeleproLeadForm({
       }),
     });
 
-    setSaving(false);
+    setStatusSaving(false);
     if (res.ok) {
       setLead((l) => ({ ...l, ...updates }));
       if (onStatusChangeSuccess) {
@@ -223,8 +237,13 @@ export function TeleproLeadForm({
   };
 
   const handleNrpClick = async () => {
-    if (!lead || saving) return;
-    setSaving(true);
+    if (!lead || statusSaving) return;
+    setStatusSaving(true);
+
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    }
 
     const newCount = ((lead.nrp_count as number) || 0) + 1;
     const res = await fetch(`/api/telepro/lead/${leadId}`, {
@@ -239,7 +258,7 @@ export function TeleproLeadForm({
       }),
     });
 
-    setSaving(false);
+    setStatusSaving(false);
     if (res.ok) {
       setLead((l) => ({ ...l, nrp_count: newCount }));
       if (onNrpClickSuccess) {
@@ -594,7 +613,7 @@ export function TeleproLeadForm({
                       onSelect={(callbackAt) =>
                         handleStatusChange(s, callbackAt)
                       }
-                      disabled={saving}
+                      disabled={saving || statusSaving}
                     />
                   ))}
             </div>
@@ -602,7 +621,7 @@ export function TeleproLeadForm({
               <button
                 type="button"
                 onClick={handleNrpClick}
-                disabled={saving}
+                disabled={saving || statusSaving}
                 className="mt-3 px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200 text-sm font-medium"
               >
                 Toujours NRP (appelé {(lead.nrp_count as number) || 0} fois)

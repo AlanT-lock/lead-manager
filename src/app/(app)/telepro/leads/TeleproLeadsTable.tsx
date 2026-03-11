@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, type LeadStatus } from "@/lib/types";
 import { formatDateParis, formatFullDateTimeParis } from "@/lib/date";
@@ -66,6 +66,11 @@ export function TeleproLeadsTable({ leads }: TeleproLeadsTableProps) {
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
   const [statusSort, setStatusSort] = useState<StatusSortDirection>("none");
+  const [optimisticStatuses, setOptimisticStatuses] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    setOptimisticStatuses({});
+  }, [leads]);
 
   const sortedLeads = useMemo(() => {
     if (statusSort === "none") return leads;
@@ -102,8 +107,9 @@ export function TeleproLeadsTable({ leads }: TeleproLeadsTableProps) {
 
   const handleStatusChange = async (leadId: string, newStatus: LeadStatus, oldStatus: string) => {
     if (newStatus === oldStatus) return;
-    if (newStatus === "ancien_documents_recus") return; // Non sélectionnable par télépro
+    if (newStatus === "ancien_documents_recus") return;
     setUpdatingId(leadId);
+    setOptimisticStatuses((prev) => ({ ...prev, [leadId]: newStatus }));
 
     const body: Record<string, unknown> = {
       status: newStatus,
@@ -115,15 +121,31 @@ export function TeleproLeadsTable({ leads }: TeleproLeadsTableProps) {
       body.callback_at = null;
     }
 
-    const res = await fetch(`/api/telepro/lead/${leadId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(body),
-    });
+    try {
+      const res = await fetch(`/api/telepro/lead/${leadId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(body),
+      });
 
+      if (res.ok) {
+        router.refresh();
+      } else {
+        setOptimisticStatuses((prev) => {
+          const next = { ...prev };
+          delete next[leadId];
+          return next;
+        });
+      }
+    } catch {
+      setOptimisticStatuses((prev) => {
+        const next = { ...prev };
+        delete next[leadId];
+        return next;
+      });
+    }
     setUpdatingId(null);
-    if (res.ok) router.refresh();
   };
 
   return (
@@ -169,11 +191,13 @@ export function TeleproLeadsTable({ leads }: TeleproLeadsTableProps) {
                 </td>
               </tr>
             ) : (
-              sortedLeads.map((lead) => (
+              sortedLeads.map((lead) => {
+                const displayStatus = optimisticStatuses[lead.id] ?? lead.status;
+                return (
                 <tr
                   key={lead.id}
                   onClick={() => router.push(`/telepro/leads/${lead.id}`)}
-                  className={`border-b border-slate-100 cursor-pointer transition-colors ${getRowStatusClass(lead.status)}`}
+                  className={`border-b border-slate-100 cursor-pointer transition-colors ${getRowStatusClass(displayStatus)}`}
                 >
                   <td className="py-3 px-2">
                     <span className="font-medium text-slate-800">
@@ -191,7 +215,7 @@ export function TeleproLeadsTable({ leads }: TeleproLeadsTableProps) {
                     onClick={(e) => e.stopPropagation()}
                   >
                     <select
-                      value={lead.status}
+                      value={displayStatus}
                       onChange={(e) =>
                         handleStatusChange(
                           lead.id,
@@ -200,7 +224,7 @@ export function TeleproLeadsTable({ leads }: TeleproLeadsTableProps) {
                         )
                       }
                       disabled={updatingId === lead.id}
-                        className={`inline-flex px-2 py-1 text-xs font-medium rounded-full border cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-1 disabled:opacity-50 ${getStatusSelectClass(lead.status)}`}
+                        className={`inline-flex px-2 py-1 text-xs font-medium rounded-full border cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-1 disabled:opacity-50 ${getStatusSelectClass(displayStatus)}`}
                       >
                         {lead.status === "ancien_documents_recus" && (
                           <option value="ancien_documents_recus" disabled>
@@ -273,7 +297,8 @@ export function TeleproLeadsTable({ leads }: TeleproLeadsTableProps) {
                     )}
                   </td>
                 </tr>
-              ))
+                );
+              })
             )}
           </tbody>
         </table>
