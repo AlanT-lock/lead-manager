@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Trash2, Settings } from "lucide-react";
 
-const TELEPRO_CONFIG_PATH = (id: string) => `/admin/users/telepro/${id}`;
+const TELEPRO_CONFIG_PATH = (id: string) => `/admin/users/telepro/${id}`; // config assistant IA
 
 interface User {
   id: string;
