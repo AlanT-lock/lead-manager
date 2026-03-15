@@ -3,7 +3,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Phone } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 
 const POLL_INTERVAL_MS = 1500;
 const POLL_MAX_DURATION_MS = 120000;
@@ -52,23 +51,9 @@ export function NrpCallsButton() {
     setSuccess(null);
     setLoading(true);
     try {
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        setError("Session expirée. Reconnectez-vous.");
-        return;
-      }
-      const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      if (!baseUrl) {
-        setError("Configuration Supabase manquante.");
-        return;
-      }
-      const res = await fetch(`${baseUrl.replace(/\/$/, "")}/functions/v1/nrp-calls-start`, {
+      const res = await fetch("/api/telepro/nrp-calls/start", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-          "Content-Type": "application/json",
-        },
+        credentials: "include",
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -79,6 +64,9 @@ export function NrpCallsButton() {
       pollStartRef.current = Date.now();
       setPolling(true);
       pollPendingLead();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erreur réseau";
+      setError(message);
     } finally {
       setLoading(false);
     }

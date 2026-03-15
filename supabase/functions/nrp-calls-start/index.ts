@@ -5,6 +5,20 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 const VAPI_API_URL = "https://api.vapi.ai";
 
+const CORS_HEADERS: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, Authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Max-Age": "86400",
+};
+
+function jsonResponse(body: unknown, status: number) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+  });
+}
+
 /** Normalise le numéro lead : p:+336..., 0636..., +336... → +336... */
 function normalizeLeadPhone(phone: string): string {
   let s = (phone || "").trim();
@@ -19,20 +33,21 @@ function normalizeLeadPhone(phone: string): string {
 }
 
 Deno.serve(async (req) => {
+  console.log("[nrp-calls-start] request method:", req.method);
+
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: CORS_HEADERS });
+  }
+
   if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), {
-      status: 405,
-      headers: { "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: "Method not allowed" }, 405);
   }
 
   const authHeader = req.headers.get("Authorization");
   const token = authHeader?.replace("Bearer ", "");
   if (!token) {
-    return new Response(JSON.stringify({ error: "Non authentifié" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
+    console.log("[nrp-calls-start] missing Authorization");
+    return jsonResponse({ error: "Non authentifié" }, 401);
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -47,11 +62,10 @@ Deno.serve(async (req) => {
     error: userError,
   } = await authClient.auth.getUser(token);
   if (userError || !user) {
-    return new Response(JSON.stringify({ error: "Token invalide" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
+    console.log("[nrp-calls-start] auth failed:", userError?.message ?? "no user");
+    return jsonResponse({ error: "Token invalide" }, 401);
   }
+  console.log("[nrp-calls-start] user:", user.id);
 
   const admin = createClient(supabaseUrl, supabaseServiceKey);
   const { data: profile } = await admin
@@ -62,18 +76,14 @@ Deno.serve(async (req) => {
 
   const role = profile?.role?.toString().trim().toLowerCase();
   if (role !== "telepro") {
-    return new Response(
-      JSON.stringify({ error: "Réservé aux télépros" }),
-      { status: 403, headers: { "Content-Type": "application/json" } }
-    );
+    console.log("[nrp-calls-start] role not telepro:", role);
+    return jsonResponse({ error: "Réservé aux télépros" }, 403);
   }
 
   const apiKey = Deno.env.get("VAPI_API_KEY");
   if (!apiKey) {
-    return new Response(
-      JSON.stringify({ error: "Configuration Vapi manquante côté serveur" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    console.log("[nrp-calls-start] VAPI_API_KEY not set");
+    return jsonResponse({ error: "Configuration Vapi manquante côté serveur" }, 500);
   }
 
   if (
@@ -81,13 +91,11 @@ Deno.serve(async (req) => {
     !profile!.vapi_phone_number_id ||
     !profile!.phone
   ) {
-    return new Response(
-      JSON.stringify({
-        error:
-          "Votre agent IA et/ou numéro ne sont pas configurés. Demandez à l'admin de les renseigner dans Utilisateurs.",
-      }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
-    );
+    console.log("[nrp-calls-start] vapi/phone config missing for user");
+    return jsonResponse({
+      error:
+        "Votre agent IA et/ou numéro ne sont pas configurés. Demandez à l'admin de les renseigner dans Utilisateurs.",
+    }, 400);
   }
 
   const { data: nrpLeads } = await admin
@@ -100,11 +108,10 @@ Deno.serve(async (req) => {
     .limit(2);
 
   if (!nrpLeads?.length) {
-    return new Response(
-      JSON.stringify({ error: "Aucun lead NRP à appeler pour le moment." }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
-    );
+    console.log("[nrp-calls-start] no NRP leads for user");
+    return jsonResponse({ error: "Aucun lead NRP à appeler pour le moment." }, 400);
   }
+  console.log("[nrp-calls-start] launching", nrpLeads.length, "call(s) for leads:", nrpLeads.map((l) => l.id));
 
   const holdMessage =
     profile!.vapi_hold_message ||
@@ -191,18 +198,14 @@ Deno.serve(async (req) => {
         // keep default
       }
     }
-    return new Response(JSON.stringify({ error: errMsg }), {
-      status: 502,
-      headers: { "Content-Type": "application/json" },
-    });
+    console.log("[nrp-calls-start] Vapi call(s) failed:", errMsg);
+    return jsonResponse({ error: errMsg }, 502);
   }
 
-  return new Response(
-    JSON.stringify({
-      ok: true,
-      callsStarted: inserted.length,
-      message: `${inserted.length} appel(s) NRP lancé(s). Dès qu'un lead décroche, vous serez appelé et la fiche s'ouvrira ici.`,
-    }),
-    { status: 200, headers: { "Content-Type": "application/json" } }
-  );
+  console.log("[nrp-calls-start] success, inserted:", inserted.length);
+  return jsonResponse({
+    ok: true,
+    callsStarted: inserted.length,
+    message: `${inserted.length} appel(s) NRP lancé(s). Dès qu'un lead décroche, vous serez appelé et la fiche s'ouvrira ici.`,
+  }, 200);
 });

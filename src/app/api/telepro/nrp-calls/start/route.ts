@@ -1,16 +1,36 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { createClientFromRequest } from "@/lib/supabase/route-handler";
 
 /**
- * Le lancement des appels NRP est géré par l'Edge Function Supabase (nrp-calls-start).
- * Aucune variable Vapi (VAPI_API_KEY) n'est nécessaire sur Vercel.
- * Le frontend appelle directement l'Edge Function avec le JWT du télépro.
+ * Proxy vers l'Edge Function nrp-calls-start. Le frontend appelle cette route
+ * (same-origin, pas de CORS), le serveur transmet le JWT à l'Edge Function.
  */
-export async function POST() {
-  return NextResponse.json(
-    {
-      error:
-        "Utilisez l'Edge Function nrp-calls-start. Déployez-la avec supabase functions deploy nrp-calls-start.",
+export async function POST(request: NextRequest) {
+  const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
+  if (!baseUrl) {
+    return NextResponse.json(
+      { error: "Configuration Supabase manquante." },
+      { status: 500 }
+    );
+  }
+
+  const { supabase } = await createClientFromRequest(request);
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) {
+    return NextResponse.json(
+      { error: "Session expirée. Reconnectez-vous." },
+      { status: 401 }
+    );
+  }
+
+  const edgeUrl = baseUrl.replace(/\/$/, "") + "/functions/v1/nrp-calls-start";
+  const res = await fetch(edgeUrl, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
     },
-    { status: 501 }
-  );
+  });
+  const data = await res.json().catch(() => ({}));
+  return NextResponse.json(data, { status: res.status });
 }
