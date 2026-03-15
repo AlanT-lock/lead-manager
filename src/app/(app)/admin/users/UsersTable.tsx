@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Trash2, Settings } from "lucide-react";
 
 const TELEPRO_CONFIG_PATH = (id: string) => `/admin/users/telepro/${id}`;
@@ -45,9 +46,7 @@ export function UsersTable({ users }: UsersTableProps) {
     }
   };
 
-  const goToTeleproConfig = (id: string) => {
-    window.location.href = TELEPRO_CONFIG_PATH(id);
-  };
+  const teleproConfigHref = (id: string) => TELEPRO_CONFIG_PATH(id);
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
@@ -97,13 +96,13 @@ export function UsersTable({ users }: UsersTableProps) {
             <tr
               key={u.id}
               className="border-b border-slate-100 hover:bg-slate-50/50 group cursor-pointer"
-              onClick={() => goToTeleproConfig(u.id)}
+              onClick={() => router.push(teleproConfigHref(u.id))}
               role="button"
               tabIndex={0}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
-                  goToTeleproConfig(u.id);
+                  router.push(teleproConfigHref(u.id));
                 }
               }}
             >
@@ -115,14 +114,13 @@ export function UsersTable({ users }: UsersTableProps) {
                 </span>
               </td>
               <td className="py-4 px-4 flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                <button
-                  type="button"
-                  onClick={() => goToTeleproConfig(u.id)}
+                <Link
+                  href={teleproConfigHref(u.id)}
                   className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg inline-flex"
                   title="Configurer l'agent IA"
                 >
                   <Settings className="w-4 h-4" />
-                </button>
+                </Link>
                 <button
                   type="button"
                   onClick={() => handleDelete(u)}

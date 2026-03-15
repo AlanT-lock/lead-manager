@@ -36,7 +36,8 @@ export default async function TeleproAgentConfigPage({
     .eq("id", teleproId)
     .single();
 
-  if (error || !telepro || telepro.role !== "telepro") {
+  const roleLower = telepro?.role?.toString().trim().toLowerCase();
+  if (error || !telepro || roleLower !== "telepro") {
     redirect("/admin/users");
   }
 
