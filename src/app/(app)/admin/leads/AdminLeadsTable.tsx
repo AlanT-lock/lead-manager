@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, type LeadStatus } from "@/lib/types";
 import { formatDateParis } from "@/lib/date";
@@ -72,7 +72,12 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
   const [statusSort, setStatusSort] = useState<StatusSortDirection>("none");
+  const [optimisticStatuses, setOptimisticStatuses] = useState<Record<string, string>>({});
   const router = useRouter();
+
+  useEffect(() => {
+    setOptimisticStatuses({});
+  }, [leads]);
 
   const sortedLeads = useMemo(() => {
     if (statusSort === "none") return leads;
@@ -94,6 +99,7 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
   const handleStatusChange = useCallback(async (leadId: string, newStatus: LeadStatus, oldStatus: string) => {
     if (newStatus === oldStatus) return;
     setUpdatingId(leadId);
+    setOptimisticStatuses((prev) => ({ ...prev, [leadId]: newStatus }));
     const body: Record<string, unknown> = {
       status: newStatus,
       logAction: "Changement de statut",
@@ -101,14 +107,30 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
       logNewStatus: newStatus,
     };
     if (newStatus === "a_rappeler") body.callback_at = null;
-    const res = await fetch(`/api/admin/lead/${leadId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(body),
-    });
+    try {
+      const res = await fetch(`/api/admin/lead/${leadId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(body),
+      });
+      if (res.ok) {
+        router.refresh();
+      } else {
+        setOptimisticStatuses((prev) => {
+          const next = { ...prev };
+          delete next[leadId];
+          return next;
+        });
+      }
+    } catch {
+      setOptimisticStatuses((prev) => {
+        const next = { ...prev };
+        delete next[leadId];
+        return next;
+      });
+    }
     setUpdatingId(null);
-    if (res.ok) router.refresh();
   }, [router]);
 
   const handleCommentSave = useCallback(async (leadId: string, value: string) => {
@@ -388,11 +410,13 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
                   </td>
                 </tr>
               ) : (
-                sortedLeads.map((lead) => (
+                sortedLeads.map((lead) => {
+                  const displayStatus = optimisticStatuses[lead.id] ?? lead.status;
+                  return (
                   <tr
                     key={lead.id}
                     onClick={() => router.push(`/admin/leads/${lead.id}`)}
-                    className={`border-b border-slate-100 cursor-pointer transition-colors ${getRowStatusClass(lead.status)}`}
+                    className={`border-b border-slate-100 cursor-pointer transition-colors ${getRowStatusClass(displayStatus)}`}
                   >
                     <td className="py-3 px-2" onClick={(e) => e.stopPropagation()}>
                       <input
@@ -418,7 +442,7 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
                       onClick={(e) => e.stopPropagation()}
                     >
                       <select
-                        value={lead.status}
+                        value={displayStatus}
                         onChange={(e) =>
                           handleStatusChange(
                             lead.id,
@@ -427,7 +451,7 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
                           )
                         }
                         disabled={updatingId === lead.id}
-                        className={`inline-flex px-2 py-1 text-xs font-medium rounded-full border cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-1 disabled:opacity-50 ${getStatusSelectClass(lead.status)}`}
+                        className={`inline-flex px-2 py-1 text-xs font-medium rounded-full border cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-1 disabled:opacity-50 ${getStatusSelectClass(displayStatus)}`}
                       >
                         {LEAD_STATUSES_ADMIN.map((s) => (
                           <option key={s} value={s}>
@@ -493,7 +517,8 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
                       )}
                     </td>
                   </tr>
-                ))
+                  );
+                })
               )}
             </tbody>
           </table>
