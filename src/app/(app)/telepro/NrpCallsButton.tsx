@@ -55,9 +55,20 @@ export function NrpCallsButton() {
         method: "POST",
         credentials: "include",
       });
-      const data = await res.json().catch(() => ({}));
+      const raw = await res.text();
+      const data = (() => {
+        try {
+          return raw ? JSON.parse(raw) : {};
+        } catch {
+          return {};
+        }
+      })();
       if (!res.ok) {
-        setError(data.error || "Erreur lors du lancement des appels");
+        const msg = data?.error ?? `Erreur ${res.status} lors du lancement des appels`;
+        setError(msg);
+        if (process.env.NODE_ENV === "development") {
+          console.error("[nrp-calls-start] API error:", res.status, raw);
+        }
         return;
       }
       setSuccess(data.message || "Appels lancés.");
