@@ -161,13 +161,13 @@ export default async function AdminStatsPage({
               key={type}
               label={INSTALLATION_TYPE_LABELS[type]}
               value={installationTypeCounts[type] ?? 0}
-              href={baseInstalleUrl}
+              href={`${baseInstalleUrl}&installation_type=${encodeURIComponent(type)}`}
             />
           ))}
           <StatCard
             label="Non renseigné"
             value={installationTypeCounts["non_renseigne"] ?? 0}
-            href={baseInstalleUrl}
+            href={`${baseInstalleUrl}&installation_type=non_renseigne`}
           />
         </div>
       </div>

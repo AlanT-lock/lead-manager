@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { startOfDay, startOfWeek, startOfMonth } from "date-fns";
 import Link from "next/link";
 import { LEAD_STATUS_LABELS, type LeadStatus } from "@/lib/types";
+import { NrpCallsButton } from "./NrpCallsButton";
 
 export default async function TeleproDashboard() {
   const supabase = await createClient();
@@ -128,7 +129,8 @@ export default async function TeleproDashboard() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap gap-4 items-end">
+        <NrpCallsButton />
         <Link
           href="/telepro/leads"
           className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"

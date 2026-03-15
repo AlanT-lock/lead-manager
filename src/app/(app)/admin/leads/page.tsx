@@ -11,7 +11,7 @@ const CHANTIER_FIELDS = CHANTIER_STATUS_FIELDS.map((f) => f.field);
 export default async function AdminLeadsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; q?: string; telepro?: string; from?: string; to?: string; chantier?: string; delegataire?: string }>;
+  searchParams: Promise<{ status?: string; q?: string; telepro?: string; from?: string; to?: string; chantier?: string; delegataire?: string; installation_type?: string }>;
 }) {
   const adminClient = createAdminClient();
   const params = await searchParams;
@@ -22,6 +22,7 @@ export default async function AdminLeadsPage({
   const to = params.to;
   const chantier = params.chantier;
   const delegataire = params.delegataire;
+  const installationType = params.installation_type;
 
   // Parsing en heure locale pour éviter les décalages de fuseau
   const fromDate = from ? new Date(`${from}T00:00:00`) : null;
@@ -42,6 +43,14 @@ export default async function AdminLeadsPage({
     query = query.eq("status", status ?? "documents_recus").eq(chantier, true);
   } else if (status) {
     query = query.eq("status", status);
+  }
+
+  if (installationType) {
+    if (installationType === "non_renseigne") {
+      query = query.is("installation_type", null);
+    } else {
+      query = query.eq("installation_type", installationType);
+    }
   }
 
   if (assignedTo) {

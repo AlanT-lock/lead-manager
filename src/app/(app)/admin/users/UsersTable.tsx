@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2 } from "lucide-react";
+import Link from "next/link";
+import { Trash2, Settings } from "lucide-react";
 
 interface User {
   id: string;
@@ -88,15 +89,34 @@ export function UsersTable({ users }: UsersTableProps) {
             </tr>
           ))}
           {telepros.map((u) => (
-            <tr key={u.id} className="border-b border-slate-100">
-              <td className="py-4 px-4 font-medium">{u.full_name || "-"}</td>
+            <tr
+              key={u.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => router.push(`/admin/users/telepro/${u.id}`)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  router.push(`/admin/users/telepro/${u.id}`);
+                }
+              }}
+              className="border-b border-slate-100 hover:bg-slate-50/50 cursor-pointer"
+            >
+              <td className="py-4 px-4 font-medium text-blue-600">{u.full_name || "-"}</td>
               <td className="py-4 px-4 text-slate-600">{u.email}</td>
               <td className="py-4 px-4">
                 <span className="px-2 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-700">
                   Télépro
                 </span>
               </td>
-              <td className="py-4 px-4">
+              <td className="py-4 px-4 flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                <Link
+                  href={`/admin/users/telepro/${u.id}`}
+                  className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+                  title="Configurer l'agent IA"
+                >
+                  <Settings className="w-4 h-4" />
+                </Link>
                 <button
                   type="button"
                   onClick={() => handleDelete(u)}
@@ -111,6 +131,7 @@ export function UsersTable({ users }: UsersTableProps) {
           ))}
         </tbody>
       </table>
+
     </div>
   );
 }
