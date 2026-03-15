@@ -14,6 +14,7 @@ export function NrpCallsButton() {
   const [polling, setPolling] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [noAnswer, setNoAnswer] = useState(false);
   const pollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pollStartRef = useRef<number>(0);
 
@@ -33,6 +34,11 @@ export function NrpCallsButton() {
     fetch("/api/telepro/pending-lead", { credentials: "include" })
       .then((res) => res.json())
       .then((data) => {
+        if (data.noAnswer) {
+          stopPolling();
+          setNoAnswer(true);
+          return;
+        }
         if (data.leadId) {
           stopPolling();
           router.push(`/telepro/leads/${data.leadId}`);
@@ -50,6 +56,7 @@ export function NrpCallsButton() {
   const handleStartCalls = async () => {
     setError(null);
     setSuccess(null);
+    setNoAnswer(false);
     setLoading(true);
     try {
       const supabase = createClient();
@@ -111,7 +118,12 @@ export function NrpCallsButton() {
       {error && (
         <p className="text-sm text-red-600">{error}</p>
       )}
-      {success && !error && (
+      {noAnswer && (
+        <p className="text-sm text-amber-600 font-medium">
+          Personne n&apos;a répondu. Vous pouvez relancer les appels.
+        </p>
+      )}
+      {success && !error && !noAnswer && (
         <p className="text-sm text-slate-600">{success}</p>
       )}
     </div>

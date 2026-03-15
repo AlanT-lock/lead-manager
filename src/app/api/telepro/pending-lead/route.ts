@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     .single();
 
   if (!row) {
-    return NextResponse.json({ leadId: null });
+    return NextResponse.json({ leadId: null, noAnswer: false });
   }
 
   await adminClient
@@ -37,5 +37,10 @@ export async function GET(request: NextRequest) {
     .delete()
     .eq("telepro_id", user.id);
 
-  return NextResponse.json({ leadId: row.lead_id });
+  // lead_id null = personne n'a répondu (signal du webhook)
+  if (!row.lead_id) {
+    return NextResponse.json({ leadId: null, noAnswer: true });
+  }
+
+  return NextResponse.json({ leadId: row.lead_id, noAnswer: false });
 }

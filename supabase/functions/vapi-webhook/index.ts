@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
 
     const { data: row } = await admin
       .from("nrp_call_batches")
-      .select("batch_id, telepro_id")
+      .select("batch_id, telepro_id, lead_id")
       .eq("call_id", callId)
       .single();
 
@@ -85,7 +85,20 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { batch_id, telepro_id } = row;
+    const { batch_id, telepro_id, lead_id } = row;
+
+    // Logger le résultat de l'appel NRP IA
+    const logAction = isVoicemail
+      ? "NRP IA - Messagerie vocale détectée"
+      : `NRP IA - Pas de réponse (${status})`;
+    await admin.from("lead_logs").insert({
+      lead_id,
+      user_id: telepro_id,
+      action: logAction,
+      old_status: "nrp",
+      new_status: "nrp",
+    });
+
     await admin.from("nrp_call_batches").delete().eq("call_id", callId);
 
     const { count } = await admin
@@ -108,6 +121,11 @@ Deno.serve(async (req) => {
         description: desc,
         callback_at: new Date().toISOString(),
       });
+      // Notifier le front que personne n'a répondu (lead_id = null)
+      await admin.from("telepro_pending_lead_opens").upsert(
+        { telepro_id, lead_id: null, created_at: new Date().toISOString() },
+        { onConflict: "telepro_id" }
+      );
     } else {
       console.log("[vapi-webhook] batch still has", count, "call(s) remaining — keeping them");
     }
@@ -143,6 +161,15 @@ Deno.serve(async (req) => {
   }
 
   const { batch_id, telepro_id, lead_id, control_url } = row;
+
+  // Logger que le lead a décroché via l'appel NRP IA
+  await admin.from("lead_logs").insert({
+    lead_id,
+    user_id: telepro_id,
+    action: "NRP IA - Lead a décroché, transfert vers le télépro",
+    old_status: "nrp",
+    new_status: "nrp",
+  });
 
   const { data: otherRows } = await admin
     .from("nrp_call_batches")

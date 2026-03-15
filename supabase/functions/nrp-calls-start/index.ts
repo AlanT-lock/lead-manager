@@ -98,11 +98,13 @@ Deno.serve(async (req) => {
     }, 400);
   }
 
+  // Prioriser les leads jamais appelés par l'IA (null en premier), puis les plus anciennement appelés
   const { data: nrpLeads } = await admin
     .from("leads")
     .select("id, phone")
     .eq("assigned_to", user.id)
     .eq("status", "nrp")
+    .order("last_nrp_ai_call_at", { ascending: true, nullsFirst: true })
     .order("nrp_count", { ascending: true })
     .order("created_at", { ascending: true })
     .limit(2);
@@ -173,6 +175,18 @@ Deno.serve(async (req) => {
       lead_id: lead.id,
       control_url: controlUrl,
     });
+    // Log l'appel NRP IA + mise à jour de la date du dernier appel
+    await admin.from("lead_logs").insert({
+      lead_id: lead.id,
+      user_id: user.id,
+      action: "NRP IA - Appel lancé par l'agent IA",
+      old_status: "nrp",
+      new_status: "nrp",
+    });
+    await admin
+      .from("leads")
+      .update({ last_nrp_ai_call_at: new Date().toISOString() })
+      .eq("id", lead.id);
     inserted.push({
       call_id: callId,
       lead_id: lead.id,
