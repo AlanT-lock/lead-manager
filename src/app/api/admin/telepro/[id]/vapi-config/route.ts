@@ -28,7 +28,7 @@ export async function GET(
 
   const { data: telepro, error } = await adminClient
     .from("profiles")
-    .select("id, phone, vapi_assistant_id, vapi_phone_number_id, vapi_hold_message, vapi_voice_id, first_message_audio_url, full_name")
+    .select("*")
     .eq("id", teleproId)
     .single();
 
@@ -36,13 +36,8 @@ export async function GET(
     return NextResponse.json({ error: "Télépro non trouvé" }, { status: 404 });
   }
 
-  const { data: roleRow } = await adminClient
-    .from("profiles")
-    .select("role")
-    .eq("id", teleproId)
-    .single();
-
-  if (roleRow?.role !== "telepro") {
+  const teleproRole = telepro.role?.toString().trim().toLowerCase();
+  if (teleproRole !== "telepro") {
     return NextResponse.json({ error: "L'utilisateur n'est pas un télépro" }, { status: 400 });
   }
 
@@ -87,7 +82,7 @@ export async function PATCH(
     .eq("id", teleproId)
     .single();
 
-  if (!roleRow || roleRow.role !== "telepro") {
+  if (!roleRow || roleRow.role?.toString().trim().toLowerCase() !== "telepro") {
     return NextResponse.json({ error: "Télépro non trouvé" }, { status: 404 });
   }
 

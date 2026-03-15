@@ -35,7 +35,7 @@ export async function POST(
     .eq("id", teleproId)
     .single();
 
-  if (!telepro || telepro.role !== "telepro") {
+  if (!telepro || telepro.role?.toString().trim().toLowerCase() !== "telepro") {
     return NextResponse.json({ error: "Télépro non trouvé" }, { status: 404 });
   }
 

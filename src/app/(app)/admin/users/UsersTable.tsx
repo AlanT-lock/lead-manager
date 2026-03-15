@@ -22,9 +22,10 @@ export function UsersTable({ users }: UsersTableProps) {
   const [deleting, setDeleting] = useState<string | null>(null);
   const router = useRouter();
 
-  const telepros = users.filter((u) => u.role === "telepro");
-  const secretaires = users.filter((u) => u.role === "secretaire");
-  const admins = users.filter((u) => u.role === "admin");
+  const normalize = (r: string) => r?.toString().trim().toLowerCase();
+  const telepros = users.filter((u) => normalize(u.role) === "telepro");
+  const secretaires = users.filter((u) => normalize(u.role) === "secretaire");
+  const admins = users.filter((u) => normalize(u.role) === "admin");
 
   const handleDelete = async (telepro: User) => {
     if (!confirm(`Supprimer le télépro ${telepro.full_name || telepro.email} ?\n\nSes leads devront être redistribués.`)) return;
