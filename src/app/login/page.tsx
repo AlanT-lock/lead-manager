@@ -30,17 +30,44 @@ function LoginForm() {
     setError(null);
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-    setLoading(false);
-
-    if (error) {
-      setError(error.message);
+    const supabaseUrl =
+      (typeof window !== "undefined" && (window as unknown as { __SUPABASE_ENV?: { url: string } }).__SUPABASE_ENV?.url) ||
+      process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      "";
+    if (
+      !supabaseUrl ||
+      supabaseUrl.includes("xxxxx") ||
+      supabaseUrl.includes("placeholder")
+    ) {
+      setError(
+        "Configuration manquante : remplacez XXXXXXX dans .env.local par l’URL de votre projet Supabase (ex. https://abcdef.supabase.co), puis redémarrez le serveur (npm run dev) et rechargez la page."
+      );
+      setLoading(false);
       return;
     }
 
-    // Redirection complète pour que les cookies de session soient bien envoyés au serveur (Netlify/serverless)
-    window.location.href = "/";
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        setError(error.message);
+        return;
+      }
+
+      // Redirection complète pour que les cookies de session soient bien envoyés au serveur (Netlify/serverless)
+      window.location.href = "/";
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes("Load failed") || msg.includes("Failed to fetch") || msg.includes("fetch")) {
+        setError(
+          "Impossible de contacter le serveur d'authentification. Vérifiez votre connexion internet et que .env.local contient NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY, puis redémarrez le serveur (npm run dev)."
+        );
+      } else {
+        setError(msg);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

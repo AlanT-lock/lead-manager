@@ -1,74 +1,50 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClientFromRequest } from "@/lib/supabase/route-handler";
 
 /**
  * Proxy vers l'Edge Function nrp-calls-start.
- * Flux : navigateur → cette route (Netlify) → Edge Function (Supabase) → Vapi.
- * Le serveur transmet le JWT à l'Edge Function pour éviter le CORS.
+ * Le frontend envoie le token Supabase dans le header Authorization.
+ * Cette route le transmet tel quel à l'Edge Function (pas de CORS).
  */
 export async function POST(request: NextRequest) {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
     if (!baseUrl) {
       return NextResponse.json(
-        { error: "Configuration Supabase manquante (NEXT_PUBLIC_SUPABASE_URL ou SUPABASE_URL sur Netlify)." },
+        { error: "NEXT_PUBLIC_SUPABASE_URL non configuré sur le serveur." },
         { status: 500 }
       );
     }
 
-    if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    const authHeader = request.headers.get("Authorization");
+    if (!authHeader) {
       return NextResponse.json(
-        { error: "Configuration Supabase manquante (NEXT_PUBLIC_SUPABASE_ANON_KEY sur Netlify)." },
-        { status: 500 }
+        { error: "Token manquant. Reconnectez-vous." },
+        { status: 401 }
       );
     }
 
-    const { supabase, supabaseResponse } = await createClientFromRequest(request);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json(
-        { error: "Session expirée ou invalide. Reconnectez-vous." },
-        { status: 401, headers: supabaseResponse.headers }
-      );
-    }
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.access_token) {
-      return NextResponse.json(
-        { error: "Session expirée. Reconnectez-vous." },
-        { status: 401, headers: supabaseResponse.headers }
-      );
-    }
+    const edgeUrl = `${baseUrl.replace(/\/$/, "")}/functions/v1/nrp-calls-start`;
+    const res = await fetch(edgeUrl, {
+      method: "POST",
+      headers: {
+        Authorization: authHeader,
+        "Content-Type": "application/json",
+      },
+    });
 
-    const edgeUrl = baseUrl.replace(/\/$/, "") + "/functions/v1/nrp-calls-start";
-    let res: Response;
+    const text = await res.text();
+    let data: Record<string, unknown>;
     try {
-      res = await fetch(edgeUrl, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-          "Content-Type": "application/json",
-        },
-      });
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Réseau";
-      const errResponse = NextResponse.json(
-        {
-          error: `Impossible de joindre l'Edge Function Supabase (${msg}). Vérifiez que NEXT_PUBLIC_SUPABASE_URL est bien configuré sur Netlify et que l'Edge Function nrp-calls-start est déployée.`,
-        },
-        { status: 502 }
-      );
-      supabaseResponse.headers.forEach((value, key) => errResponse.headers.set(key, value));
-      return errResponse;
+      data = JSON.parse(text);
+    } catch {
+      data = { error: `Edge Function a répondu ${res.status}: ${text.slice(0, 300)}` };
     }
 
-    const data = await res.json().catch(() => ({}));
-    const response = NextResponse.json(data, { status: res.status });
-    supabaseResponse.headers.forEach((value, key) => response.headers.set(key, value));
-    return response;
+    return NextResponse.json(data, { status: res.status });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return NextResponse.json(
-      { error: `Erreur serveur: ${message}` },
+      { error: `Erreur serveur proxy: ${message}` },
       { status: 500 }
     );
   }

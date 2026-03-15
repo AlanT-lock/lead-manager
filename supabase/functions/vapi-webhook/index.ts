@@ -19,6 +19,8 @@ function normalizeTeleproPhone(phone: string): string {
 }
 
 Deno.serve(async (req) => {
+  console.log("[vapi-webhook] request received:", req.method);
+
   if (req.method !== "POST") {
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405,
@@ -31,6 +33,7 @@ Deno.serve(async (req) => {
       type?: string;
       status?: string;
       call?: { id?: string; monitor?: { controlUrl?: string } };
+      endedReason?: string;
     };
   };
 
@@ -47,6 +50,9 @@ Deno.serve(async (req) => {
   const type = msg?.type;
   const status = msg?.status;
   const callId = msg?.call?.id;
+  const endedReason = msg?.endedReason;
+
+  console.log("[vapi-webhook] type:", type, "status:", status, "callId:", callId, "endedReason:", endedReason);
 
   if (type !== "status-update" || !callId) {
     return new Response(JSON.stringify({ ok: true }), {
@@ -59,8 +65,13 @@ Deno.serve(async (req) => {
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const admin = createClient(supabaseUrl, supabaseServiceKey);
 
-  // ——— Appel terminé sans décrochage (ended, no-answer, busy, failed) ———
-  if (ENDED_STATUSES.includes(status)) {
+  // ——— Appel terminé sans décrochage (ended, no-answer, busy, failed, voicemail) ———
+  const isVoicemail = endedReason === "voicemail";
+  if (ENDED_STATUSES.includes(status) || isVoicemail) {
+    if (isVoicemail) {
+      console.log("[vapi-webhook] voicemail detected for callId:", callId, "— hanging up, keeping other call");
+    }
+
     const { data: row } = await admin
       .from("nrp_call_batches")
       .select("batch_id, telepro_id")
@@ -89,11 +100,16 @@ Deno.serve(async (req) => {
         .eq("id", telepro_id)
         .single();
       const name = telepro?.full_name || "Télépro";
+      const desc = isVoicemail
+        ? `Télépro : ${name}. Un lead est tombé sur messagerie, l'autre n'a pas décroché.`
+        : `Télépro : ${name}. Aucun des 2 leads NRP n'a décroché.`;
       await admin.from("rappels").insert({
         name: "NRP - Personne n'a répondu",
-        description: `Télépro : ${name}. Aucun des 2 leads NRP n'a décroché.`,
+        description: desc,
         callback_at: new Date().toISOString(),
       });
+    } else {
+      console.log("[vapi-webhook] batch still has", count, "call(s) remaining — keeping them");
     }
 
     return new Response(JSON.stringify({ ok: true }), {
@@ -110,6 +126,8 @@ Deno.serve(async (req) => {
     });
   }
 
+  console.log("[vapi-webhook] lead picked up! callId:", callId);
+
   const { data: row, error: findError } = await admin
     .from("nrp_call_batches")
     .select("batch_id, telepro_id, lead_id, control_url")
@@ -117,6 +135,7 @@ Deno.serve(async (req) => {
     .single();
 
   if (findError || !row) {
+    console.log("[vapi-webhook] no batch row found for callId:", callId, "error:", findError?.message);
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
@@ -171,10 +190,13 @@ Deno.serve(async (req) => {
     }
   }
 
+  console.log("[vapi-webhook] telepro phone:", teleproPhone, "controlUrl:", controlUrlToUse ? "present" : "MISSING");
+
   if (teleproPhone && controlUrlToUse) {
     const normalizedPhone = normalizeTeleproPhone(teleproPhone);
+    console.log("[vapi-webhook] transferring to:", normalizedPhone);
     try {
-      await fetch(`${controlUrlToUse}/control`, {
+      const transferRes = await fetch(`${controlUrlToUse}/control`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -183,12 +205,14 @@ Deno.serve(async (req) => {
           content: holdMessage,
         }),
       });
-    } catch {
-      // ignore
+      console.log("[vapi-webhook] transfer response:", transferRes.status, await transferRes.text().catch(() => ""));
+    } catch (err) {
+      console.error("[vapi-webhook] transfer FAILED:", err instanceof Error ? err.message : err);
     }
+  } else {
+    console.warn("[vapi-webhook] CANNOT transfer: teleproPhone=", teleproPhone, "controlUrl=", controlUrlToUse);
   }
 
-  // Ouvrir la fiche lead uniquement si on a bien appelé le télépro (numéro + controlUrl)
   if (teleproPhone && controlUrlToUse) {
     await admin.from("telepro_pending_lead_opens").upsert(
       { telepro_id, lead_id, created_at: new Date().toISOString() },

@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Phone } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 const POLL_INTERVAL_MS = 1500;
 const POLL_MAX_DURATION_MS = 120000;
@@ -51,33 +52,42 @@ export function NrpCallsButton() {
     setSuccess(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/telepro/nrp-calls/start", {
-        method: "POST",
-        credentials: "include",
-      });
-      const raw = await res.text();
-      const data = (() => {
-        try {
-          return raw ? JSON.parse(raw) : {};
-        } catch {
-          return {};
-        }
-      })();
-      if (!res.ok) {
-        const msg = data?.error ?? `Erreur ${res.status} lors du lancement des appels`;
-        setError(msg);
-        if (process.env.NODE_ENV === "development") {
-          console.error("[nrp-calls-start] API error:", res.status, raw);
-        }
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        setError("Session expirée. Reconnectez-vous.");
         return;
       }
-      setSuccess(data.message || "Appels lancés.");
+
+      const res = await fetch("/api/telepro/nrp-calls/start", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      const text = await res.text();
+      let data: Record<string, unknown> = {};
+      try {
+        data = JSON.parse(text);
+      } catch {
+        /* response is not JSON */
+      }
+
+      if (!res.ok) {
+        setError(
+          (data?.error as string) ??
+          `Erreur ${res.status}: ${text.slice(0, 200)}`
+        );
+        return;
+      }
+
+      setSuccess((data.message as string) || "Appels lancés.");
       pollStartRef.current = Date.now();
       setPolling(true);
       pollPendingLead();
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Erreur réseau";
-      setError(message);
+      setError(err instanceof Error ? err.message : "Erreur réseau");
     } finally {
       setLoading(false);
     }
@@ -95,7 +105,7 @@ export function NrpCallsButton() {
         {loading
           ? "Lancement…"
           : polling
-            ? "En attente d’un décrochage…"
+            ? "En attente d'un décrochage…"
             : "Lancer les appels NRP (2 numéros)"}
       </button>
       {error && (

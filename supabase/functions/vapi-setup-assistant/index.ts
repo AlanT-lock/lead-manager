@@ -49,6 +49,15 @@ function buildAssistantPayload(opts: {
       provider: "11labs",
       voiceId: resolveVoiceId(opts.voiceId),
     },
+    voicemailDetection: {
+      provider: "vapi",
+      enabled: true,
+      backoffPlan: {
+        startAtSeconds: 2,
+        frequencySeconds: 2.5,
+        maxRetries: 3,
+      },
+    },
   };
   if (opts.firstMessageAudioUrl?.trim()) {
     payload.firstMessageAudioUrl = opts.firstMessageAudioUrl.trim();
@@ -184,6 +193,7 @@ Deno.serve(async (req) => {
           server: payload.server,
           serverMessages: payload.serverMessages,
           voice: payload.voice,
+          voicemailDetection: payload.voicemailDetection,
         }),
       }
     );

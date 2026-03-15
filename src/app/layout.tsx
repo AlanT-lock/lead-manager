@@ -17,9 +17,17 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+  const envScript =
+    typeof window === "undefined"
+      ? `window.__SUPABASE_ENV=${JSON.stringify({ url: supabaseUrl, anonKey: supabaseAnonKey })};`
+      : "";
+
   return (
     <html lang="fr">
       <body className={`${inter.variable} font-sans antialiased bg-slate-50 text-slate-900`}>
+        <script dangerouslySetInnerHTML={{ __html: envScript }} />
         {children}
       </body>
     </html>
