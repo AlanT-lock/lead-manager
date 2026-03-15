@@ -15,12 +15,19 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { supabase } = await createClientFromRequest(request);
+  const { supabase, supabaseResponse } = await createClientFromRequest(request);
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json(
+      { error: "Session expirée ou invalide. Reconnectez-vous." },
+      { status: 401, headers: supabaseResponse.headers }
+    );
+  }
   const { data: { session } } = await supabase.auth.getSession();
   if (!session?.access_token) {
     return NextResponse.json(
       { error: "Session expirée. Reconnectez-vous." },
-      { status: 401 }
+      { status: 401, headers: supabaseResponse.headers }
     );
   }
 
@@ -36,14 +43,18 @@ export async function POST(request: NextRequest) {
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Réseau";
-    return NextResponse.json(
+    const errResponse = NextResponse.json(
       {
         error: `Impossible de joindre l'Edge Function Supabase (${msg}). Vérifiez que NEXT_PUBLIC_SUPABASE_URL est bien configuré sur Netlify et que l'Edge Function nrp-calls-start est déployée.`,
       },
       { status: 502 }
     );
+    supabaseResponse.headers.forEach((value, key) => errResponse.headers.set(key, value));
+    return errResponse;
   }
 
   const data = await res.json().catch(() => ({}));
-  return NextResponse.json(data, { status: res.status });
+  const response = NextResponse.json(data, { status: res.status });
+  supabaseResponse.headers.forEach((value, key) => response.headers.set(key, value));
+  return response;
 }
