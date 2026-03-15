@@ -89,27 +89,26 @@ export function UsersTable({ users }: UsersTableProps) {
             </tr>
           ))}
           {telepros.map((u) => (
-            <tr
-              key={u.id}
-              role="button"
-              tabIndex={0}
-              onClick={() => router.push(`/admin/users/telepro/${u.id}`)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  router.push(`/admin/users/telepro/${u.id}`);
-                }
-              }}
-              className="border-b border-slate-100 hover:bg-slate-50/50 cursor-pointer"
-            >
-              <td className="py-4 px-4 font-medium text-blue-600">{u.full_name || "-"}</td>
-              <td className="py-4 px-4 text-slate-600">{u.email}</td>
-              <td className="py-4 px-4">
-                <span className="px-2 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-700">
-                  Télépro
-                </span>
+            <tr key={u.id} className="border-b border-slate-100 hover:bg-slate-50/50 group">
+              <td colSpan={3} className="relative p-0 align-middle">
+                <Link
+                  href={`/admin/users/telepro/${u.id}`}
+                  className="absolute inset-0 z-0"
+                  aria-label={`Configurer l'assistant de ${u.full_name || u.email}`}
+                />
+                <div className="relative z-10 flex w-full">
+                  <span className="py-4 px-4 font-medium text-blue-600 group-hover:underline flex-1">
+                    {u.full_name || "-"}
+                  </span>
+                  <span className="py-4 px-4 text-slate-600 flex-1">{u.email}</span>
+                  <span className="py-4 px-4 flex-1">
+                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-700">
+                      Télépro
+                    </span>
+                  </span>
+                </div>
               </td>
-              <td className="py-4 px-4 flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+              <td className="py-4 px-4 flex items-center gap-1 relative z-10 bg-white">
                 <Link
                   href={`/admin/users/telepro/${u.id}`}
                   className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg"
