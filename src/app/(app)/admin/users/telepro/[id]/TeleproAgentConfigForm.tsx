@@ -81,7 +81,8 @@ export function TeleproAgentConfigForm({
         router.refresh();
       } else {
         setSetupResult(null);
-        setError(data.error || "Erreur lors du setup");
+        const detail = data.details ? `\n${data.details}` : "";
+        setError((data.error || "Erreur lors du setup") + detail);
       }
     } finally {
       setSetupLoading(false);

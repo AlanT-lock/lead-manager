@@ -6,8 +6,19 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 const VAPI_API_URL = "https://api.vapi.ai";
 
-// Config par défaut de l'assistant NRP (webhook + status-update)
-// Si firstMessageAudioUrl est fourni, il est utilisé à la place du TTS pour le premier message.
+const VOICE_ID_MAP: Record<string, string> = {
+  charlotte: "XB0fDUnXU5powFXDhCwa",
+  alice: "Xb7hH8MSUJpSbSDYk0k2",
+  rachel: "21m00Tcm4TlvDq8ikWAM",
+};
+
+const DEFAULT_VOICE_ID = VOICE_ID_MAP.charlotte;
+
+function resolveVoiceId(raw: string | null | undefined): string {
+  const key = (raw ?? "").trim().toLowerCase();
+  return VOICE_ID_MAP[key] ?? (key || DEFAULT_VOICE_ID);
+}
+
 function buildAssistantPayload(opts: {
   name: string;
   serverUrl: string;
@@ -36,7 +47,7 @@ function buildAssistantPayload(opts: {
     },
     voice: {
       provider: "11labs",
-      voiceId: opts.voiceId || "charlotte",
+      voiceId: resolveVoiceId(opts.voiceId),
     },
   };
   if (opts.firstMessageAudioUrl?.trim()) {
