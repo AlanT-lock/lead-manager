@@ -43,6 +43,8 @@ export async function GET(
 
   return NextResponse.json({
     phone: telepro.phone ?? "",
+    twilio_phone_number: telepro.twilio_phone_number ?? "",
+    twilio_say_voice: telepro.twilio_say_voice ?? "",
     vapi_assistant_id: telepro.vapi_assistant_id ?? "",
     vapi_phone_number_id: telepro.vapi_phone_number_id ?? "",
     vapi_hold_message: telepro.vapi_hold_message ?? "",
@@ -89,19 +91,15 @@ export async function PATCH(
   const body = await request.json();
   const updates: {
     phone?: string | null;
-    vapi_assistant_id?: string | null;
-    vapi_phone_number_id?: string | null;
+    twilio_phone_number?: string | null;
+    twilio_say_voice?: string | null;
     vapi_hold_message?: string | null;
-    vapi_voice_id?: string | null;
-    first_message_audio_url?: string | null;
   } = {};
 
-  if (typeof body.phone === "string") updates.phone = body.phone || null;
-  if (typeof body.vapi_assistant_id === "string") updates.vapi_assistant_id = body.vapi_assistant_id || null;
-  if (typeof body.vapi_phone_number_id === "string") updates.vapi_phone_number_id = body.vapi_phone_number_id || null;
-  if (typeof body.vapi_hold_message === "string") updates.vapi_hold_message = body.vapi_hold_message || null;
-  if (typeof body.vapi_voice_id === "string") updates.vapi_voice_id = body.vapi_voice_id || null;
-  if (typeof body.first_message_audio_url === "string") updates.first_message_audio_url = body.first_message_audio_url || null;
+  if (typeof body.phone === "string") updates.phone = body.phone?.trim() || null;
+  if (typeof body.twilio_phone_number === "string") updates.twilio_phone_number = body.twilio_phone_number?.trim() || null;
+  if (typeof body.twilio_say_voice === "string") updates.twilio_say_voice = body.twilio_say_voice?.trim() || null;
+  if (typeof body.vapi_hold_message === "string") updates.vapi_hold_message = body.vapi_hold_message?.trim() || null;
 
   const { error } = await adminClient
     .from("profiles")

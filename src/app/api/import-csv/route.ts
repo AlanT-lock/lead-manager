@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClientFromRequest } from "@/lib/supabase/route-handler";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { normalizePhoneToE164 } from "@/lib/phone";
 
 const PHONE_COLUMNS = [
   "phone_number",
@@ -131,7 +132,8 @@ export async function POST(request: NextRequest) {
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i] as Record<string, string>;
-    const phone = extractValue(row, phoneCol).replace(/\s/g, "") || `row_${i}`;
+    const phoneRaw = extractValue(row, phoneCol).replace(/\s/g, "").trim() || `row_${i}`;
+    const phone = phoneRaw !== `row_${i}` ? (normalizePhoneToE164(phoneRaw) || phoneRaw) : phoneRaw;
     const email = extractValue(row, emailCol);
     const { firstName, lastName } = parseFirstNameLastName(row);
     const firstNameFinal = firstName || "Inconnu";

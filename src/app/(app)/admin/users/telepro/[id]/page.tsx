@@ -5,19 +5,13 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { TeleproAgentConfigForm } from "./TeleproAgentConfigForm";
 
-const VAPI_VOICE_OPTIONS = [
-  { value: "charlotte", label: "Charlotte (français)" },
-  { value: "alice", label: "Alice (français)" },
-  { value: "rachel", label: "Rachel (multilingue)" },
-] as const;
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function safeStr(val: any): string {
   if (val === null || val === undefined) return "";
   return String(val);
 }
 
-export default async function TeleproAgentConfigPage({
+export default async function TeleproConfigPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -38,10 +32,9 @@ export default async function TeleproAgentConfigPage({
   const role = profile?.role?.toString().trim().toLowerCase();
   if (role !== "admin") redirect("/admin");
 
-  // Use select("*") to avoid errors if vapi columns don't exist yet (migrations 024/025)
   const { data: telepro, error } = await adminClient
     .from("profiles")
-    .select("*")
+    .select("id, full_name, email, role, phone, twilio_phone_number, vapi_hold_message, twilio_say_voice")
     .eq("id", teleproId)
     .single();
 
@@ -62,11 +55,10 @@ export default async function TeleproAgentConfigPage({
         </Link>
         <div>
           <h1 className="text-2xl font-bold text-slate-800">
-            Agent IA — {telepro.full_name || telepro.email}
+            Configuration télépro — {telepro.full_name || telepro.email}
           </h1>
           <p className="text-slate-600 text-sm mt-0.5">
-            Numéro Twilio (Vapi), numéro du télépro, message d&apos;attente,
-            voix ou fichier audio.
+            Numéro du télépro, numéro Twilio et message d&apos;accueil (lorsque le lead répond).
           </p>
         </div>
       </div>
@@ -76,12 +68,10 @@ export default async function TeleproAgentConfigPage({
         teleproName={telepro.full_name || telepro.email}
         initial={{
           phone: safeStr(telepro.phone),
-          vapi_phone_number_id: safeStr(telepro.vapi_phone_number_id),
-          vapi_hold_message: safeStr(telepro.vapi_hold_message),
-          vapi_voice_id: safeStr(telepro.vapi_voice_id) || "charlotte",
-          first_message_audio_url: safeStr(telepro.first_message_audio_url),
+          twilio_phone_number: safeStr(telepro.twilio_phone_number),
+          welcome_message: safeStr(telepro.vapi_hold_message),
+          twilio_say_voice: safeStr(telepro.twilio_say_voice),
         }}
-        voiceOptions={VAPI_VOICE_OPTIONS}
       />
     </div>
   );

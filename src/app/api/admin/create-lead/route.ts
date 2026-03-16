@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClientFromRequest } from "@/lib/supabase/route-handler";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { normalizePhoneToE164 } from "@/lib/phone";
 
 export async function POST(request: NextRequest) {
   const { supabase } = await createClientFromRequest(request);
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
   const leadData = {
     first_name: String(first_name).trim(),
     last_name: String(last_name).trim(),
-    phone: String(phone).trim(),
+    phone: normalizePhoneToE164(String(phone).trim()) || String(phone).trim(),
     email: email ? String(email).trim() || null : null,
     assigned_to: isManual ? null : assigned_to,
     status: "nouveau",
