@@ -29,7 +29,7 @@ export function CallbackNotifications() {
     }
   }, []);
 
-  // Ne pas poller quand l'onglet est en arrière-plan (évite requêtes inutiles si personne n'utilise)
+  // Ne pas poller quand l'onglet est en arrière-plan ; polling 3 min quand visible
   useEffect(() => {
     fetchDue();
     let interval: ReturnType<typeof setInterval> | null = null;
