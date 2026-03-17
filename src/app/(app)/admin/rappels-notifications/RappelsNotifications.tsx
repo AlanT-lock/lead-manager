@@ -58,10 +58,32 @@ export function RappelsNotifications() {
     setDismissedLoaded(true);
   }, []);
 
+  // Ne pas poller quand l'onglet est en arrière-plan (évite requêtes inutiles si personne n'utilise)
   useEffect(() => {
     fetchDue();
-    const interval = setInterval(fetchDue, 60000);
-    return () => clearInterval(interval);
+    let interval: ReturnType<typeof setInterval> | null = null;
+    const startPolling = () => {
+      if (!interval) interval = setInterval(fetchDue, 60000);
+    };
+    const stopPolling = () => {
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+      }
+    };
+    const onVisibility = () => {
+      if (document.hidden) stopPolling();
+      else {
+        fetchDue();
+        startPolling();
+      }
+    };
+    if (!document.hidden) startPolling();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      stopPolling();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, [fetchDue]);
 
   const visible = dismissedLoaded ? entries.filter((e) => !dismissed.has(e.id)) : [];

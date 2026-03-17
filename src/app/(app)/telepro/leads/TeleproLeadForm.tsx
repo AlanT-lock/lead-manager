@@ -147,21 +147,14 @@ export function TeleproLeadForm({
     setSaving(false);
     if (res.ok) {
       lastSavedRef.current = dataToSave;
+      pendingSaveRef.current = false;
       if (redirectAfter) {
         router.push("/telepro/leads");
       } else {
-        // Vérifier s'il y a des modifications saisies pendant l'enregistrement
-        const latestData = pickLeadFields(leadRef.current);
-        const latestStr = JSON.stringify(latestData);
-        if (latestStr !== lastSavedRef.current) {
-          // Re-sauvegarder les modifications sans refresh (évite d'écraser la saisie)
-          pendingSaveRef.current = false;
-          performSave(latestData, false);
-        } else {
-          pendingSaveRef.current = false;
-          router.refresh();
-        }
+        router.refresh();
       }
+      // Ne pas rappeler performSave ici : une comparaison JSON peut varier (ordre des clés)
+      // et provoquer une boucle. L'auto-save et le save-on-leave gèrent les modifications.
     } else if (pendingSaveRef.current) {
       pendingSaveRef.current = false;
       scheduleAutoSaveRef.current();
