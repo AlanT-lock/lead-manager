@@ -33,8 +33,9 @@ export function CallbackNotifications() {
   useEffect(() => {
     fetchDue();
     let interval: ReturnType<typeof setInterval> | null = null;
+    const POLL_INTERVAL_MS = 3 * 60 * 1000; // 3 min (réduit les requêtes si onglet ouvert / PC en veille)
     const startPolling = () => {
-      if (!interval) interval = setInterval(fetchDue, 60000);
+      if (!interval) interval = setInterval(fetchDue, POLL_INTERVAL_MS);
     };
     const stopPolling = () => {
       if (interval) {

@@ -70,12 +70,13 @@ export function CodeCourrierNotifications() {
     setDismissedLoaded(true);
   }, []);
 
-  // Ne pas poller quand l'onglet est en arrière-plan (évite requêtes inutiles si personne n'utilise)
+  // Ne pas poller quand l'onglet est en arrière-plan ; 3 min quand visible (réduit requêtes si PC en veille)
+  const POLL_INTERVAL_MS = 3 * 60 * 1000;
   useEffect(() => {
     fetchDue();
     let interval: ReturnType<typeof setInterval> | null = null;
     const startPolling = () => {
-      if (!interval) interval = setInterval(fetchDue, 60000);
+      if (!interval) interval = setInterval(fetchDue, POLL_INTERVAL_MS);
     };
     const stopPolling = () => {
       if (interval) {
