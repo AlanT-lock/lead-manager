@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { TeleproLeadForm } from "../leads/TeleproLeadForm";
 import { LeadLogsSidebar, type LogEntry } from "@/components/LeadLogsSidebar";
 import { TeleprospectionStatusBar } from "./TeleprospectionStatusBar";
+import { useSaveOnLeave } from "@/contexts/SaveOnLeaveContext";
 
 interface TeleproDoc {
   id: string;
@@ -52,6 +53,7 @@ export function TeleprospectionClient({
   const [loadError, setLoadError] = useState(false);
   const [preloaded, setPreloaded] = useState<{ id: string; data: PreloadedData } | null>(null);
   const router = useRouter();
+  const saveOnLeave = useSaveOnLeave();
 
   const currentIndex = leadId ? leadIds.indexOf(leadId) : -1;
   const hasPrev = currentIndex > 0;
@@ -112,7 +114,8 @@ export function TeleprospectionClient({
       });
   }, [leadId, nextId, preloadNext]);
 
-  const handleStatusChangeSuccess = (nextIdToGo: string | null) => {
+  const handleStatusChangeSuccess = async (nextIdToGo: string | null) => {
+    await saveOnLeave?.flushBeforeNavigate();
     if (nextIdToGo) {
       router.push(`/telepro/teleprospection?lead=${nextIdToGo}`);
       setLeadId(nextIdToGo);
@@ -122,7 +125,8 @@ export function TeleprospectionClient({
     }
   };
 
-  const handleNrpClickSuccess = (nextIdToGo: string | null) => {
+  const handleNrpClickSuccess = async (nextIdToGo: string | null) => {
+    await saveOnLeave?.flushBeforeNavigate();
     if (nextIdToGo) {
       router.push(`/telepro/teleprospection?lead=${nextIdToGo}`);
       setLeadId(nextIdToGo);
@@ -130,6 +134,20 @@ export function TeleprospectionClient({
       router.push("/telepro/teleprospection?done=1");
       setLeadId(null);
     }
+  };
+
+  const goToPrev = async () => {
+    if (!prevId) return;
+    await saveOnLeave?.flushBeforeNavigate();
+    router.push(`/telepro/teleprospection?lead=${prevId}`);
+    setLeadId(prevId);
+  };
+
+  const goToNext = async () => {
+    if (!nextId) return;
+    await saveOnLeave?.flushBeforeNavigate();
+    router.push(`/telepro/teleprospection?lead=${nextId}`);
+    setLeadId(nextId);
   };
 
   if (!initialLeadId) {
@@ -166,9 +184,7 @@ export function TeleprospectionClient({
             </Link>
             <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg p-1">
               <button
-                onClick={() =>
-                  prevId && (router.push(`/telepro/teleprospection?lead=${prevId}`), setLeadId(prevId))
-                }
+                onClick={goToPrev}
                 disabled={!hasPrev}
                 className="p-2 rounded hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed"
                 aria-label="Lead précédent"
@@ -179,9 +195,7 @@ export function TeleprospectionClient({
                 {currentIndex + 1} sur {leadIds.length}
               </span>
               <button
-                onClick={() =>
-                  nextId && (router.push(`/telepro/teleprospection?lead=${nextId}`), setLeadId(nextId))
-                }
+                onClick={goToNext}
                 disabled={!hasNext}
                 className="p-2 rounded hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed"
                 aria-label="Lead suivant"

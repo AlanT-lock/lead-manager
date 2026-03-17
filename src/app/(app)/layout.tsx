@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { Drawer } from "@/components/Drawer";
+import { SaveOnLeaveProvider } from "@/contexts/SaveOnLeaveContext";
 import { LEAD_STATUSES_ADMIN } from "@/lib/types";
 
 export default async function AppLayout({
@@ -81,18 +82,20 @@ export default async function AppLayout({
   }
 
   return (
-    <div className="min-h-screen flex">
-      <Suspense fallback={<div className="hidden lg:block w-64 shrink-0" />}>
-        <Drawer
-          role={role === "admin" || role === "secretaire" ? (role as "admin" | "secretaire") : "telepro"}
-          userName={profile?.full_name || user.email || undefined}
-          unreadNotifications={count || 0}
-          statusCounts={statusCounts}
-        />
-      </Suspense>
-      <main className="flex-1 lg:ml-64 min-h-screen pt-4 pb-8 px-4 lg:px-8">
-        {children}
-      </main>
-    </div>
+    <SaveOnLeaveProvider>
+      <div className="min-h-screen flex">
+        <Suspense fallback={<div className="hidden lg:block w-64 shrink-0" />}>
+          <Drawer
+            role={role === "admin" || role === "secretaire" ? (role as "admin" | "secretaire") : "telepro"}
+            userName={profile?.full_name || user.email || undefined}
+            unreadNotifications={count || 0}
+            statusCounts={statusCounts}
+          />
+        </Suspense>
+        <main className="flex-1 lg:ml-64 min-h-screen pt-4 pb-8 px-4 lg:px-8">
+          {children}
+        </main>
+      </div>
+    </SaveOnLeaveProvider>
   );
 }

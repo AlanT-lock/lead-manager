@@ -23,6 +23,7 @@ import {
   fromDatetimeLocalValueParis,
 } from "@/lib/date";
 import { usePostalCodeToCity } from "@/hooks/usePostalCodeToCity";
+import { useSaveOnLeave } from "@/contexts/SaveOnLeaveContext";
 import { TeleproDocumentsSection } from "./TeleproDocumentsSection";
 
 interface TeleproDoc {
@@ -167,6 +168,7 @@ export function TeleproLeadForm({
     }
   }, [leadId, router]);
 
+  // Debounce 8s pour limiter les requêtes : une sauvegarde après 8s sans modification
   const scheduleAutoSave = useCallback(() => {
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = setTimeout(() => {
@@ -176,7 +178,7 @@ export function TeleproLeadForm({
       if (dataStr !== lastSavedRef.current) {
         performSave(data, false);
       }
-    }, 2000);
+    }, 8000);
   }, [performSave]);
 
   useEffect(() => {
@@ -189,6 +191,22 @@ export function TeleproLeadForm({
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     };
   }, []);
+
+  const saveOnLeave = useSaveOnLeave();
+  useEffect(() => {
+    if (!saveOnLeave) return;
+    const flush = async () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+        saveTimeoutRef.current = null;
+      }
+      const data = pickLeadFields(leadRef.current);
+      if (JSON.stringify(data) !== lastSavedRef.current) {
+        await performSave(data, false);
+      }
+    };
+    return saveOnLeave.registerSaveOnLeave(flush);
+  }, [saveOnLeave, performSave]);
 
   const handleStatusChange = async (newStatus: LeadStatus, callbackAt?: string) => {
     if (!lead || saving) return;

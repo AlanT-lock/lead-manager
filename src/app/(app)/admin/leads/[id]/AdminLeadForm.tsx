@@ -26,6 +26,7 @@ import {
   fromDatetimeLocalValueParis,
 } from "@/lib/date";
 import { MaterialCostSection, type SelectedMaterial } from "./MaterialCostSection";
+import { useSaveOnLeave } from "@/contexts/SaveOnLeaveContext";
 
 interface AdminLeadFormProps {
   lead: Record<string, unknown>;
@@ -141,15 +142,15 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
           body: JSON.stringify({ materials: [] }),
         });
       }
-      // Vérifier s'il y a des modifications saisies pendant l'enregistrement
-      const latestUpdates = buildUpdates(leadRef.current);
-      if (JSON.stringify(latestUpdates) !== lastSavedRef.current) {
-        performSave();
-      }
+      // Ne pas rappeler performSave() ici : buildUpdates() inclut updated_at: new Date()
+      // donc la comparaison serait toujours différente et provoquerait une boucle infinie
+      // (PATCH + PUT en continu). L'auto-save (scheduleAutoSave) gère les modifications
+      // utilisateur après la fin de l'enregistrement.
     }
     setLoading(false);
   }, []);
 
+  // Debounce 8s pour limiter les requêtes : une sauvegarde après 8s sans modification
   const scheduleAutoSave = useCallback(() => {
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = setTimeout(() => {
@@ -158,7 +159,7 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
       if (JSON.stringify(updates) !== lastSavedRef.current) {
         performSave();
       }
-    }, 1500);
+    }, 8000);
   }, [performSave]);
 
   useEffect(() => {
@@ -167,6 +168,22 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     };
   }, []);
+
+  const saveOnLeave = useSaveOnLeave();
+  useEffect(() => {
+    if (!saveOnLeave) return;
+    const flush = async () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+        saveTimeoutRef.current = null;
+      }
+      const updates = buildUpdates(leadRef.current);
+      if (JSON.stringify(updates) !== lastSavedRef.current) {
+        await performSave();
+      }
+    };
+    return saveOnLeave.registerSaveOnLeave(flush);
+  }, [saveOnLeave, performSave]);
 
   const updateField = (field: string, value: unknown) => {
     setLead((l) => ({ ...l, [field]: value }));
