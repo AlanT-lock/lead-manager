@@ -120,7 +120,7 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
     setLoading(true);
     const res = await fetch(`/api/admin/lead/${leadRef.current.id}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "X-Lead-Form-Version": "2" },
       credentials: "include",
       body: JSON.stringify(updates),
     });
@@ -130,14 +130,14 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
       if (materials.length > 0) {
         await fetch(`/api/admin/leads/${leadRef.current.id}/materials`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "X-Lead-Form-Version": "2" },
           credentials: "include",
           body: JSON.stringify({ materials }),
         });
       } else {
         await fetch(`/api/admin/leads/${leadRef.current.id}/materials`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "X-Lead-Form-Version": "2" },
           credentials: "include",
           body: JSON.stringify({ materials: [] }),
         });
@@ -227,7 +227,7 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
     setLoading(true);
     const res = await fetch(`/api/admin/lead/${lead.id}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "X-Lead-Form-Version": "2" },
       credentials: "include",
       body: JSON.stringify(updates),
     });

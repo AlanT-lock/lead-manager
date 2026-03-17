@@ -103,7 +103,7 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
     if (newStatus === "a_rappeler") body.callback_at = null;
     const res = await fetch(`/api/admin/lead/${leadId}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "X-Lead-Form-Version": "2" },
       credentials: "include",
       body: JSON.stringify(body),
     });
@@ -115,7 +115,7 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
     setEditingCommentId(null);
     const res = await fetch(`/api/admin/lead/${leadId}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "X-Lead-Form-Version": "2" },
       credentials: "include",
       body: JSON.stringify({ commentaire: value || null }),
     });

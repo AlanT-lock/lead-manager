@@ -51,10 +51,19 @@ export async function GET(
   return NextResponse.json(data || []);
 }
 
+/** En-tête requis pour éviter les anciens clients en boucle (sans ce header = 403). */
+const CLIENT_VERSION_HEADER = "x-lead-form-version";
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (request.headers.get(CLIENT_VERSION_HEADER) !== "2") {
+    return NextResponse.json(
+      { error: "Client obsolète. Merci de rafraîchir la page (F5)." },
+      { status: 403 }
+    );
+  }
   const { id: leadId } = await params;
   const { supabase } = await createClientFromRequest(request);
   const { data: { user } } = await supabase.auth.getUser();

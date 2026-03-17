@@ -34,7 +34,7 @@ export function DocumentsRecusTable({ leads }: DocumentsRecusTableProps) {
     setEditingCommentId(null);
     const res = await fetch(`/api/admin/lead/${leadId}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "X-Lead-Form-Version": "2" },
       credentials: "include",
       body: JSON.stringify({ commentaire: value || null }),
     });
