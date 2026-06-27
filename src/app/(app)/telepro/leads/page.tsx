@@ -2,13 +2,14 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
 import { Plus } from "lucide-react";
+import { LEAD_CATEGORIES, type LeadCategory } from "@/lib/types";
 import { LeadsFilters } from "./LeadsFilters";
 import { TeleproLeadsTable } from "./TeleproLeadsTable";
 
 export default async function TeleproLeadsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; q?: string; from?: string; to?: string }>;
+  searchParams: Promise<{ status?: string; q?: string; from?: string; to?: string; category?: string }>;
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -21,6 +22,7 @@ export default async function TeleproLeadsPage({
   const search = params.q;
   const from = params.from;
   const to = params.to;
+  const category = params.category as LeadCategory | undefined;
 
   const fromDate = from ? new Date(`${from}T00:00:00`) : null;
   const toDate = to ? new Date(`${to}T23:59:59.999`) : null;
@@ -36,6 +38,10 @@ export default async function TeleproLeadsPage({
 
   if (status) {
     query = query.eq("status", status);
+  }
+
+  if (category && LEAD_CATEGORIES.includes(category)) {
+    query = query.eq("category", category);
   }
 
   if (search && search.trim()) {

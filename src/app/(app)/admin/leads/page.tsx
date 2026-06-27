@@ -1,7 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { CHANTIER_STATUS_FIELDS, type LeadStatus } from "@/lib/types";
+import { CHANTIER_STATUS_FIELDS, LEAD_CATEGORIES, type LeadCategory, type LeadStatus } from "@/lib/types";
 import { AdminLeadsFilters } from "./AdminLeadsFilters";
 import { AdminLeadsTable } from "./AdminLeadsTable";
 import { DocumentsRecusTable } from "../documents-recus/DocumentsRecusTable";
@@ -11,7 +11,7 @@ const CHANTIER_FIELDS = CHANTIER_STATUS_FIELDS.map((f) => f.field);
 export default async function AdminLeadsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; q?: string; telepro?: string; from?: string; to?: string; chantier?: string; delegataire?: string; installation_type?: string }>;
+  searchParams: Promise<{ status?: string; q?: string; telepro?: string; from?: string; to?: string; chantier?: string; delegataire?: string; installation_type?: string; category?: string }>;
 }) {
   const adminClient = createAdminClient();
   const params = await searchParams;
@@ -23,6 +23,7 @@ export default async function AdminLeadsPage({
   const chantier = params.chantier;
   const delegataire = params.delegataire;
   const installationType = params.installation_type;
+  const category = params.category as LeadCategory | undefined;
 
   // Parsing en heure locale pour éviter les décalages de fuseau
   const fromDate = from ? new Date(`${from}T00:00:00`) : null;
@@ -51,6 +52,10 @@ export default async function AdminLeadsPage({
     } else {
       query = query.eq("installation_type", installationType);
     }
+  }
+
+  if (category && LEAD_CATEGORIES.includes(category)) {
+    query = query.eq("category", category);
   }
 
   if (assignedTo) {
