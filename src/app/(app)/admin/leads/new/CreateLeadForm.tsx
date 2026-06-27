@@ -10,6 +10,8 @@ import {
   HEATING_MODE_LABELS,
   RADIATOR_TYPE_LABELS,
   RADIATOR_TYPE_OPTIONS,
+  LEAD_CATEGORIES,
+  LEAD_CATEGORY_LABELS,
   type LeadColor,
   type InstallationType,
   type ElectricityType,
@@ -46,6 +48,7 @@ export function CreateLeadForm({ telepros }: CreateLeadFormProps) {
     date_of_birth: "",
     heating_mode: "",
     color: "",
+    category: "fenetre",
     is_owner: "",
     installation_type: "",
     electricity_type: "",
@@ -269,6 +272,20 @@ export function CreateLeadForm({ telepros }: CreateLeadFormProps) {
                 {(Object.keys(HEATING_MODE_LABELS) as HeatingMode[]).map((m) => (
                   <option key={m} value={m}>
                     {HEATING_MODE_LABELS[m]}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm text-slate-600 mb-1">Catégorie</label>
+              <select
+                value={form.category}
+                onChange={(e) => update("category", e.target.value)}
+                className="w-full px-4 py-2 border rounded-lg"
+              >
+                {LEAD_CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {LEAD_CATEGORY_LABELS[c]}
                   </option>
                 ))}
               </select>

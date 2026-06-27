@@ -23,6 +23,16 @@ export const LEAD_STATUSES_ADMIN: LeadStatus[] = [
   'nouveau', 'nrp', 'a_rappeler', 'en_attente_doc', 'documents_recus', 'incomplet', 'bloque_mpr', 'valide', 'installe', 'ancien_documents_recus', 'annule',
 ];
 
+export type LeadCategory = 'fenetre' | 'clim_1euro' | 'clim_3990euros';
+
+export const LEAD_CATEGORIES: LeadCategory[] = ['fenetre', 'clim_1euro', 'clim_3990euros'];
+
+export const LEAD_CATEGORY_LABELS: Record<LeadCategory, string> = {
+  fenetre: 'Fenêtre',
+  clim_1euro: 'Clim 1 €',
+  clim_3990euros: 'Clim 3990 €',
+};
+
 export type LeadColor = 'bleu' | 'jaune' | 'violet' | 'rose';
 
 export type InstallationType = 'pac' | 'pac_ballon' | 'pac_ssc' | 'pac_ssc_jaune' | 'ssc' | 'ssc_jaune' | 'ballon_solaire';
@@ -194,6 +204,7 @@ export interface Lead {
   is_duplicate: boolean;
   meta_lead_id: string | null;
   status: LeadStatus;
+  category: LeadCategory;
   callback_at: string | null;
   nrp_count: number;
   surface_m2: number | null;

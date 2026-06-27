@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
     installation_type,
     electricity_type,
     commentaire,
+    category,
   } = body;
 
   if (!first_name?.trim() || !last_name?.trim() || !phone?.trim()) {
@@ -71,6 +72,7 @@ export async function POST(request: NextRequest) {
     color: color || null,
     is_owner: is_owner === true || is_owner === "owner" ? true : is_owner === false || is_owner === "tenant" ? false : null,
     installation_type: installation_type || null,
+    category: category || "fenetre",
     electricity_type: electricity_type || null,
     commentaire: commentaire ? String(commentaire).trim() || null : null,
   };

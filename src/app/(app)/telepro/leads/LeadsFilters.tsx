@@ -3,13 +3,14 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Search } from "lucide-react";
-import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, type LeadStatus } from "@/lib/types";
+import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, LEAD_CATEGORIES, LEAD_CATEGORY_LABELS, type LeadStatus } from "@/lib/types";
 
 export function LeadsFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("q") || "");
   const currentStatus = searchParams.get("status") || "";
+  const currentCategory = searchParams.get("category") || "";
   const [from, setFrom] = useState(searchParams.get("from") || "");
   const [to, setTo] = useState(searchParams.get("to") || "");
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -29,18 +30,20 @@ export function LeadsFilters() {
     setTo(urlTo);
   }, [urlFrom, urlTo]);
 
-  const buildParams = useCallback((overrides?: { status?: string; q?: string; from?: string; to?: string }) => {
+  const buildParams = useCallback((overrides?: { status?: string; q?: string; from?: string; to?: string; category?: string }) => {
     const params = new URLSearchParams();
     const s = overrides?.status ?? currentStatus;
+    const cat = overrides?.category ?? currentCategory;
     const q = overrides?.q ?? search.trim();
     const f = overrides?.from ?? from;
     const t = overrides?.to ?? to;
     if (s) params.set("status", s);
+    if (cat) params.set("category", cat);
     if (q) params.set("q", q);
     if (f) params.set("from", f);
     if (t) params.set("to", t);
     return params;
-  }, [currentStatus, search, from, to]);
+  }, [currentStatus, search, from, to, currentCategory]);
 
   // Recherche automatique avec debounce (300ms)
   useEffect(() => {
@@ -61,6 +64,10 @@ export function LeadsFilters() {
 
   const handleStatusChange = (status: string) => {
     router.push(`/telepro/leads?${buildParams({ status }).toString()}`);
+  };
+
+  const handleCategoryChange = (category: string) => {
+    router.push(`/telepro/leads?${buildParams({ category }).toString()}`);
   };
 
   const handleDateApply = () => {
@@ -89,6 +96,21 @@ export function LeadsFilters() {
         </button>
       </form>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-end">
+        <div>
+          <label className="block text-sm text-slate-600 mb-1">Catégorie</label>
+          <select
+            value={currentCategory}
+            onChange={(e) => handleCategoryChange(e.target.value)}
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Toutes les catégories</option>
+            {LEAD_CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {LEAD_CATEGORY_LABELS[c]}
+              </option>
+            ))}
+          </select>
+        </div>
         <div>
           <label className="block text-sm text-slate-600 mb-1">Statut</label>
           <select

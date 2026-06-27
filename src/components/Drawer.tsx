@@ -26,13 +26,13 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, type LeadStatus } from "@/lib/types";
+import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, LEAD_CATEGORIES, LEAD_CATEGORY_LABELS, type LeadStatus, type LeadCategory } from "@/lib/types";
 
 interface DrawerProps {
   role: "admin" | "telepro" | "secretaire";
   userName?: string;
   unreadNotifications?: number;
-  statusCounts?: Record<string, number>;
+  statusCounts?: Record<string, Record<string, number>>;
 }
 
 const adminNav = [
@@ -66,7 +66,9 @@ const teleproNav = [
 export function Drawer({ role, userName, unreadNotifications = 0, statusCounts = {} }: DrawerProps) {
   const [open, setOpen] = useState(false);
   // Sous-menu des statuts : fermé par défaut, ne se ferme que au clic sur la flèche (persiste à la navigation)
-  const [statusSubmenuExpanded, setStatusSubmenuExpanded] = useState(false);
+  // Niveau 0 : déploie les catégories ; Niveau 1 : déploie les statuts d'UNE catégorie à la fois
+  const [categoriesExpanded, setCategoriesExpanded] = useState(false);
+  const [expandedCategory, setExpandedCategory] = useState<LeadCategory | null>(null);
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -141,8 +143,11 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
                     ? pathname === "/admin/leads" && searchParams.get("status") !== "installe"
                     : pathname === item.href ||
                       (item.href !== homeHref && pathname.startsWith(item.href.split("?")[0]));
-              const statuses = LEAD_STATUSES_ADMIN;
+              const currentCategory = isLeadsPage ? (searchParams.get("category") as LeadCategory | null) : null;
               const currentStatus = isLeadsPage ? searchParams.get("status") : null;
+              const statuses = LEAD_STATUSES_ADMIN;
+              const catTotal = (cat: LeadCategory) =>
+                Object.values(statusCounts[cat] ?? {}).reduce((a, b) => a + b, 0);
 
               return (
                 <div key={item.href} className="space-y-1">
@@ -167,52 +172,94 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
                           type="button"
                           onClick={(e) => {
                             e.preventDefault();
-                            setStatusSubmenuExpanded((v) => !v);
+                            setCategoriesExpanded((v) => !v);
                           }}
                           className="p-1.5 rounded-md hover:bg-white/20 text-white shrink-0"
-                          aria-label={statusSubmenuExpanded ? "Replier le sous-menu" : "Déplier le sous-menu des statuts"}
-                          aria-expanded={statusSubmenuExpanded}
+                          aria-label={categoriesExpanded ? "Replier les catégories" : "Déplier les catégories"}
+                          aria-expanded={categoriesExpanded}
                         >
-                          {statusSubmenuExpanded ? (
+                          {categoriesExpanded ? (
                             <ChevronDown className="w-5 h-5" />
                           ) : (
                             <ChevronRight className="w-5 h-5" />
                           )}
                         </button>
                       </div>
-                      {statusSubmenuExpanded && (
+                      {categoriesExpanded && (
                         <div className="pl-4 pr-2 py-1 space-y-1">
-                          <Link
-                            href={item.href}
-                            onClick={() => setOpen(false)}
-                            className={`flex items-center justify-between w-full px-3 py-2 text-sm rounded-md transition-colors ${
-                              !currentStatus
-                                ? "bg-white/25 text-white font-medium"
-                                : "text-white/90 hover:bg-white/20"
-                            }`}
-                          >
-                            <span>Tous</span>
-                            <span className="text-white/70 tabular-nums">
-                              {Object.values(statusCounts).reduce((a, b) => a + b, 0)}
-                            </span>
-                          </Link>
-                          {statuses.map((s) => (
-                            <Link
-                              key={s}
-                              href={`${item.href}?status=${s}`}
-                              onClick={() => setOpen(false)}
-                              className={`flex items-center justify-between w-full px-3 py-2 text-sm rounded-md transition-colors ${
-                                currentStatus === s
-                                  ? "bg-white/25 text-white font-medium"
-                                  : "text-white/90 hover:bg-white/20"
-                              }`}
-                            >
-                              <span>{LEAD_STATUS_LABELS[s as LeadStatus]}</span>
-                              <span className="text-white/70 tabular-nums">
-                                {statusCounts[s] ?? 0}
-                              </span>
-                            </Link>
-                          ))}
+                          {LEAD_CATEGORIES.map((cat) => {
+                            const isCatActive = currentCategory === cat;
+                            const isCatExpanded = expandedCategory === cat;
+                            return (
+                              <div key={cat} className="space-y-1">
+                                <div
+                                  className={`flex items-center gap-1 px-2 py-2 rounded-md transition-colors ${
+                                    isCatActive
+                                      ? "bg-white/25 text-white font-medium"
+                                      : "text-white/90 hover:bg-white/20"
+                                  }`}
+                                >
+                                  <Link
+                                    href={`${item.href}?category=${cat}`}
+                                    onClick={() => setOpen(false)}
+                                    className="flex items-center justify-between gap-2 flex-1 min-w-0 text-sm"
+                                  >
+                                    <span className="truncate">{LEAD_CATEGORY_LABELS[cat]}</span>
+                                    <span className="text-white/70 tabular-nums">{catTotal(cat)}</span>
+                                  </Link>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      setExpandedCategory((v) => (v === cat ? null : cat));
+                                    }}
+                                    className="p-1 rounded-md hover:bg-white/20 text-white shrink-0"
+                                    aria-label={isCatExpanded ? "Replier les statuts" : "Déplier les statuts"}
+                                    aria-expanded={isCatExpanded}
+                                  >
+                                    {isCatExpanded ? (
+                                      <ChevronDown className="w-4 h-4" />
+                                    ) : (
+                                      <ChevronRight className="w-4 h-4" />
+                                    )}
+                                  </button>
+                                </div>
+                                {isCatExpanded && (
+                                  <div className="pl-3 pr-1 py-1 space-y-1">
+                                    <Link
+                                      href={`${item.href}?category=${cat}`}
+                                      onClick={() => setOpen(false)}
+                                      className={`flex items-center justify-between w-full px-3 py-2 text-sm rounded-md transition-colors ${
+                                        isCatActive && !currentStatus
+                                          ? "bg-white/25 text-white font-medium"
+                                          : "text-white/90 hover:bg-white/20"
+                                      }`}
+                                    >
+                                      <span>Tous</span>
+                                      <span className="text-white/70 tabular-nums">{catTotal(cat)}</span>
+                                    </Link>
+                                    {statuses.map((s) => (
+                                      <Link
+                                        key={s}
+                                        href={`${item.href}?category=${cat}&status=${s}`}
+                                        onClick={() => setOpen(false)}
+                                        className={`flex items-center justify-between w-full px-3 py-2 text-sm rounded-md transition-colors ${
+                                          isCatActive && currentStatus === s
+                                            ? "bg-white/25 text-white font-medium"
+                                            : "text-white/90 hover:bg-white/20"
+                                        }`}
+                                      >
+                                        <span>{LEAD_STATUS_LABELS[s as LeadStatus]}</span>
+                                        <span className="text-white/70 tabular-nums">
+                                          {statusCounts[cat]?.[s] ?? 0}
+                                        </span>
+                                      </Link>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </>

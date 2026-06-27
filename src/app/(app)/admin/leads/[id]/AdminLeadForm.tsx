@@ -14,6 +14,8 @@ import {
   DELEGATAIRE_GROUPS,
   CHANTIER_STATUS_FIELDS,
   INSTALLATEUR_OPTIONS,
+  LEAD_CATEGORIES,
+  LEAD_CATEGORY_LABELS,
   type LeadStatus,
   type LeadColor,
   type InstallationType,
@@ -50,6 +52,7 @@ function buildUpdates(lead: Record<string, unknown>) {
     heating_mode: lead.heating_mode,
     radiator_type: lead.radiator_type,
     color: lead.color,
+    category: lead.category,
     is_owner: lead.is_owner,
     installation_type: lead.installation_type,
     electricity_type: lead.electricity_type,
@@ -417,6 +420,20 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
               {(Object.keys(HEATING_MODE_LABELS) as HeatingMode[]).map((m) => (
                 <option key={m} value={m}>
                   {HEATING_MODE_LABELS[m]}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm text-slate-600 mb-1">Catégorie</label>
+            <select
+              value={(lead.category as string) || "fenetre"}
+              onChange={(e) => updateField("category", e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg"
+            >
+              {LEAD_CATEGORIES.map((c) => (
+                <option key={c} value={c}>
+                  {LEAD_CATEGORY_LABELS[c]}
                 </option>
               ))}
             </select>
