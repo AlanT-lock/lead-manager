@@ -12,6 +12,8 @@ import {
   HEATING_MODE_LABELS,
   RADIATOR_TYPE_LABELS,
   RADIATOR_TYPE_OPTIONS,
+  LEAD_CATEGORIES,
+  LEAD_CATEGORY_LABELS,
   type LeadStatus,
   type LeadColor,
   type InstallationType,
@@ -89,6 +91,7 @@ export function TeleproLeadForm({
     heating_mode: l.heating_mode,
     radiator_type: l.radiator_type,
     color: l.color,
+    category: l.category,
     is_owner: l.is_owner,
     installation_type: l.installation_type,
     electricity_type: l.electricity_type,
@@ -459,6 +462,20 @@ export function TeleproLeadForm({
               {(Object.keys(HEATING_MODE_LABELS) as HeatingMode[]).map((m) => (
                 <option key={m} value={m}>
                   {HEATING_MODE_LABELS[m]}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Catégorie</label>
+            <select
+              value={(lead.category as string) || "fenetre"}
+              onChange={(e) => handleFieldChange("category", e.target.value)}
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+              {LEAD_CATEGORIES.map((c) => (
+                <option key={c} value={c}>
+                  {LEAD_CATEGORY_LABELS[c]}
                 </option>
               ))}
             </select>

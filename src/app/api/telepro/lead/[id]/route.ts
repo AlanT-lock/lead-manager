@@ -78,7 +78,7 @@ export async function PATCH(
   const teleproAllowedFields = [
     "first_name", "last_name", "phone", "email", "surface_m2", "revenu_fiscal_ref", "numero_fiscal", "date_of_birth",
     "department", "address", "postal_code", "city", "heating_mode", "radiator_type", "color",
-    "is_owner", "installation_type", "electricity_type", "commentaire",
+    "is_owner", "installation_type", "electricity_type", "commentaire", "category",
   ];
   for (const key of teleproAllowedFields) {
     if (key in rest) updates[key] = rest[key];
