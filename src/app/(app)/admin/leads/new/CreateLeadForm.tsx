@@ -277,19 +277,19 @@ export function CreateLeadForm({ telepros }: CreateLeadFormProps) {
               </select>
             </div>
             <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Catégorie</label>
-                <select
-                  value={form.category}
-                  onChange={(e) => update("category", e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-                  {LEAD_CATEGORIES.map((c) => (
-                    <option key={c} value={c}>
-                      {LEAD_CATEGORY_LABELS[c]}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <label className="block text-sm text-slate-600 mb-1">Catégorie</label>
+              <select
+                value={form.category}
+                onChange={(e) => update("category", e.target.value)}
+                className="w-full px-4 py-2 border rounded-lg"
+              >
+                {LEAD_CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {LEAD_CATEGORY_LABELS[c]}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div>
               <label className="block text-sm text-slate-600 mb-1">Couleur</label>
               <select

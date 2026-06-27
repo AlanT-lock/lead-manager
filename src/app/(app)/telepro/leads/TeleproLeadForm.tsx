@@ -471,7 +471,7 @@ export function TeleproLeadForm({
             <select
               value={(lead.category as string) || "fenetre"}
               onChange={(e) => handleFieldChange("category", e.target.value)}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
             >
               {LEAD_CATEGORIES.map((c) => (
                 <option key={c} value={c}>
