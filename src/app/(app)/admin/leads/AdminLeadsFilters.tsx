@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Search } from "lucide-react";
-import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, CHANTIER_STATUS_FIELDS, DELEGATAIRE_GROUPS } from "@/lib/types";
+import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, CHANTIER_STATUS_FIELDS, DELEGATAIRE_GROUPS, LEAD_CATEGORIES, LEAD_CATEGORY_LABELS } from "@/lib/types";
 
 interface Telepro {
   id: string;
@@ -23,6 +23,7 @@ export function AdminLeadsFilters({ basePath = "/admin/leads", telepros = [] }: 
   const [search, setSearch] = useState(searchParams.get("q") || "");
 
   const currentStatus = searchParams.get("status") || "";
+  const currentCategory = searchParams.get("category") || "";
   const currentTelepro = searchParams.get("telepro") || "";
   const currentChantier = searchParams.get("chantier") || "";
   const currentDelegataire = searchParams.get("delegataire") || "";
@@ -45,12 +46,13 @@ export function AdminLeadsFilters({ basePath = "/admin/leads", telepros = [] }: 
     setTo(urlTo);
   }, [urlFrom, urlTo]);
 
-  const buildParams = useCallback((overrides?: { status?: string; telepro?: string; chantier?: string; delegataire?: string; q?: string; from?: string; to?: string }) => {
+  const buildParams = useCallback((overrides?: { status?: string; telepro?: string; chantier?: string; delegataire?: string; q?: string; from?: string; to?: string; category?: string }) => {
     const params = new URLSearchParams();
     const s = overrides?.status ?? currentStatus;
     const t = overrides?.telepro ?? currentTelepro;
     const c = overrides?.chantier ?? currentChantier;
     const d = overrides?.delegataire ?? currentDelegataire;
+    const cat = overrides?.category ?? currentCategory;
     const q = overrides?.q ?? search.trim();
     const f = overrides?.from ?? from;
     const toVal = overrides?.to ?? to;
@@ -58,11 +60,12 @@ export function AdminLeadsFilters({ basePath = "/admin/leads", telepros = [] }: 
     if (t) params.set("telepro", t);
     if (c) params.set("chantier", c);
     if (d) params.set("delegataire", d);
+    if (cat) params.set("category", cat);
     if (q) params.set("q", q);
     if (f) params.set("from", f);
     if (toVal) params.set("to", toVal);
     return params;
-  }, [currentStatus, currentTelepro, currentChantier, currentDelegataire, search, from, to]);
+  }, [currentStatus, currentTelepro, currentChantier, currentDelegataire, search, from, to, currentCategory]);
 
   // Recherche automatique avec debounce (300ms)
   useEffect(() => {
@@ -83,6 +86,10 @@ export function AdminLeadsFilters({ basePath = "/admin/leads", telepros = [] }: 
 
   const handleStatusChange = (status: string) => {
     router.push(`${basePath}?${buildParams({ status }).toString()}`);
+  };
+
+  const handleCategoryChange = (category: string) => {
+    router.push(`${basePath}?${buildParams({ category }).toString()}`);
   };
 
   const handleTeleproChange = (teleproId: string) => {
@@ -120,6 +127,21 @@ export function AdminLeadsFilters({ basePath = "/admin/leads", telepros = [] }: 
       </form>
       {basePath === "/admin/leads" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4 items-end">
+          <div>
+            <label className="block text-sm text-slate-600 mb-1">Catégorie</label>
+            <select
+              value={currentCategory}
+              onChange={(e) => handleCategoryChange(e.target.value)}
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Toutes les catégories</option>
+              {LEAD_CATEGORIES.map((c) => (
+                <option key={c} value={c}>
+                  {LEAD_CATEGORY_LABELS[c]}
+                </option>
+              ))}
+            </select>
+          </div>
           <div>
             <label className="block text-sm text-slate-600 mb-1">Statut</label>
             <select
