@@ -4,7 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { Drawer } from "@/components/Drawer";
 import { SaveOnLeaveProvider } from "@/contexts/SaveOnLeaveContext";
-import { LEAD_STATUSES_ADMIN } from "@/lib/types";
+import { LEAD_STATUSES_ADMIN, LEAD_CATEGORIES } from "@/lib/types";
 
 export default async function AppLayout({
   children,
@@ -50,33 +50,24 @@ export default async function AppLayout({
 
   const adminClient = createAdminClient();
   const isAdminOrSecretaire = role === "admin" || role === "secretaire";
-  let statusCounts: Record<string, number> = {};
+  let statusCounts: Record<string, Record<string, number>> = {};
   try {
-    if (isAdminOrSecretaire) {
-      const counts = await Promise.all(
-        LEAD_STATUSES_ADMIN.map(async (s) => {
-          const { count } = await adminClient
-            .from("leads")
-            .select("*", { count: "exact", head: true })
-            .eq("status", s);
-          return [s, count ?? 0] as const;
-        })
-      );
-      statusCounts = Object.fromEntries(counts);
-    } else {
-      // Télépro : une seule requête puis comptage en mémoire pour éviter les incohérences
-      const { data: rows } = await adminClient
-        .from("leads")
-        .select("id, status")
-        .eq("assigned_to", user.id);
-      const counts: Record<string, number> = {};
-      for (const s of LEAD_STATUSES_ADMIN) counts[s] = 0;
-      for (const row of rows || []) {
-        const s = row.status as string;
-        if (s in counts) counts[s]++;
-      }
-      statusCounts = counts;
+    let rowsQuery = adminClient.from("leads").select("status, category");
+    if (!isAdminOrSecretaire) {
+      rowsQuery = rowsQuery.eq("assigned_to", user.id);
     }
+    const { data: rows } = await rowsQuery;
+    const counts: Record<string, Record<string, number>> = {};
+    for (const cat of LEAD_CATEGORIES) {
+      counts[cat] = {};
+      for (const s of LEAD_STATUSES_ADMIN) counts[cat][s] = 0;
+    }
+    for (const row of rows || []) {
+      const cat = row.category as string;
+      const s = row.status as string;
+      if (cat in counts && s in counts[cat]) counts[cat][s]++;
+    }
+    statusCounts = counts;
   } catch {
     // Ignore errors, counts will be empty
   }
