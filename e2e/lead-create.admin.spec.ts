@@ -9,30 +9,22 @@ test("création d'un lead avec catégorie Clim 1 €, puis filtrable", async ({ 
 
   const form = page.getByTestId("lead-create-form");
 
-  // Sélecteurs adaptés au formulaire réel :
-  // Les <label> n'ont pas de htmlFor et les <input> n'ont pas d'id/name,
-  // donc getByLabel() ne fonctionne pas. On utilise des sélecteurs de type.
-
-  // Prénom : premier input[type="text"] dans le formulaire (avant last_name)
-  await form.locator('input[type="text"]').nth(0).fill("Test");
-
-  // Nom : deuxième input[type="text"]
-  await form.locator('input[type="text"]').nth(1).fill(nom);
-
-  // Téléphone : unique input[type="tel"]
-  await form.locator('input[type="tel"]').fill(`06${stamp}0000`.slice(0, 10));
+  // Sélecteurs stables via data-testid (résistants à tout restyle du formulaire).
+  await form.getByTestId("lead-first-name").fill("Test");
+  await form.getByTestId("lead-last-name").fill(nom);
+  await form.getByTestId("lead-phone").fill(`06${stamp}0000`.slice(0, 10));
 
   // Catégorie : data-testid posé par Task 6
   await page.getByTestId("lead-category-select").selectOption("clim_1euro");
 
-  // Télépro assigné : premier <select> du formulaire (champ requis).
-  // Index 0 = option vide "— Sélectionner —", index 1 = premier télépro disponible.
-  const assign = form.locator("select").nth(0);
-  if ((await assign.count()) > 0) {
-    await assign.selectOption({ index: 1 });
-  }
+  // Télépro assigné : champ requis — sélection inconditionnelle de la première option réelle.
+  await form.getByTestId("lead-assigned-to").selectOption({ index: 1 });
 
   await page.getByRole("button", { name: /Créer|Ajouter|Enregistrer/ }).click();
+
+  // Attendre la redirection vers /admin/leads/<id> avant de continuer.
+  // handleSubmit redirige via router.push(`/admin/leads/${data.id}`).
+  await page.waitForURL(/\/admin\/leads\/(?!new)/, { timeout: 10000 });
 
   // Retour liste, filtrer par catégorie + recherche → le lead doit apparaître.
   await page.goto("/admin/leads?category=clim_1euro");

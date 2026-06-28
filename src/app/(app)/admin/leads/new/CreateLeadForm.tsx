@@ -129,6 +129,7 @@ export function CreateLeadForm({ telepros }: CreateLeadFormProps) {
             onChange={(e) => update("assigned_to", e.target.value)}
             className="w-full px-4 py-2 border rounded-lg"
             required
+            data-testid="lead-assigned-to"
           >
             <option value="">— Sélectionner —</option>
             {telepros.map((t) => (
@@ -152,6 +153,7 @@ export function CreateLeadForm({ telepros }: CreateLeadFormProps) {
                 onChange={(e) => update("first_name", e.target.value)}
                 className="w-full px-4 py-2 border rounded-lg"
                 required
+                data-testid="lead-first-name"
               />
             </div>
             <div>
@@ -162,6 +164,7 @@ export function CreateLeadForm({ telepros }: CreateLeadFormProps) {
                 onChange={(e) => update("last_name", e.target.value)}
                 className="w-full px-4 py-2 border rounded-lg"
                 required
+                data-testid="lead-last-name"
               />
             </div>
             <div>
@@ -172,6 +175,7 @@ export function CreateLeadForm({ telepros }: CreateLeadFormProps) {
                 onChange={(e) => update("phone", e.target.value)}
                 className="w-full px-4 py-2 border rounded-lg"
                 required
+                data-testid="lead-phone"
               />
             </div>
             <div>
