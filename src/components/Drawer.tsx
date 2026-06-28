@@ -87,7 +87,7 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed top-4 left-4 z-40 p-2 rounded-lg bg-[#2d4a6d] border border-white/20 shadow-sm hover:bg-[#3d5a80] lg:hidden"
+        className="fixed top-4 left-4 z-40 p-2 rounded-lg bg-[#13294b] border border-white/15 lg:hidden"
         aria-label="Ouvrir le menu"
       >
         <Menu className="w-6 h-6 text-white" />
@@ -102,12 +102,12 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
       )}
 
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-[#2d4a6d] border-r border-white/20 z-50 transform transition-transform duration-200 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-0 left-0 h-full w-64 bg-gradient-to-b from-[#0b1f3a] to-[#13294b] border-r border-white/10 z-50 transform transition-transform duration-200 ease-in-out lg:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex flex-col h-full">
-          <div className="p-4 border-b border-white/20 flex items-center justify-between">
+          <div className="p-4 border-b border-white/10 flex items-center justify-between">
             <div className="flex flex-col gap-1">
               <Link href={isAdminSpace ? (role === "secretaire" ? "/admin/documents-recus" : "/admin") : "/telepro"} className="block">
                 <Image
@@ -156,8 +156,8 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
                       <div
                         className={`flex items-center gap-1 px-4 py-3 rounded-lg transition-colors ${
                           isActive
-                            ? "bg-white/25 text-white font-medium"
-                            : "text-white hover:bg-white/20"
+                            ? "bg-[#3b82f6]/20 text-white font-medium shadow-[inset_0_0_0_1px_rgba(96,165,250,.45)]"
+                            : "text-[#9fb4d6] hover:bg-white/10"
                         }`}
                       >
                         <Link
@@ -197,8 +197,8 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
                                 <div
                                   className={`flex items-center gap-1 px-2 py-2 rounded-md transition-colors ${
                                     isCatActive
-                                      ? "bg-white/25 text-white font-medium"
-                                      : "text-white/90 hover:bg-white/20"
+                                      ? "bg-white/15 text-white font-medium"
+                                      : "text-[#9fb4d6] hover:bg-white/10"
                                   }`}
                                 >
                                   <Link
@@ -234,8 +234,8 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
                                       onClick={() => setOpen(false)}
                                       className={`flex items-center justify-between w-full px-3 py-2 text-sm rounded-md transition-colors ${
                                         isCatActive && !currentStatus
-                                          ? "bg-white/25 text-white font-medium"
-                                          : "text-white/90 hover:bg-white/20"
+                                          ? "bg-white/15 text-white font-medium"
+                                          : "text-[#cfe0ff] hover:bg-white/10"
                                       }`}
                                     >
                                       <span>Tous</span>
@@ -249,8 +249,8 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
                                         data-testid={`nav-status-${cat}-${s}`}
                                         className={`flex items-center justify-between w-full px-3 py-2 text-sm rounded-md transition-colors ${
                                           isCatActive && currentStatus === s
-                                            ? "bg-white/25 text-white font-medium"
-                                            : "text-white/90 hover:bg-white/20"
+                                            ? "bg-white/15 text-white font-medium"
+                                            : "text-[#cfe0ff] hover:bg-white/10"
                                         }`}
                                       >
                                         <span>{LEAD_STATUS_LABELS[s as LeadStatus]}</span>
@@ -273,8 +273,8 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
                       onClick={() => setOpen(false)}
                       className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                         isActive
-                          ? "bg-white/25 text-white font-medium"
-                          : "text-white hover:bg-white/20"
+                          ? "bg-[#3b82f6]/20 text-white font-medium shadow-[inset_0_0_0_1px_rgba(96,165,250,.45)]"
+                          : "text-[#9fb4d6] hover:bg-white/10"
                       }`}
                     >
                       <item.icon className="w-5 h-5 shrink-0" />
@@ -286,12 +286,12 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
             })}
           </nav>
 
-          <div className="p-4 border-t border-white/20 space-y-2">
+          <div className="p-4 border-t border-white/10 space-y-2">
             {unreadNotifications > 0 && (
               <Link
                 href={isAdminSpace ? "/admin/notifications" : "/telepro/notifications"}
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-white/20"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-[#9fb4d6] hover:bg-white/10"
               >
                 <Bell className="w-5 h-5 shrink-0" />
                 <span>Notifications</span>
@@ -307,7 +307,7 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
             )}
             <button
               onClick={handleLogout}
-              className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-white hover:bg-red-500/30 hover:text-white transition-colors"
+              className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-white hover:bg-red-500/25 transition-colors"
             >
               <LogOut className="w-5 h-5 shrink-0" />
               Déconnexion
