@@ -14,7 +14,15 @@ const PHONE_COLUMNS = [
 const EMAIL_COLUMNS = ["email", "Email"];
 const FIRST_NAME_COLUMNS = ["first_name", "First Name", "prenom", "Prénom"];
 const LAST_NAME_COLUMNS = ["last_name", "Last Name", "nom", "Nom"];
-const FULL_NAME_COLUMNS = ["full name", "Full Name", "nom complet", "Nom complet"];
+const FULL_NAME_COLUMNS = [
+  "full name",
+  "Full Name",
+  "full_name",
+  "fullname",
+  "nom complet",
+  "Nom complet",
+  "nom_complet",
+];
 
 function findColumn(row: Record<string, string>, candidates: string[]): string | null {
   const keys = Object.keys(row).map((k) => k.trim().toLowerCase());
