@@ -3,6 +3,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { AuthShell } from "@/components/auth/AuthShell";
+import { cn } from "@/lib/utils";
 
 export default function SetupPage() {
   const [email, setEmail] = useState("");
@@ -95,144 +99,120 @@ export default function SetupPage() {
 
   if (canSetup === null && !checkError) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-slate-500">Chargement...</div>
+      <div className="min-h-screen flex items-center justify-center bg-[#f4f7fb]">
+        <div className="animate-pulse text-[#64748b]">Chargement...</div>
       </div>
     );
   }
 
   if (checkError) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-8">
-        <div className="text-center max-w-md">
-          <h1 className="text-xl font-bold text-slate-800 mb-4">
-            Erreur de vérification
-          </h1>
-          <p className="text-slate-600 mb-4 text-sm">{checkError}</p>
-          <p className="text-slate-500 text-sm mb-6">
+      <AuthShell
+        title="Erreur de vérification"
+        footer={
+          <Link href="/" className="text-[#2563eb] hover:underline">
+            Retour à l&apos;accueil
+          </Link>
+        }
+      >
+        <div className="space-y-4">
+          <div className="rounded-[9px] bg-[#fee2e2] px-3 py-2 text-sm text-[#b91c1c]">
+            {checkError}
+          </div>
+          <p className="text-sm text-[#64748b]">
             Vérifiez que la migration Supabase a été exécutée et que les variables d&apos;environnement sont correctes dans .env.local
           </p>
           <div className="flex flex-col gap-3">
-            <button
-              onClick={runCheck}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
+            <Button onClick={runCheck} className="w-full">
               Réessayer
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="outline"
               onClick={() => {
                 setCheckError(null);
                 setCanSetup(true);
               }}
-              className="px-6 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 text-slate-700"
+              className="w-full"
             >
               Continuer quand même (créer un admin)
-            </button>
+            </Button>
           </div>
-          <Link
-            href="/"
-            className="block mt-4 text-blue-600 hover:underline text-sm"
-          >
-            Retour à l&apos;accueil
-          </Link>
         </div>
-      </div>
+      </AuthShell>
     );
   }
 
   if (!canSetup) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-8">
-        <div className="text-center">
-          <h1 className="text-xl font-bold text-slate-800 mb-4">
-            Configuration déjà effectuée
-          </h1>
-          <p className="text-slate-600 mb-6">
+      <AuthShell title="Configuration déjà effectuée">
+        <div className="space-y-4">
+          <p className="text-sm text-[#64748b]">
             Un administrateur existe déjà. Utilisez la page de connexion.
           </p>
-          <Link
-            href="/login"
-            className="inline-block py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
+          <Link href="/login" className={cn(buttonVariants(), "w-full justify-center")}>
             Se connecter
           </Link>
         </div>
-      </div>
+      </AuthShell>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-8 bg-slate-50">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
-          <h1 className="text-2xl font-bold text-slate-800 mb-2">
-            Première configuration
-          </h1>
-          <p className="text-slate-600 mb-6">
-            Créez le compte administrateur
-          </p>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
-            <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-slate-700 mb-1">
-                Nom complet
-              </label>
-              <input
-                id="fullName"
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1">
-                Mot de passe
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
-            >
-              {loading ? "Création..." : "Créer le compte admin"}
-            </button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-slate-500">
-            <Link href="/" className="text-blue-600 hover:underline">
-              Retour à l&apos;accueil
-            </Link>
-          </p>
+    <AuthShell
+      title="Première configuration"
+      subtitle="Créez le compte administrateur"
+      footer={
+        <Link href="/" className="text-[#2563eb] hover:underline">
+          Retour à l&apos;accueil
+        </Link>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <div className="rounded-[9px] bg-[#fee2e2] px-3 py-2 text-sm text-[#b91c1c]">
+            {error}
+          </div>
+        )}
+        <div className="space-y-1.5">
+          <label htmlFor="fullName" className="text-sm font-medium text-[#0b1f3a]">
+            Nom complet
+          </label>
+          <Input
+            id="fullName"
+            type="text"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+          />
         </div>
-      </div>
-    </div>
+        <div className="space-y-1.5">
+          <label htmlFor="email" className="text-sm font-medium text-[#0b1f3a]">
+            Email
+          </label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <label htmlFor="password" className="text-sm font-medium text-[#0b1f3a]">
+            Mot de passe
+          </label>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={6}
+          />
+        </div>
+        <Button type="submit" disabled={loading} className="w-full">
+          {loading ? "Création..." : "Créer le compte admin"}
+        </Button>
+      </form>
+    </AuthShell>
   );
 }
