@@ -1,4 +1,7 @@
 import { test, expect } from "@playwright/test";
+import { hasAuthEnv } from "./helpers";
+
+test.skip(!hasAuthEnv, "identifiants E2E absents (.env.test.local)");
 
 test("création d'un lead avec catégorie Clim 1 €, puis filtrable", async ({ page }) => {
   const stamp = Date.now().toString().slice(-6);
@@ -15,7 +18,7 @@ test("création d'un lead avec catégorie Clim 1 €, puis filtrable", async ({ 
   await form.getByTestId("lead-phone").fill(`06${stamp}0000`.slice(0, 10));
 
   // Catégorie : data-testid posé par Task 6
-  await page.getByTestId("lead-category-select").selectOption("clim_1euro");
+  await form.getByTestId("lead-category-select").selectOption("clim_1euro");
 
   // Télépro assigné : champ requis — sélection inconditionnelle de la première option réelle.
   await form.getByTestId("lead-assigned-to").selectOption({ index: 1 });

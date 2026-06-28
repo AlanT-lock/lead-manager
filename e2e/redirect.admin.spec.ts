@@ -1,4 +1,7 @@
 import { test, expect } from "@playwright/test";
+import { hasAuthEnv } from "./helpers";
+
+test.skip(!hasAuthEnv, "identifiants E2E absents (.env.test.local)");
 
 test("admin connecté atterrit dans l'espace admin", async ({ page }) => {
   await page.goto("/admin");
