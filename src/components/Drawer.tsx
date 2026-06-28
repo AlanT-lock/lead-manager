@@ -164,6 +164,7 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
                           href={item.href}
                           onClick={() => setOpen(false)}
                           className="flex items-center gap-3 flex-1 min-w-0"
+                          data-testid="nav-leads"
                         >
                           <item.icon className="w-5 h-5 shrink-0" />
                           {item.label}
@@ -177,6 +178,7 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
                           className="p-1.5 rounded-md hover:bg-white/20 text-white shrink-0"
                           aria-label={categoriesExpanded ? "Replier les catégories" : "Déplier les catégories"}
                           aria-expanded={categoriesExpanded}
+                          data-testid="nav-leads-toggle"
                         >
                           {categoriesExpanded ? (
                             <ChevronDown className="w-5 h-5" />
@@ -203,6 +205,7 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
                                     href={`${item.href}?category=${cat}`}
                                     onClick={() => setOpen(false)}
                                     className="flex items-center justify-between gap-2 flex-1 min-w-0 text-sm"
+                                    data-testid={`nav-category-${cat}`}
                                   >
                                     <span className="truncate">{LEAD_CATEGORY_LABELS[cat]}</span>
                                     <span className="text-white/70 tabular-nums">{catTotal(cat)}</span>
@@ -243,6 +246,7 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
                                         key={s}
                                         href={`${item.href}?category=${cat}&status=${s}`}
                                         onClick={() => setOpen(false)}
+                                        data-testid={`nav-status-${cat}-${s}`}
                                         className={`flex items-center justify-between w-full px-3 py-2 text-sm rounded-md transition-colors ${
                                           isCatActive && currentStatus === s
                                             ? "bg-white/25 text-white font-medium"

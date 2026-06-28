@@ -393,6 +393,8 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
                     key={lead.id}
                     onClick={() => router.push(`/admin/leads/${lead.id}`)}
                     className={`border-b border-slate-100 cursor-pointer transition-colors ${getRowStatusClass(lead.status)}`}
+                    data-testid="lead-row"
+                    data-lead-id={lead.id}
                   >
                     <td className="py-3 px-2" onClick={(e) => e.stopPropagation()}>
                       <input

@@ -103,7 +103,7 @@ export function CreateLeadForm({ telepros }: CreateLeadFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6" data-testid="lead-create-form">
       <div className="flex items-center justify-between">
         <Link
           href="/admin/leads"
@@ -282,6 +282,7 @@ export function CreateLeadForm({ telepros }: CreateLeadFormProps) {
                 value={form.category}
                 onChange={(e) => update("category", e.target.value)}
                 className="w-full px-4 py-2 border rounded-lg"
+                data-testid="lead-category-select"
               >
                 {LEAD_CATEGORIES.map((c) => (
                   <option key={c} value={c}>
