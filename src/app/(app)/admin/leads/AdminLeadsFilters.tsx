@@ -116,6 +116,7 @@ export function AdminLeadsFilters({ basePath = "/admin/leads", telepros = [] }: 
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher par nom, prénom, téléphone ou email..."
             className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            data-testid="filter-search"
           />
         </div>
         <button
@@ -133,6 +134,7 @@ export function AdminLeadsFilters({ basePath = "/admin/leads", telepros = [] }: 
               value={currentCategory}
               onChange={(e) => handleCategoryChange(e.target.value)}
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              data-testid="filter-category"
             >
               <option value="">Toutes les catégories</option>
               {LEAD_CATEGORIES.map((c) => (
@@ -148,6 +150,7 @@ export function AdminLeadsFilters({ basePath = "/admin/leads", telepros = [] }: 
               value={currentStatus}
               onChange={(e) => handleStatusChange(e.target.value)}
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              data-testid="filter-status"
             >
               <option value="">Tous les statuts</option>
               {LEAD_STATUSES_ADMIN.map((s) => (

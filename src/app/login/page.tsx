@@ -81,7 +81,7 @@ function LoginForm() {
             Connectez-vous à votre espace
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" data-testid="login-form">
             {error && (
               <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm">
                 {error}
