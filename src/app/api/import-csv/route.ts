@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClientFromRequest } from "@/lib/supabase/route-handler";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizePhoneToE164 } from "@/lib/phone";
+import { LEAD_CATEGORIES, type LeadCategory } from "@/lib/types";
 
 const PHONE_COLUMNS = [
   "phone_number",
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { rows, teleproIds, teleproPercentages } = body;
+  const { rows, teleproIds, teleproPercentages, category } = body;
 
   if (!rows || !Array.isArray(rows) || !teleproIds?.length) {
     return NextResponse.json(
@@ -61,6 +62,10 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
+
+  const leadCategory: LeadCategory = LEAD_CATEGORIES.includes(category)
+    ? category
+    : "fenetre";
 
   const usePercentages =
     teleproPercentages &&
@@ -155,6 +160,7 @@ export async function POST(request: NextRequest) {
       is_duplicate: isDuplicate,
       meta_lead_id: row.id || null,
       status: "nouveau",
+      category: leadCategory,
       assigned_to: null,
       imported_at: new Date().toISOString(),
     });

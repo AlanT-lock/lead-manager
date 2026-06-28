@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Papa from "papaparse";
+import { LEAD_CATEGORIES, LEAD_CATEGORY_LABELS, type LeadCategory } from "@/lib/types";
 
 interface Telepro {
   id: string;
@@ -16,6 +17,7 @@ interface CsvImportFormProps {
 
 export function CsvImportForm({ telepros }: CsvImportFormProps) {
   const [file, setFile] = useState<File | null>(null);
+  const [category, setCategory] = useState<LeadCategory>("fenetre");
   const [selectedTelepros, setSelectedTelepros] = useState<Set<string>>(
     new Set(telepros.map((t) => t.id))
   );
@@ -118,6 +120,7 @@ export function CsvImportForm({ telepros }: CsvImportFormProps) {
         rows: parsed.data,
         teleproIds: selectedList,
         teleproPercentages: validatedPercentages ?? undefined,
+        category,
       }),
     });
 
@@ -157,6 +160,27 @@ export function CsvImportForm({ telepros }: CsvImportFormProps) {
           onChange={(e) => setFile(e.target.files?.[0] || null)}
           className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700"
         />
+      </div>
+
+      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <h2 className="font-medium text-slate-800 mb-4">
+          Catégorie des leads importés
+        </h2>
+        <p className="text-sm text-slate-500 mb-4">
+          Tous les leads de ce fichier seront enregistrés dans la catégorie
+          choisie.
+        </p>
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value as LeadCategory)}
+          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
+          {LEAD_CATEGORIES.map((c) => (
+            <option key={c} value={c}>
+              {LEAD_CATEGORY_LABELS[c]}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
