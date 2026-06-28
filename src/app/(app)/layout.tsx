@@ -52,20 +52,30 @@ export default async function AppLayout({
   const isAdminOrSecretaire = role === "admin" || role === "secretaire";
   let statusCounts: Record<string, Record<string, number>> = {};
   try {
-    let rowsQuery = adminClient.from("leads").select("status, category");
-    if (!isAdminOrSecretaire) {
-      rowsQuery = rowsQuery.eq("assigned_to", user.id);
-    }
-    const { data: rows } = await rowsQuery;
     const counts: Record<string, Record<string, number>> = {};
     for (const cat of LEAD_CATEGORIES) {
       counts[cat] = {};
       for (const s of LEAD_STATUSES_ADMIN) counts[cat][s] = 0;
     }
-    for (const row of rows || []) {
-      const cat = row.category as string;
-      const s = row.status as string;
-      if (cat in counts && s in counts[cat]) counts[cat][s]++;
+    // PostgREST limite chaque requête à 1000 lignes : on pagine pour compter
+    // TOUS les leads (sinon les compteurs plafonnent à 1000).
+    const PAGE = 1000;
+    for (let from = 0; ; from += PAGE) {
+      let rowsQuery = adminClient
+        .from("leads")
+        .select("status, category")
+        .range(from, from + PAGE - 1);
+      if (!isAdminOrSecretaire) {
+        rowsQuery = rowsQuery.eq("assigned_to", user.id);
+      }
+      const { data: rows, error } = await rowsQuery;
+      if (error || !rows || rows.length === 0) break;
+      for (const row of rows) {
+        const cat = row.category as string;
+        const s = row.status as string;
+        if (cat in counts && s in counts[cat]) counts[cat][s]++;
+      }
+      if (rows.length < PAGE) break;
     }
     statusCounts = counts;
   } catch {
