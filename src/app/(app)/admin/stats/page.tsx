@@ -4,6 +4,7 @@ import { StatsFilters } from "./StatsFilters";
 import { StatCard } from "./StatCard";
 import { DelegataireRow } from "./DelegataireRow";
 import { StatusRow } from "./StatusRow";
+import { PageHeader } from "@/components/ui-kit/PageHeader";
 
 const STATUSES: LeadStatus[] = [
   "nouveau",
@@ -135,12 +136,10 @@ export default async function AdminStatsPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Statistiques</h1>
-        <p className="text-slate-600 mt-1">
-          Vue d&apos;ensemble des bénéfices et coûts. Cliquez sur une stat pour voir les dossiers.
-        </p>
-      </div>
+      <PageHeader
+        title="Statistiques"
+        subtitle="Vue d'ensemble des bénéfices et coûts. Cliquez sur une stat pour voir les dossiers."
+      />
 
       <StatsFilters />
 
@@ -151,8 +150,8 @@ export default async function AdminStatsPage({
       )}
 
       <div>
-        <h2 className="font-medium text-slate-800 mb-3">Types d&apos;installation (installés)</h2>
-        <p className="text-sm text-slate-500 mb-3">
+        <h2 className="font-semibold text-[#0b1f3a] mb-1">Types d&apos;installation (installés)</h2>
+        <p className="text-sm text-[#64748b] mb-3">
           Nombre de dossiers par type d&apos;installation
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -173,7 +172,7 @@ export default async function AdminStatsPage({
       </div>
 
       <div>
-        <h2 className="font-medium text-slate-800 mb-3">Indicateurs financiers (installés)</h2>
+        <h2 className="font-semibold text-[#0b1f3a] mb-3">Indicateurs financiers (installés)</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {financialStats.map((stat) => (
             <StatCard
@@ -187,9 +186,9 @@ export default async function AdminStatsPage({
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="font-medium text-slate-800 mb-4">Dossiers par mandataire (installés)</h2>
-        <p className="text-sm text-slate-500 mb-4">Cliquez sur une ligne pour voir les dossiers filtrés</p>
+      <div className="rounded-[12px] border border-[#e1e8f2] bg-white p-6 shadow-[0_1px_2px_rgba(13,38,76,.06)]">
+        <h2 className="font-semibold text-[#0b1f3a] mb-1">Dossiers par mandataire (installés)</h2>
+        <p className="text-sm text-[#64748b] mb-4">Cliquez sur une ligne pour voir les dossiers filtrés</p>
         <div className="space-y-0">
           {DELEGATAIRE_GROUPS.map((d) => (
             <DelegataireRow
@@ -208,9 +207,9 @@ export default async function AdminStatsPage({
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="font-medium text-slate-800 mb-4">Dossiers par statut chantier (installés)</h2>
-        <p className="text-sm text-slate-500 mb-4">
+      <div className="rounded-[12px] border border-[#e1e8f2] bg-white p-6 shadow-[0_1px_2px_rgba(13,38,76,.06)]">
+        <h2 className="font-semibold text-[#0b1f3a] mb-1">Dossiers par statut chantier (installés)</h2>
+        <p className="text-sm text-[#64748b] mb-4">
           Nombre de dossiers ayant chaque statut (cumulables). Cliquez pour filtrer.
         </p>
         <div className="space-y-0">
@@ -226,9 +225,9 @@ export default async function AdminStatsPage({
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="font-medium text-slate-800 mb-4">Leads par statut (tous types)</h2>
-        <p className="text-sm text-slate-500 mb-4">
+      <div className="rounded-[12px] border border-[#e1e8f2] bg-white p-6 shadow-[0_1px_2px_rgba(13,38,76,.06)]">
+        <h2 className="font-semibold text-[#0b1f3a] mb-1">Leads par statut (tous types)</h2>
+        <p className="text-sm text-[#64748b] mb-4">
           Total : {totalLeads} leads mis à jour dans la période. Cliquez pour filtrer.
         </p>
         <div className="space-y-0">

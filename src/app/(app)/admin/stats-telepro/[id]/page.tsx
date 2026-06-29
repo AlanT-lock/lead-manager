@@ -6,6 +6,7 @@ import { TeleproStatsClient } from "./TeleproStatsClient";
 import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, INSTALLATION_TYPE_LABELS, INSTALLATION_TYPES } from "@/lib/types";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { StatsTeleproDetailFilters } from "./StatsTeleproDetailFilters";
+import { PageHeader } from "@/components/ui-kit/PageHeader";
 
 function getDateRange(from?: string, to?: string) {
   const now = new Date();
@@ -109,19 +110,17 @@ export default async function TeleproStatsDetailPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         <Link
           href="/admin"
-          className="p-2 rounded-lg hover:bg-slate-100 text-slate-600"
+          className="p-2 rounded-[8px] hover:bg-[#f1f5f9] text-[#64748b] transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">
-            {profile.full_name || profile.email}
-          </h1>
-          <p className="text-slate-600 text-sm">{profile.email}</p>
-        </div>
+        <PageHeader
+          title={profile.full_name || profile.email}
+          subtitle={profile.email ?? undefined}
+        />
       </div>
 
       <StatsTeleproDetailFilters />

@@ -2,6 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { INSTALLATION_TYPE_LABELS, INSTALLATION_TYPES } from "@/lib/types";
 import { StatsSecretaireFilters } from "./StatsSecretaireFilters";
 import { StatCard } from "../stats/StatCard";
+import { PageHeader } from "@/components/ui-kit/PageHeader";
 
 export default async function StatsSecretairePage({
   searchParams,
@@ -52,12 +53,10 @@ export default async function StatsSecretairePage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Statistiques</h1>
-        <p className="text-slate-600 mt-1">
-          Types d&apos;installation des dossiers documents reçus. Cliquez sur une stat pour voir les dossiers.
-        </p>
-      </div>
+      <PageHeader
+        title="Statistiques"
+        subtitle="Types d'installation des dossiers documents reçus. Cliquez sur une stat pour voir les dossiers."
+      />
 
       <StatsSecretaireFilters />
 
@@ -68,8 +67,8 @@ export default async function StatsSecretairePage({
       )}
 
       <div>
-        <h2 className="font-medium text-slate-800 mb-3">Types d&apos;installation (documents reçus)</h2>
-        <p className="text-sm text-slate-500 mb-3">
+        <h2 className="font-semibold text-[#0b1f3a] mb-1">Types d&apos;installation (documents reçus)</h2>
+        <p className="text-sm text-[#64748b] mb-3">
           Nombre de dossiers par type d&apos;installation
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
