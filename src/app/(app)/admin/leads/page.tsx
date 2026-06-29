@@ -5,6 +5,9 @@ import { CHANTIER_STATUS_FIELDS, LEAD_CATEGORIES, type LeadCategory, type LeadSt
 import { AdminLeadsFilters } from "./AdminLeadsFilters";
 import { AdminLeadsTable } from "./AdminLeadsTable";
 import { DocumentsRecusTable } from "../documents-recus/DocumentsRecusTable";
+import { PageHeader } from "@/components/ui-kit/PageHeader";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const CHANTIER_FIELDS = CHANTIER_STATUS_FIELDS.map((f) => f.field);
 
@@ -105,22 +108,19 @@ export default async function AdminLeadsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">Tous les leads</h1>
-          <p className="text-slate-600 mt-1">
-            Liste de tous les leads importés. Sélectionnez des leads pour les
-            transférer ou les supprimer.
-          </p>
-        </div>
-        <Link
-          href="/admin/leads/new"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
-        >
-          <Plus className="w-4 h-4" />
-          Ajouter un lead
-        </Link>
-      </div>
+      <PageHeader
+        title="Tous les leads"
+        subtitle="Liste de tous les leads importés. Sélectionnez des leads pour les transférer ou les supprimer."
+        actions={
+          <Link
+            href="/admin/leads/new"
+            className={cn(buttonVariants(), "gap-2")}
+          >
+            <Plus className="w-4 h-4" />
+            Ajouter un lead
+          </Link>
+        }
+      />
 
       <AdminLeadsFilters telepros={teleprosForFilter} />
 

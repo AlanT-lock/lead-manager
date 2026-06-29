@@ -4,6 +4,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Search } from "lucide-react";
 import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, CHANTIER_STATUS_FIELDS, DELEGATAIRE_GROUPS, LEAD_CATEGORIES, LEAD_CATEGORY_LABELS } from "@/lib/types";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface Telepro {
   id: string;
@@ -105,35 +107,32 @@ export function AdminLeadsFilters({ basePath = "/admin/leads", telepros = [] }: 
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_1px_2px_rgba(13,38,76,.06)] p-4 flex flex-col gap-4">
       <form onSubmit={handleSearch} className="w-full flex gap-2">
         <div className="relative flex-1 min-w-0">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-          <input
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748b]" />
+          <Input
             ref={searchInputRef}
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher par nom, prénom, téléphone ou email..."
-            className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="pl-9 h-9 border-[#e1e8f2] rounded-[9px] text-[#0b1f3a] placeholder:text-[#64748b]"
             data-testid="filter-search"
           />
         </div>
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shrink-0"
-        >
+        <Button type="submit" size="sm" className="h-9 shrink-0">
           Rechercher
-        </button>
+        </Button>
       </form>
       {basePath === "/admin/leads" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4 items-end">
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Catégorie</label>
+            <label className="block text-xs font-medium text-[#64748b] mb-1">Catégorie</label>
             <select
               value={currentCategory}
               onChange={(e) => handleCategoryChange(e.target.value)}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full h-9 px-3 py-1.5 text-sm border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40 focus:border-[#2563eb]"
               data-testid="filter-category"
             >
               <option value="">Toutes les catégories</option>
@@ -145,11 +144,11 @@ export function AdminLeadsFilters({ basePath = "/admin/leads", telepros = [] }: 
             </select>
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Statut</label>
+            <label className="block text-xs font-medium text-[#64748b] mb-1">Statut</label>
             <select
               value={currentStatus}
               onChange={(e) => handleStatusChange(e.target.value)}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full h-9 px-3 py-1.5 text-sm border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40 focus:border-[#2563eb]"
               data-testid="filter-status"
             >
               <option value="">Tous les statuts</option>
@@ -161,11 +160,11 @@ export function AdminLeadsFilters({ basePath = "/admin/leads", telepros = [] }: 
             </select>
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Télépro</label>
+            <label className="block text-xs font-medium text-[#64748b] mb-1">Télépro</label>
             <select
               value={currentTelepro}
               onChange={(e) => handleTeleproChange(e.target.value)}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full h-9 px-3 py-1.5 text-sm border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40 focus:border-[#2563eb]"
             >
               <option value="">Tous les télépros</option>
               {telepros.map((t) => (
@@ -176,11 +175,11 @@ export function AdminLeadsFilters({ basePath = "/admin/leads", telepros = [] }: 
             </select>
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Chantier</label>
+            <label className="block text-xs font-medium text-[#64748b] mb-1">Chantier</label>
             <select
               value={currentChantier}
               onChange={(e) => handleChantierChange(e.target.value)}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full h-9 px-3 py-1.5 text-sm border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40 focus:border-[#2563eb]"
             >
               <option value="">Statut chantier</option>
               {CHANTIER_STATUS_FIELDS.map(({ field, label }) => (
@@ -191,11 +190,11 @@ export function AdminLeadsFilters({ basePath = "/admin/leads", telepros = [] }: 
             </select>
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Mandataire</label>
+            <label className="block text-xs font-medium text-[#64748b] mb-1">Mandataire</label>
             <select
               value={currentDelegataire}
               onChange={(e) => router.push(`${basePath}?${buildParams({ delegataire: e.target.value }).toString()}`)}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full h-9 px-3 py-1.5 text-sm border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40 focus:border-[#2563eb]"
             >
               <option value="">Tous les mandataires</option>
               {DELEGATAIRE_GROUPS.map((d) => (
@@ -207,31 +206,32 @@ export function AdminLeadsFilters({ basePath = "/admin/leads", telepros = [] }: 
             </select>
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Du</label>
-            <input
+            <label className="block text-xs font-medium text-[#64748b] mb-1">Du</label>
+            <Input
               type="date"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg"
+              className="h-9 border-[#e1e8f2] rounded-[9px] text-[#0b1f3a]"
             />
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Au</label>
-            <input
+            <label className="block text-xs font-medium text-[#64748b] mb-1">Au</label>
+            <Input
               type="date"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg"
+              className="h-9 border-[#e1e8f2] rounded-[9px] text-[#0b1f3a]"
             />
           </div>
           <div className="sm:col-span-2 lg:col-span-1">
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={handleDateApply}
-              className="w-full px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200"
+              className="w-full h-9"
             >
               Appliquer dates
-            </button>
+            </Button>
           </div>
         </div>
       )}
