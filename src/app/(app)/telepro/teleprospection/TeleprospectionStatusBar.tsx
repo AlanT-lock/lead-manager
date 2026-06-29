@@ -7,6 +7,9 @@ import {
   fromDatetimeLocalValueParis,
 } from "@/lib/date";
 
+const CARD_CLS =
+  "rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_1px_2px_rgba(13,38,76,.06)]";
+
 function formatPhoneDisplay(phone: string): string {
   const digits = String(phone ?? "").replace(/\D/g, "");
   if (digits.length === 0) return "";
@@ -20,20 +23,20 @@ function formatPhoneDisplay(phone: string): string {
 }
 
 function getStatusButtonClass(status: LeadStatus, isSelected: boolean): string {
-  if (!isSelected) return "bg-slate-100 hover:bg-slate-200";
+  if (!isSelected) return "bg-[#f8fafc] hover:bg-[#f1f5f9] border border-[#e1e8f2] text-[#64748b]";
   switch (status) {
-    case "nouveau": return "bg-blue-100 text-blue-800";
-    case "nrp": return "bg-yellow-100 text-yellow-800";
-    case "a_rappeler": return "bg-blue-800 text-white";
-    case "en_attente_doc": return "bg-green-100 text-green-800";
-    case "documents_recus": return "bg-green-700 text-white";
-    case "incomplet": return "bg-amber-100 text-amber-800";
-    case "bloque_mpr": return "bg-red-800 text-white";
-    case "valide": return "bg-emerald-700 text-white";
-    case "installe": return "bg-teal-200 text-teal-900";
-    case "ancien_documents_recus": return "bg-slate-500 text-white";
-    case "annule": return "bg-red-100 text-red-800";
-    default: return "bg-slate-100 text-slate-700";
+    case "nouveau": return "bg-slate-100 text-slate-700 border border-slate-200";
+    case "nrp": return "bg-[#fef9c3] text-[#a16207] border border-[#fde68a]";
+    case "a_rappeler": return "bg-[#1e3a5f] text-white border border-[#1e3a5f]";
+    case "en_attente_doc": return "bg-[#d1fae5] text-[#065f46] border border-[#6ee7b7]";
+    case "documents_recus": return "bg-[#065f46] text-white border border-[#065f46]";
+    case "incomplet": return "bg-[#fef3c7] text-[#b45309] border border-[#fcd34d]";
+    case "bloque_mpr": return "bg-[#7f1d1d] text-white border border-[#7f1d1d]";
+    case "valide": return "bg-[#14532d] text-white border border-[#14532d]";
+    case "installe": return "bg-[#99f6e4] text-[#134e4a] border border-[#5eead4]";
+    case "ancien_documents_recus": return "bg-[#94a3b8] text-white border border-[#94a3b8]";
+    case "annule": return "bg-[#fee2e2] text-[#b91c1c] border border-[#fca5a5]";
+    default: return "bg-[#f8fafc] text-[#64748b] border border-[#e1e8f2]";
   }
 }
 
@@ -86,13 +89,13 @@ function StatusButton({
               type="datetime-local"
               value={callbackAt}
               onChange={(e) => setCallbackAt(e.target.value)}
-              className="px-4 py-2.5 border border-slate-300 rounded-lg text-base"
+              className="h-9 px-3 border border-[#e1e8f2] rounded-[9px] text-sm text-[#0b1f3a] bg-white focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40"
             />
             <button
               type="button"
               onClick={handleSaveCallback}
               disabled={disabled || !callbackAt}
-              className="px-5 py-2.5 bg-blue-800 text-white rounded-lg text-base font-medium hover:bg-blue-900 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-9 px-4 bg-[#1e3a5f] text-white rounded-[9px] text-sm font-medium hover:bg-[#162d4a] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               OK
             </button>
@@ -100,7 +103,7 @@ function StatusButton({
               <button
                 type="button"
                 onClick={() => setShowCallback(false)}
-                className="text-slate-500 text-base hover:text-slate-700"
+                className="text-[#64748b] text-sm hover:text-[#0b1f3a]"
               >
                 Annuler
               </button>
@@ -112,7 +115,7 @@ function StatusButton({
             type="button"
             onClick={() => setShowCallback(true)}
             disabled={disabled}
-            className={`px-5 py-3 rounded-lg text-base font-medium ${getStatusButtonClass(status, currentStatus === status)}`}
+            className={`px-4 py-2 rounded-[9px] text-sm font-medium transition-colors ${getStatusButtonClass(status, currentStatus === status)}`}
           >
             {LEAD_STATUS_LABELS[status]}
           </button>
@@ -126,7 +129,7 @@ function StatusButton({
       type="button"
       onClick={() => onSelect()}
       disabled={disabled}
-      className={`px-5 py-3 rounded-lg text-base font-medium ${getStatusButtonClass(status, currentStatus === status)}`}
+      className={`px-4 py-2 rounded-[9px] text-sm font-medium transition-colors ${getStatusButtonClass(status, currentStatus === status)}`}
     >
       {LEAD_STATUS_LABELS[status]}
     </button>
@@ -200,17 +203,20 @@ export function TeleprospectionStatusBar({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm mt-4">
+    <div className={`${CARD_CLS} p-6 mt-4`}>
       <div className="space-y-4">
         <div>
-          <p className="text-xl font-semibold text-slate-800">
+          <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wide mb-3">
+            Disposition de l&apos;appel
+          </p>
+          <p className="text-xl font-semibold text-[#0b1f3a]">
             {String(lead.first_name ?? "")} {String(lead.last_name ?? "")}
           </p>
-          <p className="text-2xl font-bold text-slate-800 mt-2">
+          <p className="text-2xl font-bold text-[#0b1f3a] mt-1">
             {formatPhoneDisplay(lead.phone as string)}
           </p>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2">
           {LEAD_STATUSES_ADMIN.map((s) => (
             <StatusButton
               key={s}
@@ -227,7 +233,7 @@ export function TeleprospectionStatusBar({
             type="button"
             onClick={handleNrpClick}
             disabled={saving}
-            className="px-5 py-3 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200 text-base font-medium"
+            className="px-4 py-2 bg-[#fef9c3] text-[#a16207] border border-[#fde68a] rounded-[9px] hover:bg-[#fef3c7] text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Toujours NRP (appelé {(lead.nrp_count as number) || 0} fois)
           </button>

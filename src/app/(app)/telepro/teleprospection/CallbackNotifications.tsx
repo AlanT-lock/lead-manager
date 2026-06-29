@@ -80,22 +80,24 @@ export function CallbackNotifications() {
           tabIndex={0}
           onClick={() => handleClick(lead.id)}
           onKeyDown={(e) => e.key === "Enter" && handleClick(lead.id)}
-          className="bg-rose-50 border border-rose-200 rounded-lg p-4 shadow-lg hover:bg-rose-100 cursor-pointer transition-colors flex items-start gap-3"
+          className="rounded-[12px] border border-rose-200 bg-white shadow-[0_4px_12px_rgba(190,18,60,.12)] hover:shadow-[0_4px_16px_rgba(190,18,60,.18)] cursor-pointer transition-all flex items-start gap-3 p-4"
         >
           <div className="flex-1 min-w-0">
-            <p className="font-medium text-rose-900">
+            <p className="font-semibold text-[#0b1f3a]">
               {lead.first_name} {lead.last_name}
             </p>
-            <p className="text-sm text-rose-700">{lead.phone}</p>
-            <p className="text-xs text-rose-600 mt-1">Rappel à effectuer</p>
+            <p className="text-sm text-[#64748b] mt-0.5">{lead.phone}</p>
+            <p className="text-xs text-rose-600 mt-1 font-medium uppercase tracking-wide">
+              Rappel à effectuer
+            </p>
           </div>
           <button
             type="button"
             onClick={(e) => handleDismiss(e, lead.id)}
-            className="p-1 rounded hover:bg-rose-200 text-rose-600 shrink-0"
+            className="p-1 rounded-[6px] hover:bg-rose-50 text-[#64748b] shrink-0 transition-colors"
             aria-label="Fermer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
       ))}
