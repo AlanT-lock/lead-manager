@@ -5,6 +5,9 @@ import { Plus } from "lucide-react";
 import { LEAD_CATEGORIES, type LeadCategory } from "@/lib/types";
 import { LeadsFilters } from "./LeadsFilters";
 import { TeleproLeadsTable } from "./TeleproLeadsTable";
+import { PageHeader } from "@/components/ui-kit/PageHeader";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default async function TeleproLeadsPage({
   searchParams,
@@ -55,21 +58,19 @@ export default async function TeleproLeadsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">Mes leads</h1>
-          <p className="text-slate-600 mt-1">
-            Liste de tous vos leads assignés
-          </p>
-        </div>
-        <Link
-          href="/telepro/leads/new"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
-        >
-          <Plus className="w-4 h-4" />
-          Ajouter un lead
-        </Link>
-      </div>
+      <PageHeader
+        title="Mes leads"
+        subtitle="Liste de tous vos leads assignés"
+        actions={
+          <Link
+            href="/telepro/leads/new"
+            className={cn(buttonVariants(), "gap-2")}
+          >
+            <Plus className="w-4 h-4" />
+            Ajouter un lead
+          </Link>
+        }
+      />
 
       <LeadsFilters />
 
