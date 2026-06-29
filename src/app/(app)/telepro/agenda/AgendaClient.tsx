@@ -18,6 +18,7 @@ import {
 import { fr } from "date-fns/locale";
 import { formatTimeParis } from "@/lib/date";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface AgendaEvent {
   id: string;
@@ -64,41 +65,47 @@ export function AgendaClient({ events }: AgendaClientProps) {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-      <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-800">
+    <div className="rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_1px_2px_rgba(13,38,76,.06)] overflow-hidden">
+      <div className="px-5 py-4 border-b border-[#e1e8f2] flex items-center justify-between">
+        <h2 className="text-base font-semibold text-[#0b1f3a] capitalize">
           {format(currentMonth, "MMMM yyyy", { locale: fr })}
         </h2>
         <div className="flex items-center gap-1">
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-            className="p-2 rounded-lg hover:bg-slate-100"
             aria-label="Mois précédent"
+            className="h-8 w-8 text-[#64748b] hover:text-[#0b1f3a]"
           >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <button
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setCurrentMonth(new Date())}
-            className="px-3 py-1 text-sm text-slate-600 hover:bg-slate-100 rounded-lg"
+            className="px-3 h-8 text-sm text-[#64748b] hover:text-[#0b1f3a]"
           >
             Aujourd&apos;hui
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-            className="p-2 rounded-lg hover:bg-slate-100"
             aria-label="Mois suivant"
+            className="h-8 w-8 text-[#64748b] hover:text-[#0b1f3a]"
           >
-            <ChevronRight className="w-5 h-5" />
-          </button>
+            <ChevronRight className="w-4 h-4" />
+          </Button>
         </div>
       </div>
 
       <div className="p-4">
-        <div className="grid grid-cols-7 gap-px bg-slate-200 rounded-lg overflow-hidden">
+        <div className="grid grid-cols-7 gap-px bg-[#e1e8f2] rounded-lg overflow-hidden">
           {WEEKDAYS.map((d) => (
             <div
               key={d}
-              className="bg-slate-50 py-2 text-center text-sm font-medium text-slate-600"
+              className="bg-[#f8fafc] py-2 text-center text-xs font-medium text-[#64748b] uppercase tracking-wide"
             >
               {d}
             </div>
@@ -111,17 +118,17 @@ export function AgendaClient({ events }: AgendaClientProps) {
             return (
               <div
                 key={date.toISOString()}
-                className={`min-h-[100px] p-2 bg-white ${
-                  !isCurrentMonth ? "bg-slate-50/50" : ""
+                className={`min-h-[100px] p-2 ${
+                  !isCurrentMonth ? "bg-[#f8fafc]/60" : "bg-white"
                 }`}
               >
                 <div
                   className={`text-sm font-medium mb-1 ${
                     isToday
-                      ? "bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center"
+                      ? "bg-[#2563eb] text-white w-7 h-7 rounded-full flex items-center justify-center text-xs"
                       : isCurrentMonth
-                      ? "text-slate-800"
-                      : "text-slate-400"
+                      ? "text-[#0b1f3a]"
+                      : "text-[#94a3b8]"
                   }`}
                 >
                   {format(date, "d")}
@@ -131,7 +138,7 @@ export function AgendaClient({ events }: AgendaClientProps) {
                     <button
                       key={event.id}
                       onClick={() => handleEventClick(event.id)}
-                      className="w-full text-left px-2 py-1.5 rounded text-xs bg-rose-100 text-rose-800 hover:bg-rose-200 transition-colors truncate"
+                      className="w-full text-left px-2 py-1.5 rounded text-xs bg-rose-50 text-rose-700 border border-rose-100 hover:bg-rose-100 transition-colors truncate"
                       title={`${event.title} - ${event.phone}`}
                     >
                       <span className="font-medium block truncate">
@@ -147,9 +154,9 @@ export function AgendaClient({ events }: AgendaClientProps) {
       </div>
 
       {events.length === 0 && (
-        <div className="p-4 mx-4 mb-4 bg-slate-50 rounded-lg text-center text-slate-500">
-          <p className="font-medium">Aucun rappel planifié</p>
-          <p className="text-sm mt-1">
+        <div className="px-4 pb-4 mx-4 mb-4 bg-[#f8fafc] rounded-[8px] border border-[#e1e8f2] text-center py-6">
+          <p className="font-medium text-[#0b1f3a] text-sm">Aucun rappel planifié</p>
+          <p className="text-sm mt-1 text-[#64748b]">
             Les leads en statut &quot;À rappeler&quot; avec une date de rappel apparaîtront ici.
           </p>
         </div>
