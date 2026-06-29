@@ -3,6 +3,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Pencil, Trash2, X, Package, Layers, Euro, GripVertical, Truck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+const INPUT_CLS =
+  "w-full px-3 py-2 text-sm border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40";
+const SELECT_CLS =
+  "w-full px-3 py-2 text-sm border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40";
+const LABEL_CLS = "block text-sm font-medium text-[#0b1f3a] mb-1.5";
 
 interface ProductType {
   id: string;
@@ -363,31 +370,31 @@ export function StockageClient({
     <div className="space-y-8">
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200/60 p-6 shadow-sm">
+        <div className="rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_1px_2px_rgba(13,38,76,.06)] p-6">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-slate-200/80 p-3">
-              <Package className="w-6 h-6 text-slate-600" />
+            <div className="rounded-[9px] bg-[#f1f5f9] p-3">
+              <Package className="w-6 h-6 text-[#0b1f3a]" />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Produits différents</p>
-              <p className="text-2xl font-bold text-slate-800">{products.length}</p>
+              <p className="text-sm font-medium text-[#64748b]">Produits différents</p>
+              <p className="text-2xl font-bold text-[#0b1f3a]">{products.length}</p>
             </div>
           </div>
         </div>
-        <div className="rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200/60 p-6 shadow-sm">
+        <div className="rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_1px_2px_rgba(13,38,76,.06)] p-6">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-slate-200/80 p-3">
-              <Layers className="w-6 h-6 text-slate-600" />
+            <div className="rounded-[9px] bg-[#f1f5f9] p-3">
+              <Layers className="w-6 h-6 text-[#0b1f3a]" />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Quantité totale</p>
-              <p className="text-2xl font-bold text-slate-800">{totalQuantity}</p>
+              <p className="text-sm font-medium text-[#64748b]">Quantité totale</p>
+              <p className="text-2xl font-bold text-[#0b1f3a]">{totalQuantity}</p>
             </div>
           </div>
         </div>
-        <div className="rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200/60 p-6 shadow-sm">
+        <div className="rounded-[12px] border border-emerald-200 bg-emerald-50 shadow-[0_1px_2px_rgba(13,38,76,.06)] p-6">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-emerald-200/80 p-3">
+            <div className="rounded-[9px] bg-emerald-100 p-3">
               <Euro className="w-6 h-6 text-emerald-700" />
             </div>
             <div>
@@ -402,43 +409,44 @@ export function StockageClient({
 
       {/* Header + boutons */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h2 className="text-lg font-semibold text-slate-800">Catalogue des produits</h2>
+        <h2 className="text-lg font-semibold text-[#0b1f3a]">Catalogue des produits</h2>
         <div className="flex items-center gap-2">
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={() => setShowSuppliersModal(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors shadow-sm font-medium"
+            className="gap-2 border-[#e1e8f2] text-[#0b1f3a] hover:bg-[#f1f5f9]"
           >
-            <Truck className="w-5 h-5" />
+            <Truck className="w-4 h-4" />
             Fournisseurs
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors shadow-sm font-medium"
+            className="gap-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-4 h-4" />
             Ajouter un produit
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Grille produits */}
       <div>
         {products.length === 0 ? (
-          <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-12 text-center">
-            <Package className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500 font-medium">Aucun produit</p>
-            <p className="text-slate-400 text-sm mt-1">
+          <div className="rounded-[12px] border-2 border-dashed border-[#e1e8f2] bg-[#f8fafc] p-12 text-center">
+            <Package className="w-12 h-12 text-[#cbd5e1] mx-auto mb-3" />
+            <p className="text-[#64748b] font-medium">Aucun produit</p>
+            <p className="text-[#94a3b8] text-sm mt-1">
               Cliquez sur « Ajouter un produit » pour commencer.
             </p>
-            <button
+            <Button
               type="button"
               onClick={() => setShowAddModal(true)}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700"
+              className="mt-4 bg-[#2563eb] hover:bg-[#1d4ed8] text-white"
             >
               Ajouter un produit
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
@@ -454,31 +462,31 @@ export function StockageClient({
                   onDragOver={handleDragOver}
                   onDrop={(e) => handleDrop(e, product.id)}
                   onDragEnd={handleDragEnd}
-                  className={`rounded-lg border bg-white p-3 shadow-sm hover:shadow-md transition-all flex flex-col min-w-0 relative ${
-                    isDragging ? "opacity-40 border-blue-400" : "border-slate-200"
+                  className={`rounded-[12px] border bg-white p-3 shadow-[0_1px_2px_rgba(13,38,76,.06)] hover:shadow-md transition-all flex flex-col min-w-0 relative ${
+                    isDragging ? "opacity-40 border-[#2563eb]" : "border-[#e1e8f2]"
                   }`}
                   style={product.color ? { borderLeftWidth: "4px", borderLeftColor: product.color } : undefined}
                 >
-                  <div className="absolute top-1 left-1 cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500">
+                  <div className="absolute top-1 left-1 cursor-grab active:cursor-grabbing text-[#cbd5e1] hover:text-[#64748b]">
                     <GripVertical className="w-3.5 h-3.5" />
                   </div>
                   {typeName && (
-                    <span className="text-[10px] font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded w-fit mb-1.5 truncate max-w-full ml-3">
+                    <span className="text-[10px] font-medium text-[#64748b] bg-[#f1f5f9] px-1.5 py-0.5 rounded w-fit mb-1.5 truncate max-w-full ml-3">
                       {typeName}
                     </span>
                   )}
                   {supplierName && (
-                    <span className="text-[10px] font-medium text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded w-fit mb-1.5 truncate max-w-full">
+                    <span className="text-[10px] font-medium text-[#2563eb] bg-[#eff6ff] px-1.5 py-0.5 rounded w-fit mb-1.5 truncate max-w-full">
                       {supplierName}
                     </span>
                   )}
                   <div className="flex justify-between items-start gap-1 mb-1.5">
-                    <h4 className="font-medium text-slate-800 line-clamp-2 text-xs flex-1 min-w-0">{product.name}</h4>
+                    <h4 className="font-medium text-[#0b1f3a] line-clamp-2 text-xs flex-1 min-w-0">{product.name}</h4>
                     <div className="flex items-center shrink-0">
                       <button
                         type="button"
                         onClick={() => openEditModal(product)}
-                        className="p-1 rounded hover:bg-slate-100 text-slate-500 hover:text-slate-700"
+                        className="p-1 rounded hover:bg-[#f1f5f9] text-[#64748b] hover:text-[#0b1f3a]"
                         title="Modifier"
                       >
                         <Pencil className="w-3 h-3" />
@@ -487,18 +495,18 @@ export function StockageClient({
                         type="button"
                         onClick={(e) => handleDeleteProduct(product, e)}
                         disabled={loading}
-                        className="p-1 rounded hover:bg-red-50 text-slate-500 hover:text-red-600 disabled:opacity-50"
+                        className="p-1 rounded hover:bg-red-50 text-[#64748b] hover:text-red-600 disabled:opacity-50"
                         title="Supprimer"
                       >
                         <Trash2 className="w-3 h-3" />
                       </button>
                     </div>
                   </div>
-                  <p className="text-sm font-semibold text-slate-700 mb-2">
+                  <p className="text-sm font-semibold text-[#0b1f3a] mb-2">
                     {Number(product.price).toFixed(2)} €
                   </p>
                   <div className="flex items-center gap-1 mt-auto">
-                    <label className="text-[10px] text-slate-500">Qté</label>
+                    <label className="text-[10px] text-[#64748b]">Qté</label>
                     <input
                       type="number"
                       min="0"
@@ -520,7 +528,7 @@ export function StockageClient({
                           }, 500);
                         }
                       }}
-                      className="w-12 px-1 py-1 border border-slate-200 rounded text-center text-xs font-medium focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                      className="w-12 px-1 py-1 border border-[#e1e8f2] rounded text-center text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40"
                     />
                   </div>
                 </div>
@@ -532,21 +540,21 @@ export function StockageClient({
 
       {/* Section types */}
       {productTypes.length > 0 && (
-        <details className="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
-          <summary className="cursor-pointer font-medium text-slate-600 text-sm">
+        <details className="rounded-[12px] border border-[#e1e8f2] bg-[#f8fafc] p-4">
+          <summary className="cursor-pointer font-medium text-[#64748b] text-sm">
             Gérer les types de produits ({productTypes.length})
           </summary>
           <div className="mt-4 flex flex-wrap gap-2">
             {productTypes.map((type) => (
               <div
                 key={type.id}
-                className="flex items-center gap-1 bg-white rounded-lg px-3 py-2 border border-slate-200"
+                className="flex items-center gap-1 bg-white rounded-[9px] px-3 py-2 border border-[#e1e8f2]"
               >
-                <span className="text-sm text-slate-700">{type.name}</span>
+                <span className="text-sm text-[#0b1f3a]">{type.name}</span>
                 <button
                   type="button"
                   onClick={() => openEditTypeModal(type)}
-                  className="p-1 rounded hover:bg-slate-100 text-slate-500"
+                  className="p-1 rounded hover:bg-[#f1f5f9] text-[#64748b]"
                   title="Modifier"
                 >
                   <Pencil className="w-3.5 h-3.5" />
@@ -573,22 +581,22 @@ export function StockageClient({
           onClick={() => setShowAddModal(false)}
         >
           <div
-            className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto"
+            className="rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_4px_24px_rgba(13,38,76,.12)] p-6 max-w-md w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-slate-800">Nouveau produit</h3>
+              <h3 className="text-lg font-semibold text-[#0b1f3a]">Nouveau produit</h3>
               <button
                 type="button"
                 onClick={() => setShowAddModal(false)}
-                className="p-2 rounded-lg hover:bg-slate-100 text-slate-500"
+                className="p-2 rounded-[9px] hover:bg-[#f1f5f9] text-[#64748b]"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handleCreateProduct} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                <label className={LABEL_CLS}>
                   Nom complet du produit
                 </label>
                 <input
@@ -596,12 +604,12 @@ export function StockageClient({
                   value={newProductName}
                   onChange={(e) => setNewProductName(e.target.value)}
                   placeholder="Ex: PAC Daikin 5 kW"
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                  className={INPUT_CLS}
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1.5">Prix (€)</label>
+                <label className={LABEL_CLS}>Prix (€)</label>
                 <input
                   type="number"
                   step="0.01"
@@ -609,19 +617,19 @@ export function StockageClient({
                   value={newProductPrice}
                   onChange={(e) => setNewProductPrice(e.target.value)}
                   placeholder="0.00"
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                  className={INPUT_CLS}
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                <label className={LABEL_CLS}>
                   Type de produit
                 </label>
                 <div className="flex gap-2">
                   <select
                     value={newProductTypeId}
                     onChange={(e) => setNewProductTypeId(e.target.value)}
-                    className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                    className="flex-1 px-3 py-2 text-sm border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40"
                   >
                     {productTypes.map((t) => (
                       <option key={t.id} value={t.id}>
@@ -632,7 +640,7 @@ export function StockageClient({
                   <button
                     type="button"
                     onClick={() => setShowNewTypeInput(!showNewTypeInput)}
-                    className="px-3 py-2.5 border border-slate-200 rounded-xl hover:bg-slate-50"
+                    className="px-3 py-2 border border-[#e1e8f2] rounded-[9px] hover:bg-[#f1f5f9] text-[#64748b]"
                     title="Ajouter un type"
                   >
                     <Plus className="w-5 h-5" />
@@ -645,7 +653,7 @@ export function StockageClient({
                       value={newTypeName}
                       onChange={(e) => setNewTypeName(e.target.value)}
                       placeholder="Nouveau type..."
-                      className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl"
+                      className="flex-1 px-3 py-2 text-sm border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40"
                       onKeyDown={(e) =>
                         e.key === "Enter" && (e.preventDefault(), handleCreateType())
                       }
@@ -654,7 +662,7 @@ export function StockageClient({
                       type="button"
                       onClick={handleCreateType}
                       disabled={!newTypeName.trim() || loading}
-                      className="px-4 py-2.5 bg-slate-600 text-white rounded-xl hover:bg-slate-700 disabled:opacity-50"
+                      className="px-4 py-2 bg-[#0b1f3a] text-white rounded-[9px] hover:bg-[#1e3a5f] disabled:opacity-50 text-sm font-medium"
                     >
                       Créer
                     </button>
@@ -664,7 +672,7 @@ export function StockageClient({
                         setShowNewTypeInput(false);
                         setNewTypeName("");
                       }}
-                      className="px-3 py-2.5 border border-slate-200 rounded-xl hover:bg-slate-50"
+                      className="px-3 py-2 border border-[#e1e8f2] rounded-[9px] hover:bg-[#f1f5f9] text-[#64748b]"
                     >
                       <X className="w-5 h-5" />
                     </button>
@@ -672,13 +680,13 @@ export function StockageClient({
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                <label className={LABEL_CLS}>
                   Fournisseur
                 </label>
                 <select
                   value={newProductSupplierId}
                   onChange={(e) => setNewProductSupplierId(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                  className={SELECT_CLS}
                 >
                   <option value="">— Aucun —</option>
                   {suppliers.map((s) => (
@@ -689,7 +697,7 @@ export function StockageClient({
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                <label className={LABEL_CLS}>
                   Couleur du produit
                 </label>
                 <div className="flex items-center gap-3">
@@ -697,20 +705,20 @@ export function StockageClient({
                     type="color"
                     value={newProductColor || "#000000"}
                     onChange={(e) => setNewProductColor(e.target.value)}
-                    className="w-10 h-10 rounded-lg border border-slate-200 cursor-pointer p-0.5"
+                    className="w-10 h-10 rounded-[9px] border border-[#e1e8f2] cursor-pointer p-0.5"
                   />
                   <input
                     type="text"
                     value={newProductColor}
                     onChange={(e) => setNewProductColor(e.target.value)}
                     placeholder="#000000"
-                    className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                    className="flex-1 px-3 py-2 text-sm border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40"
                   />
                   {newProductColor && (
                     <button
                       type="button"
                       onClick={() => setNewProductColor("")}
-                      className="text-sm text-slate-500 hover:text-slate-700"
+                      className="text-sm text-[#64748b] hover:text-[#0b1f3a]"
                     >
                       Effacer
                     </button>
@@ -718,20 +726,21 @@ export function StockageClient({
                 </div>
               </div>
               <div className="flex gap-3 pt-2">
-                <button
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 font-medium"
+                  className="flex-1 border-[#e1e8f2] text-[#64748b] hover:bg-[#f1f5f9]"
                 >
                   Annuler
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
                   disabled={loading || !newProductName.trim() || !newProductTypeId}
-                  className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 font-medium"
+                  className="flex-1 bg-[#2563eb] hover:bg-[#1d4ed8] text-white disabled:opacity-50"
                 >
                   Créer le produit
-                </button>
+                </Button>
               </div>
             </form>
           </div>
@@ -745,48 +754,48 @@ export function StockageClient({
           onClick={() => setEditingProduct(null)}
         >
           <div
-            className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto"
+            className="rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_4px_24px_rgba(13,38,76,.12)] p-6 max-w-md w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-slate-800">Modifier le produit</h3>
+              <h3 className="text-lg font-semibold text-[#0b1f3a]">Modifier le produit</h3>
               <button
                 type="button"
                 onClick={() => setEditingProduct(null)}
-                className="p-2 rounded-lg hover:bg-slate-100 text-slate-500"
+                className="p-2 rounded-[9px] hover:bg-[#f1f5f9] text-[#64748b]"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handleUpdateProduct} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1.5">Nom</label>
+                <label className={LABEL_CLS}>Nom</label>
                 <input
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                  className={INPUT_CLS}
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1.5">Prix (€)</label>
+                <label className={LABEL_CLS}>Prix (€)</label>
                 <input
                   type="number"
                   step="0.01"
                   min="0"
                   value={editPrice}
                   onChange={(e) => setEditPrice(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                  className={INPUT_CLS}
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1.5">Type</label>
+                <label className={LABEL_CLS}>Type</label>
                 <select
                   value={editTypeId}
                   onChange={(e) => setEditTypeId(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                  className={SELECT_CLS}
                 >
                   {productTypes.map((t) => (
                     <option key={t.id} value={t.id}>
@@ -796,13 +805,13 @@ export function StockageClient({
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                <label className={LABEL_CLS}>
                   Fournisseur
                 </label>
                 <select
                   value={editSupplierId}
                   onChange={(e) => setEditSupplierId(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                  className={SELECT_CLS}
                 >
                   <option value="">— Aucun —</option>
                   {suppliers.map((s) => (
@@ -813,7 +822,7 @@ export function StockageClient({
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                <label className={LABEL_CLS}>
                   Couleur du produit
                 </label>
                 <div className="flex items-center gap-3">
@@ -821,20 +830,20 @@ export function StockageClient({
                     type="color"
                     value={editColor || "#000000"}
                     onChange={(e) => setEditColor(e.target.value)}
-                    className="w-10 h-10 rounded-lg border border-slate-200 cursor-pointer p-0.5"
+                    className="w-10 h-10 rounded-[9px] border border-[#e1e8f2] cursor-pointer p-0.5"
                   />
                   <input
                     type="text"
                     value={editColor}
                     onChange={(e) => setEditColor(e.target.value)}
                     placeholder="#000000"
-                    className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                    className="flex-1 px-3 py-2 text-sm border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40"
                   />
                   {editColor && (
                     <button
                       type="button"
                       onClick={() => setEditColor("")}
-                      className="text-sm text-slate-500 hover:text-slate-700"
+                      className="text-sm text-[#64748b] hover:text-[#0b1f3a]"
                     >
                       Effacer
                     </button>
@@ -842,20 +851,21 @@ export function StockageClient({
                 </div>
               </div>
               <div className="flex gap-3 pt-2">
-                <button
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={() => setEditingProduct(null)}
-                  className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 font-medium"
+                  className="flex-1 border-[#e1e8f2] text-[#64748b] hover:bg-[#f1f5f9]"
                 >
                   Annuler
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 font-medium"
+                  className="flex-1 bg-[#2563eb] hover:bg-[#1d4ed8] text-white disabled:opacity-50"
                 >
                   Enregistrer
-                </button>
+                </Button>
               </div>
             </form>
           </div>
@@ -869,45 +879,46 @@ export function StockageClient({
           onClick={() => setEditingType(null)}
         >
           <div
-            className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full"
+            className="rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_4px_24px_rgba(13,38,76,.12)] p-6 max-w-md w-full"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-slate-800">Modifier le type</h3>
+              <h3 className="text-lg font-semibold text-[#0b1f3a]">Modifier le type</h3>
               <button
                 type="button"
                 onClick={() => setEditingType(null)}
-                className="p-2 rounded-lg hover:bg-slate-100 text-slate-500"
+                className="p-2 rounded-[9px] hover:bg-[#f1f5f9] text-[#64748b]"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handleUpdateType} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1.5">Nom du type</label>
+                <label className={LABEL_CLS}>Nom du type</label>
                 <input
                   type="text"
                   value={editTypeName}
                   onChange={(e) => setEditTypeName(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                  className={INPUT_CLS}
                   required
                 />
               </div>
               <div className="flex gap-3 pt-2">
-                <button
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={() => setEditingType(null)}
-                  className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 font-medium"
+                  className="flex-1 border-[#e1e8f2] text-[#64748b] hover:bg-[#f1f5f9]"
                 >
                   Annuler
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 font-medium"
+                  className="flex-1 bg-[#2563eb] hover:bg-[#1d4ed8] text-white disabled:opacity-50"
                 >
                   Enregistrer
-                </button>
+                </Button>
               </div>
             </form>
           </div>
@@ -921,15 +932,15 @@ export function StockageClient({
           onClick={() => setShowSuppliersModal(false)}
         >
           <div
-            className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full max-h-[80vh] flex flex-col"
+            className="rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_4px_24px_rgba(13,38,76,.12)] p-6 max-w-md w-full max-h-[80vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-slate-800">Fournisseurs</h3>
+              <h3 className="text-lg font-semibold text-[#0b1f3a]">Fournisseurs</h3>
               <button
                 type="button"
                 onClick={() => setShowSuppliersModal(false)}
-                className="p-2 rounded-lg hover:bg-slate-100 text-slate-500"
+                className="p-2 rounded-[9px] hover:bg-[#f1f5f9] text-[#64748b]"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -940,7 +951,7 @@ export function StockageClient({
                 value={newSupplierName}
                 onChange={(e) => setNewSupplierName(e.target.value)}
                 placeholder="Nom du fournisseur..."
-                className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                className="flex-1 px-3 py-2 text-sm border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -948,32 +959,32 @@ export function StockageClient({
                   }
                 }}
               />
-              <button
+              <Button
                 type="button"
                 onClick={handleCreateSupplier}
                 disabled={!newSupplierName.trim() || loading}
-                className="px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 font-medium"
+                className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white disabled:opacity-50"
               >
                 Ajouter
-              </button>
+              </Button>
             </div>
             <div className="flex-1 overflow-y-auto space-y-2">
               {suppliers.length === 0 ? (
-                <p className="text-sm text-slate-500 text-center py-4">
+                <p className="text-sm text-[#64748b] text-center py-4">
                   Aucun fournisseur. Ajoutez-en un ci-dessus.
                 </p>
               ) : (
                 suppliers.map((supplier) => (
                   <div
                     key={supplier.id}
-                    className="flex items-center justify-between px-4 py-3 bg-slate-50 rounded-xl border border-slate-200"
+                    className="flex items-center justify-between px-4 py-3 bg-[#f8fafc] rounded-[9px] border border-[#e1e8f2]"
                   >
-                    <span className="text-sm font-medium text-slate-700">{supplier.name}</span>
+                    <span className="text-sm font-medium text-[#0b1f3a]">{supplier.name}</span>
                     <button
                       type="button"
                       onClick={() => handleDeleteSupplier(supplier)}
                       disabled={loading}
-                      className="p-1.5 rounded-lg hover:bg-red-50 text-red-500 disabled:opacity-50"
+                      className="p-1.5 rounded-[9px] hover:bg-red-50 text-red-500 disabled:opacity-50"
                       title="Supprimer"
                     >
                       <Trash2 className="w-4 h-4" />
