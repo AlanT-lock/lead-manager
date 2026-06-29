@@ -5,8 +5,13 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { X, Calendar as CalendarIcon } from "lucide-react";
 import { formatDateParis, fromDatetimeLocalValueParis, toDatetimeLocalValueParis } from "@/lib/date";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const DISMISSED_STORAGE_KEY = "code-courrier-notifications-dismissed";
+
+const SELECT_CLS =
+  "w-full h-8 px-2.5 text-sm border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40";
 
 function loadDismissedFromStorage(): Set<string> {
   if (typeof window === "undefined") return new Set();
@@ -170,19 +175,19 @@ export function CodeCourrierNotifications() {
               tabIndex={0}
               onClick={() => handleClick(entry)}
               onKeyDown={(e) => e.key === "Enter" && handleClick(entry)}
-              className="bg-rose-50 border border-rose-200 rounded-lg p-4 shadow-lg hover:bg-rose-100 cursor-pointer transition-colors flex items-start gap-3 w-full"
+              className="rounded-[12px] bg-[#fff5f5] border border-[#fecaca] shadow-[0_1px_2px_rgba(13,38,76,.06)] p-4 hover:bg-[#fff1f2] cursor-pointer transition-colors flex items-start gap-3 w-full"
             >
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-rose-900">
+                <p className="font-semibold text-[#991b1b]">
                   {entry.first_name} {entry.last_name}
                 </p>
-                <p className="text-sm text-rose-700">{entry.phone}</p>
-                <p className="text-xs text-rose-600 mt-1">Rappel code courrier</p>
+                <p className="text-sm text-[#b91c1c]">{entry.phone}</p>
+                <p className="text-xs text-[#dc2626] mt-1">Rappel code courrier</p>
               </div>
               <button
                 type="button"
                 onClick={(e) => handleDismiss(e, entry.id)}
-                className="p-1 rounded hover:bg-rose-200 text-rose-600 shrink-0"
+                className="p-1 rounded-lg hover:bg-[#fecaca] text-[#dc2626] shrink-0"
                 aria-label="Fermer"
               >
                 <X className="w-5 h-5" />
@@ -195,48 +200,48 @@ export function CodeCourrierNotifications() {
       {/* Modal suivi */}
       {selectedEntry && (
         <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between p-4 border-b border-slate-200">
-              <h3 className="text-lg font-semibold text-slate-800">Code courrier</h3>
-              <button onClick={closeModal} className="p-1 rounded-lg hover:bg-slate-100">
-                <X className="w-5 h-5" />
-              </button>
+          <div className="rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_1px_2px_rgba(13,38,76,.06)] w-full max-w-md">
+            <div className="flex items-center justify-between p-4 border-b border-[#e1e8f2]">
+              <h3 className="text-lg font-semibold text-[#0b1f3a]">Code courrier</h3>
+              <Button variant="ghost" size="icon-sm" onClick={closeModal}>
+                <X />
+              </Button>
             </div>
             <div className="p-4 space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-xs text-slate-500">Nom</p>
-                  <p className="font-medium text-slate-800">{selectedEntry.last_name}</p>
+                  <p className="text-xs text-[#64748b]">Nom</p>
+                  <p className="font-medium text-[#0b1f3a]">{selectedEntry.last_name}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500">Prénom</p>
-                  <p className="font-medium text-slate-800">{selectedEntry.first_name}</p>
+                  <p className="text-xs text-[#64748b]">Prénom</p>
+                  <p className="font-medium text-[#0b1f3a]">{selectedEntry.first_name}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500">Téléphone</p>
-                  <p className="font-medium text-slate-800">{selectedEntry.phone}</p>
+                  <p className="text-xs text-[#64748b]">Téléphone</p>
+                  <p className="font-medium text-[#0b1f3a]">{selectedEntry.phone}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500">Date de création</p>
-                  <p className="font-medium text-slate-800">{formatDateParis(selectedEntry.created_at)}</p>
+                  <p className="text-xs text-[#64748b]">Date de création</p>
+                  <p className="font-medium text-[#0b1f3a]">{formatDateParis(selectedEntry.created_at)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500">Jours écoulés</p>
-                  <p className="font-medium text-slate-800">{getDaysSinceCreation(selectedEntry.created_at)} jour(s)</p>
+                  <p className="text-xs text-[#64748b]">Jours écoulés</p>
+                  <p className="font-medium text-[#0b1f3a]">{getDaysSinceCreation(selectedEntry.created_at)} jour(s)</p>
                 </div>
               </div>
 
               {selectedEntry.callback_at && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <p className="text-sm text-blue-800">
+                <div className="bg-[#eff6ff] border border-[#bfdbfe] rounded-[10px] p-3">
+                  <p className="text-sm text-[#1e40af]">
                     <CalendarIcon className="w-4 h-4 inline mr-1" />
                     Rappel prévu le {formatDateParis(selectedEntry.callback_at)}
                   </p>
                 </div>
               )}
 
-              <div className="border-t border-slate-200 pt-3">
-                <label className="block text-sm font-medium text-slate-700 mb-2">Suivi</label>
+              <div className="border-t border-[#e1e8f2] pt-3">
+                <label className="block text-sm font-medium text-[#0b1f3a] mb-2">Suivi</label>
                 <select
                   value={followUpAction}
                   onChange={(e) => {
@@ -247,7 +252,7 @@ export function CodeCourrierNotifications() {
                       setCallbackDate("");
                     }
                   }}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={SELECT_CLS}
                 >
                   <option value="">Sélectionner une action...</option>
                   <option value="nrp">NRP</option>
@@ -257,31 +262,26 @@ export function CodeCourrierNotifications() {
 
                 {followUpAction === "a_rappeler" && (
                   <div className="mt-3">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Date et heure du rappel</label>
-                    <input
+                    <label className="block text-sm font-medium text-[#0b1f3a] mb-1">Date et heure du rappel</label>
+                    <Input
                       type="datetime-local"
                       value={callbackDate}
                       onChange={(e) => setCallbackDate(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 )}
               </div>
             </div>
-            <div className="p-4 border-t border-slate-200 flex justify-end gap-3">
-              <button
-                onClick={closeModal}
-                className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium"
-              >
+            <div className="p-4 border-t border-[#e1e8f2] flex justify-end gap-3">
+              <Button variant="outline" onClick={closeModal}>
                 Fermer
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleFollowUp}
                 disabled={actionLoading || !followUpAction || (followUpAction === "a_rappeler" && !callbackDate)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
               >
                 {actionLoading ? "En cours..." : "Valider"}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
