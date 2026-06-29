@@ -4,6 +4,14 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { formatDateParis } from "@/lib/date";
 import { INSTALLATION_TYPE_LABELS, type InstallationType } from "@/lib/types";
+import {
+  Table,
+  TableHeader,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
 
 interface Lead {
   id: string;
@@ -23,6 +31,14 @@ interface Lead {
 
 interface DocumentsRecusTableProps {
   leads: Lead[];
+}
+
+function BoolCell({ value }: { value: boolean }) {
+  return value ? (
+    <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">✓</span>
+  ) : (
+    <span className="text-[#64748b]">—</span>
+  );
 }
 
 export function DocumentsRecusTable({ leads }: DocumentsRecusTableProps) {
@@ -47,149 +63,147 @@ export function DocumentsRecusTable({ leads }: DocumentsRecusTableProps) {
   }, [router]);
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-slate-50 border-b border-slate-200">
-            <tr>
-              <th className="text-left py-3 px-2 text-sm font-medium text-slate-700">
-                Nom
-              </th>
-              <th className="text-left py-3 px-2 text-sm font-medium text-slate-700">
-                Mandataire
-              </th>
-              <th className="text-left py-4 px-4 text-sm font-medium text-slate-700">
-                Type d'installation
-              </th>
-              <th className="text-left py-4 px-4 text-sm font-medium text-slate-700">
-                Télépro
-              </th>
-              <th className="text-left py-4 px-4 text-sm font-medium text-slate-700">
-                Installé
-              </th>
-              <th className="text-left py-4 px-4 text-sm font-medium text-slate-700">
-                Dépôt MPR
-              </th>
-              <th className="text-left py-4 px-4 text-sm font-medium text-slate-700">
-                CEE payé
-              </th>
-              <th className="text-left py-4 px-4 text-sm font-medium text-slate-700">
-                MPR payé
-              </th>
-              <th className="text-left py-4 px-4 text-sm font-medium text-slate-700">
-                Rentabilité
-              </th>
-              <th className="text-left py-4 px-4 text-sm font-medium text-slate-700">
-                Date ajout
-              </th>
-              <th className="text-left py-4 px-4 text-sm font-medium text-slate-700 min-w-[180px]">
-                Commentaires
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {leads.length === 0 ? (
-              <tr>
-                <td colSpan={11} className="py-12 text-center text-slate-500">
-                  Aucun lead en Documents reçus
-                </td>
-              </tr>
-            ) : (
-              leads.map((lead) => (
-                <tr
-                  key={lead.id}
-                  onClick={() => router.push(`/admin/leads/${lead.id}`)}
-                  className="border-b border-slate-100 cursor-pointer bg-green-50 hover:bg-green-100 transition-colors"
+    <div className="rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_1px_2px_rgba(13,38,76,.06)] overflow-hidden">
+      <Table>
+        <TableHeader className="bg-[#f4f7fb] border-b border-[#e1e8f2]">
+          <TableRow className="hover:bg-transparent border-0">
+            <TableHead className="py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">
+              Nom
+            </TableHead>
+            <TableHead className="py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">
+              Mandataire
+            </TableHead>
+            <TableHead className="py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">
+              Type d&apos;installation
+            </TableHead>
+            <TableHead className="py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">
+              Télépro
+            </TableHead>
+            <TableHead className="py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">
+              Installé
+            </TableHead>
+            <TableHead className="py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">
+              Dépôt MPR
+            </TableHead>
+            <TableHead className="py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">
+              CEE payé
+            </TableHead>
+            <TableHead className="py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">
+              MPR payé
+            </TableHead>
+            <TableHead className="py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">
+              Rentabilité
+            </TableHead>
+            <TableHead className="py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">
+              Date ajout
+            </TableHead>
+            <TableHead className="py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide min-w-[180px]">
+              Commentaires
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {leads.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={11} className="py-12 text-center text-[#64748b]">
+                Aucun lead en Documents reçus
+              </TableCell>
+            </TableRow>
+          ) : (
+            leads.map((lead) => (
+              <TableRow
+                key={lead.id}
+                onClick={() => router.push(`/admin/leads/${lead.id}`)}
+                className="border-b border-[#e1e8f2] cursor-pointer hover:bg-[#f4f7fb] transition-colors"
+              >
+                <TableCell className="py-3">
+                  <span className="font-medium text-[#0b1f3a]">
+                    {lead.first_name} {lead.last_name}
+                  </span>
+                </TableCell>
+                <TableCell className="py-3 text-[#64748b]">
+                  {lead.delegataire_group || "—"}
+                </TableCell>
+                <TableCell className="py-3 text-[#64748b]">
+                  {lead.installation_type
+                    ? INSTALLATION_TYPE_LABELS[lead.installation_type]
+                    : "—"}
+                </TableCell>
+                <TableCell className="py-3 text-[#64748b]">
+                  {lead.profile?.full_name || "—"}
+                </TableCell>
+                <TableCell className="py-3">
+                  <BoolCell value={lead.is_installe} />
+                </TableCell>
+                <TableCell className="py-3">
+                  <BoolCell value={lead.is_depot_mpr} />
+                </TableCell>
+                <TableCell className="py-3">
+                  <BoolCell value={lead.is_cee_paye} />
+                </TableCell>
+                <TableCell className="py-3">
+                  <BoolCell value={lead.is_mpe_paye} />
+                </TableCell>
+                <TableCell className="py-3 font-medium text-[#0b1f3a]">
+                  {lead.profitability != null
+                    ? `${Number(lead.profitability).toFixed(2)} €`
+                    : "—"}
+                </TableCell>
+                <TableCell className="py-3 text-[#64748b] text-sm">
+                  {lead.added_at
+                    ? formatDateParis(lead.added_at)
+                    : "—"}
+                </TableCell>
+                <TableCell
+                  className="py-3 min-w-[180px]"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <td className="py-3 px-2">
-                    <span className="font-medium text-slate-800">
-                      {lead.first_name} {lead.last_name}
-                    </span>
-                  </td>
-                  <td className="py-3 px-2 text-slate-600">
-                    {lead.delegataire_group || "—"}
-                  </td>
-                  <td className="py-4 px-4 text-slate-600">
-                    {lead.installation_type
-                      ? INSTALLATION_TYPE_LABELS[lead.installation_type]
-                      : "—"}
-                  </td>
-                  <td className="py-4 px-4 text-slate-600">
-                    {lead.profile?.full_name || "-"}
-                  </td>
-                  <td className="py-4 px-4">
-                    {lead.is_installe ? "✓" : "-"}
-                  </td>
-                  <td className="py-4 px-4">
-                    {lead.is_depot_mpr ? "✓" : "-"}
-                  </td>
-                  <td className="py-4 px-4">
-                    {lead.is_cee_paye ? "✓" : "-"}
-                  </td>
-                  <td className="py-4 px-4">
-                    {lead.is_mpe_paye ? "✓" : "-"}
-                  </td>
-                  <td className="py-4 px-4 font-medium">
-                    {lead.profitability != null
-                      ? `${Number(lead.profitability).toFixed(2)} €`
-                      : "-"}
-                  </td>
-                  <td className="py-3 px-4 text-slate-600 text-sm">
-                    {lead.added_at
-                      ? formatDateParis(lead.added_at)
-                      : "-"}
-                  </td>
-                  <td
-                    className="py-3 px-4 min-w-[180px]"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {editingCommentId === lead.id ? (
-                      <input
-                        type="text"
-                        value={commentDrafts[lead.id] ?? lead.commentaire ?? ""}
-                        onChange={(e) =>
-                          setCommentDrafts((d) => ({
-                            ...d,
-                            [lead.id]: e.target.value,
-                          }))
+                  {editingCommentId === lead.id ? (
+                    <input
+                      type="text"
+                      value={commentDrafts[lead.id] ?? lead.commentaire ?? ""}
+                      onChange={(e) =>
+                        setCommentDrafts((d) => ({
+                          ...d,
+                          [lead.id]: e.target.value,
+                        }))
+                      }
+                      onBlur={() =>
+                        handleCommentSave(
+                          lead.id,
+                          commentDrafts[lead.id] ?? lead.commentaire ?? ""
+                        )
+                      }
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.currentTarget.blur();
                         }
-                        onBlur={() =>
-                          handleCommentSave(
-                            lead.id,
-                            commentDrafts[lead.id] ?? lead.commentaire ?? ""
-                          )
-                        }
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.currentTarget.blur();
-                          }
-                        }}
-                        autoFocus
-                        className="w-full px-2 py-1 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingCommentId(lead.id);
-                          setCommentDrafts((d) => ({
-                            ...d,
-                            [lead.id]: lead.commentaire ?? "",
-                          }));
-                        }}
-                        className="w-full text-left px-2 py-1 text-sm text-slate-600 hover:bg-slate-100 rounded truncate block"
-                        title={lead.commentaire ?? "Cliquer pour ajouter un commentaire"}
-                      >
-                        {lead.commentaire || "—"}
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+                      }}
+                      autoFocus
+                      className="w-full px-2 py-1 text-sm border border-[#e1e8f2] rounded-[9px] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40"
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingCommentId(lead.id);
+                        setCommentDrafts((d) => ({
+                          ...d,
+                          [lead.id]: lead.commentaire ?? "",
+                        }));
+                      }}
+                      className="w-full text-left px-2 py-1 text-sm text-[#64748b] hover:bg-[#f4f7fb] rounded-[9px] truncate block"
+                      title={lead.commentaire ?? "Cliquer pour ajouter un commentaire"}
+                    >
+                      {lead.commentaire || "—"}
+                    </button>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
     </div>
   );
 }

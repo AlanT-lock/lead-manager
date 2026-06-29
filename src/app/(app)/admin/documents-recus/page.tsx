@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DocumentsRecusFilters } from "./DocumentsRecusFilters";
 import { DocumentsRecusTable } from "./DocumentsRecusTable";
+import { PageHeader } from "@/components/ui-kit/PageHeader";
 
 import { CHANTIER_STATUS_FIELDS } from "@/lib/types";
 
@@ -62,14 +63,10 @@ export default async function AdminDocumentsRecusPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">
-          Documents reçus
-        </h1>
-        <p className="text-slate-600 mt-1">
-          Leads avec statut Documents reçus - gestion des chantiers
-        </p>
-      </div>
+      <PageHeader
+        title="Documents reçus"
+        subtitle="Leads avec statut Documents reçus — gestion des chantiers"
+      />
 
       <DocumentsRecusFilters />
 
