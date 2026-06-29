@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CsvImportForm } from "./CsvImportForm";
 import { startOfDay, startOfWeek, startOfMonth } from "date-fns";
+import { PageHeader } from "@/components/ui-kit/PageHeader";
 
 export default async function AdminImportPage() {
   const adminClient = createAdminClient();
@@ -43,21 +44,19 @@ export default async function AdminImportPage() {
 
   return (
     <div className="space-y-6 max-w-2xl">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Import CSV</h1>
-        <p className="text-slate-600 mt-1">
-          Importez des leads depuis un fichier CSV.
-        </p>
-      </div>
+      <PageHeader
+        title="Import CSV"
+        subtitle="Importez des leads depuis un fichier CSV."
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm"
+            className="rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_1px_2px_rgba(13,38,76,.06)] p-6"
           >
-            <p className="text-sm text-slate-500">{stat.label}</p>
-            <p className="text-3xl font-bold text-slate-800 mt-1">{stat.value}</p>
+            <p className="text-sm text-[#64748b]">{stat.label}</p>
+            <p className="text-3xl font-bold text-[#0b1f3a] mt-1">{stat.value}</p>
           </div>
         ))}
       </div>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Papa from "papaparse";
 import { LEAD_CATEGORIES, LEAD_CATEGORY_LABELS, type LeadCategory } from "@/lib/types";
+import { Button } from "@/components/ui/button";
 
 interface Telepro {
   id: string;
@@ -145,11 +146,11 @@ export function CsvImportForm({ telepros }: CsvImportFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-        <h2 className="font-medium text-slate-800 mb-4">
+      <div className="rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_1px_2px_rgba(13,38,76,.06)] p-6">
+        <h2 className="font-semibold text-[#0b1f3a] mb-2">
           Fichier CSV (format Meta Ads)
         </h2>
-        <p className="text-sm text-slate-500 mb-4">
+        <p className="text-sm text-[#64748b] mb-4">
           Le fichier doit contenir des colonnes pour le prénom, nom (ou nom complet), téléphone
           et email. Formats supportés : first_name/last_name, full name (Meta Ads), prénom/nom,
           phone_number, email. D&apos;autres variantes sont détectées automatiquement.
@@ -158,22 +159,22 @@ export function CsvImportForm({ telepros }: CsvImportFormProps) {
           type="file"
           accept=".csv"
           onChange={(e) => setFile(e.target.files?.[0] || null)}
-          className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700"
+          className="block w-full text-sm text-[#64748b] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[#eff6ff] file:text-[#1d4ed8] file:font-medium file:cursor-pointer hover:file:bg-[#dbeafe] transition-colors"
         />
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-        <h2 className="font-medium text-slate-800 mb-4">
+      <div className="rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_1px_2px_rgba(13,38,76,.06)] p-6">
+        <h2 className="font-semibold text-[#0b1f3a] mb-2">
           Catégorie des leads importés
         </h2>
-        <p className="text-sm text-slate-500 mb-4">
+        <p className="text-sm text-[#64748b] mb-4">
           Tous les leads de ce fichier seront enregistrés dans la catégorie
           choisie.
         </p>
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value as LeadCategory)}
-          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-[#e1e8f2] rounded-lg text-[#0b1f3a] bg-white focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-[#2563eb] transition-colors"
         >
           {LEAD_CATEGORIES.map((c) => (
             <option key={c} value={c}>
@@ -183,27 +184,29 @@ export function CsvImportForm({ telepros }: CsvImportFormProps) {
         </select>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-        <h2 className="font-medium text-slate-800 mb-4">
+      <div className="rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_1px_2px_rgba(13,38,76,.06)] p-6">
+        <h2 className="font-semibold text-[#0b1f3a] mb-2">
           Télépros à qui attribuer les leads
         </h2>
-        <p className="text-sm text-slate-500 mb-4">
+        <p className="text-sm text-[#64748b] mb-4">
           Désélectionnez les télépros absents pour ne pas leur attribuer de
           leads. Optionnel : renseignez un pourcentage pour chaque télépro pour
           répartir les leads proportionnellement. Si aucun pourcentage n&apos;est
           renseigné, la répartition est équitable.
         </p>
         {telepros.length === 0 ? (
-          <p className="text-amber-600">
+          <p className="text-amber-600 text-sm">
             Aucun télépro. Créez des comptes télépro depuis l&apos;espace admin.
           </p>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-1">
             {telepros.map((t) => (
               <div
                 key={t.id}
-                className={`flex items-center gap-3 p-3 rounded-lg ${
-                  selectedTelepros.has(t.id) ? "hover:bg-slate-50" : "opacity-60"
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                  selectedTelepros.has(t.id)
+                    ? "hover:bg-[#f8fafc]"
+                    : "opacity-50"
                 }`}
               >
                 <label className="flex items-center gap-3 cursor-pointer flex-1">
@@ -211,12 +214,12 @@ export function CsvImportForm({ telepros }: CsvImportFormProps) {
                     type="checkbox"
                     checked={selectedTelepros.has(t.id)}
                     onChange={() => toggleTelepro(t.id)}
-                    className="rounded border-slate-300"
+                    className="rounded border-[#cbd5e1] accent-[#2563eb]"
                   />
-                  <span className="font-medium">
+                  <span className="font-medium text-[#0b1f3a]">
                     {t.full_name || t.email}
                   </span>
-                  <span className="text-sm text-slate-500">{t.email}</span>
+                  <span className="text-sm text-[#64748b]">{t.email}</span>
                 </label>
                 {selectedTelepros.has(t.id) && (
                   <div className="flex items-center gap-1 shrink-0">
@@ -226,9 +229,9 @@ export function CsvImportForm({ telepros }: CsvImportFormProps) {
                       placeholder="%"
                       value={teleproPercentages[t.id] ?? ""}
                       onChange={(e) => setPercentage(t.id, e.target.value)}
-                      className="w-16 px-2 py-1 text-sm border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-16 px-2 py-1 text-sm border border-[#e1e8f2] rounded-lg text-[#0b1f3a] focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-[#2563eb] transition-colors"
                     />
-                    <span className="text-sm text-slate-500">%</span>
+                    <span className="text-sm text-[#64748b]">%</span>
                   </div>
                 )}
               </div>
@@ -236,25 +239,27 @@ export function CsvImportForm({ telepros }: CsvImportFormProps) {
           </div>
         )}
         {hasAnyPercentage && (
-          <p className="text-sm text-amber-600 mt-2">
+          <p className="text-sm text-amber-600 mt-3">
             La somme des pourcentages doit être exactement 100%.
           </p>
         )}
       </div>
 
       {validationError && (
-        <div className="p-4 rounded-lg bg-red-50 text-red-800 border border-red-200">
-          <p className="font-medium">{validationError}</p>
+        <div className="p-4 rounded-lg bg-[#fee2e2] text-[#b91c1c] border border-[#fca5a5]">
+          <p className="font-medium text-sm">{validationError}</p>
         </div>
       )}
 
       {result && !result.error && result.imported !== undefined && (
         <div
-          className={`p-4 rounded-lg ${
-            (result.errors ?? 0) > 0 ? "bg-amber-50 text-amber-800" : "bg-green-50 text-green-800"
+          className={`p-4 rounded-lg border ${
+            (result.errors ?? 0) > 0
+              ? "bg-amber-50 text-amber-800 border-amber-200"
+              : "bg-[#dcfce7] text-[#15803d] border-[#86efac]"
           }`}
         >
-          <p className="font-medium">
+          <p className="font-medium text-sm">
             {result.imported} lead(s) importé(s)
             {(result.errors ?? 0) > 0 && `, ${result.errors} erreur(s)`}
           </p>
@@ -271,13 +276,13 @@ export function CsvImportForm({ telepros }: CsvImportFormProps) {
         </div>
       )}
 
-      <button
+      <Button
         type="submit"
         disabled={loading || !file || selectedTelepros.size === 0}
-        className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50"
+        className="px-6"
       >
         {loading ? "Import en cours..." : "Importer"}
-      </button>
+      </Button>
     </form>
   );
 }
