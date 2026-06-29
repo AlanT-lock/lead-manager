@@ -1,5 +1,10 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CreateLeadForm } from "./CreateLeadForm";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { PageHeader } from "@/components/ui-kit/PageHeader";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default async function AdminNewLeadPage() {
   const adminClient = createAdminClient();
@@ -11,7 +16,17 @@ export default async function AdminNewLeadPage() {
     .order("full_name");
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
+      <Link
+        href="/admin/leads"
+        className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-1.5 text-[#64748b] hover:text-[#0b1f3a] -ml-1")}
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Retour aux leads
+      </Link>
+
+      <PageHeader title="Nouveau lead" />
+
       <CreateLeadForm telepros={telepros || []} />
     </div>
   );
