@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import {
   LEAD_STATUS_LABELS,
   LEAD_STATUSES_ADMIN,
@@ -27,6 +26,17 @@ import {
 import { usePostalCodeToCity } from "@/hooks/usePostalCodeToCity";
 import { useSaveOnLeave } from "@/contexts/SaveOnLeaveContext";
 import { TeleproDocumentsSection } from "./TeleproDocumentsSection";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+
+const CARD_CLS =
+  "rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_1px_2px_rgba(13,38,76,.06)] p-5";
+const SECTION_TITLE_CLS =
+  "text-xs font-semibold text-[#64748b] uppercase tracking-wide mb-4";
+const LABEL_CLS = "block text-sm font-medium text-[#0b1f3a] mb-1.5";
+const SELECT_CLS =
+  "h-9 w-full px-3 border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] text-sm focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40";
 
 interface TeleproDoc {
   id: string;
@@ -271,91 +281,54 @@ export function TeleproLeadForm({
   };
 
   return (
-    <div className="space-y-6">
-      {(showBackToLeads || showTeleprospectionLink) && (
-        <div className="flex items-center justify-between">
-          {showBackToLeads && (
-            <Link
-              href="/telepro/leads"
-              className="text-blue-600 hover:underline flex items-center gap-1"
-            >
-              ← Retour aux leads
-            </Link>
-          )}
-          {showTeleprospectionLink && (
-            <Link
-              href={`/telepro/teleprospection?lead=${leadId}`}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
-            >
-              Mode téléprospection
-            </Link>
-          )}
-        </div>
-      )}
+    <div className="space-y-4">
 
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
-        <h1 className="text-xl font-bold text-slate-800">
-          {String(lead.first_name ?? "")} {String(lead.last_name ?? "")}
-          {!!lead.is_duplicate && (
-            <span className="ml-2 text-sm font-normal text-amber-600">
-              (Doublon)
-            </span>
-          )}
-        </h1>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* ── Coordonnées ─────────────────────────────────── */}
+      <div className={CARD_CLS}>
+        <h2 className={SECTION_TITLE_CLS}>Coordonnées</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Prénom
-            </label>
-            <input
+            <label className={LABEL_CLS}>Prénom</label>
+            <Input
               type="text"
               value={(lead.first_name as string) || ""}
               onChange={(e) => handleFieldChange("first_name", e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Nom
-            </label>
-            <input
+            <label className={LABEL_CLS}>Nom</label>
+            <Input
               type="text"
               value={(lead.last_name as string) || ""}
               onChange={(e) => handleFieldChange("last_name", e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Téléphone
-            </label>
-            <input
+            <label className={LABEL_CLS}>Téléphone</label>
+            <Input
               type="tel"
               value={(lead.phone as string) || ""}
               onChange={(e) => handleFieldChange("phone", e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Email
-            </label>
-            <input
+            <label className={LABEL_CLS}>Email</label>
+            <Input
               type="email"
               value={(lead.email as string) || ""}
               onChange={(e) => handleFieldChange("email", e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
             />
           </div>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* ── Profil & Logement ───────────────────────────── */}
+      <div className={CARD_CLS}>
+        <h2 className={SECTION_TITLE_CLS}>Profil & Logement</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Nombre de m²
-            </label>
-            <input
+            <label className={LABEL_CLS}>Nombre de m²</label>
+            <Input
               type="number"
               step="0.01"
               min="0"
@@ -366,14 +339,11 @@ export function TeleproLeadForm({
                   e.target.value ? parseFloat(e.target.value) : null
                 )
               }
-              className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Revenu fiscal de référence
-            </label>
-            <input
+            <label className={LABEL_CLS}>Revenu fiscal de référence</label>
+            <Input
               type="number"
               step="0.01"
               min="0"
@@ -384,79 +354,61 @@ export function TeleproLeadForm({
                   e.target.value ? parseFloat(e.target.value) : null
                 )
               }
-              className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Numéro fiscal
-            </label>
-            <input
+            <label className={LABEL_CLS}>Numéro fiscal</label>
+            <Input
               type="text"
               value={(lead.numero_fiscal as string) || ""}
               onChange={(e) => handleFieldChange("numero_fiscal", e.target.value || null)}
               placeholder="13 chiffres"
-              className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Date de naissance
-            </label>
-            <input
+            <label className={LABEL_CLS}>Date de naissance</label>
+            <Input
               type="date"
               value={(lead.date_of_birth as string) || ""}
               onChange={(e) => handleFieldChange("date_of_birth", e.target.value || null)}
-              className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Code postal
-            </label>
-            <input
+            <label className={LABEL_CLS}>Code postal</label>
+            <Input
               type="text"
               value={(lead.postal_code as string) || ""}
               onChange={(e) => handleFieldChange("postal_code", e.target.value)}
               onBlur={fetchCity}
               placeholder="75001"
-              className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Ville
-            </label>
-            <input
+            <label className={LABEL_CLS}>Ville</label>
+            <Input
               type="text"
               value={(lead.city as string) || ""}
               onChange={(e) => handleFieldChange("city", e.target.value)}
               placeholder={cityLoading ? "Chargement…" : undefined}
               readOnly={cityLoading}
-              className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
             />
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Adresse postale
-            </label>
-            <input
+            <label className={LABEL_CLS}>Adresse postale</label>
+            <Input
               type="text"
               value={(lead.address as string) || ""}
               onChange={(e) => handleFieldChange("address", e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Mode chauffage
-            </label>
+            <label className={LABEL_CLS}>Mode chauffage</label>
             <select
               value={(lead.heating_mode as string) || ""}
               onChange={(e) =>
                 handleFieldChange("heating_mode", e.target.value || null)
               }
-              className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
+              className={SELECT_CLS}
             >
               <option value="">—</option>
               {(Object.keys(HEATING_MODE_LABELS) as HeatingMode[]).map((m) => (
@@ -467,11 +419,11 @@ export function TeleproLeadForm({
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Catégorie</label>
+            <label className={LABEL_CLS}>Catégorie</label>
             <select
               value={(lead.category as string) || "fenetre"}
               onChange={(e) => handleFieldChange("category", e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
+              className={SELECT_CLS}
             >
               {LEAD_CATEGORIES.map((c) => (
                 <option key={c} value={c}>
@@ -481,15 +433,13 @@ export function TeleproLeadForm({
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Couleur
-            </label>
+            <label className={LABEL_CLS}>Couleur</label>
             <select
               value={(lead.color as string) || ""}
               onChange={(e) =>
                 handleFieldChange("color", e.target.value || null)
               }
-              className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
+              className={SELECT_CLS}
             >
               <option value="">—</option>
               {(Object.keys(LEAD_COLOR_LABELS_SIMPLE) as LeadColor[]).map((c) => (
@@ -500,9 +450,7 @@ export function TeleproLeadForm({
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Propriétaire / Locataire
-            </label>
+            <label className={LABEL_CLS}>Propriétaire / Locataire</label>
             <select
               value={
                 lead.is_owner === null
@@ -519,7 +467,7 @@ export function TeleproLeadForm({
                     : e.target.value === "owner"
                 )
               }
-              className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
+              className={SELECT_CLS}
             >
               <option value="">—</option>
               <option value="owner">Propriétaire</option>
@@ -527,15 +475,13 @@ export function TeleproLeadForm({
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Type d&apos;installation
-            </label>
+            <label className={LABEL_CLS}>Type d&apos;installation</label>
             <select
               value={(lead.installation_type as string) || ""}
               onChange={(e) =>
                 handleFieldChange("installation_type", e.target.value || null)
               }
-              className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
+              className={SELECT_CLS}
             >
               <option value="">—</option>
               {(Object.keys(INSTALLATION_TYPE_LABELS) as InstallationType[]).map(
@@ -548,15 +494,13 @@ export function TeleproLeadForm({
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Type d&apos;électricité
-            </label>
+            <label className={LABEL_CLS}>Type d&apos;électricité</label>
             <select
               value={(lead.electricity_type as string) || ""}
               onChange={(e) =>
                 handleFieldChange("electricity_type", e.target.value || null)
               }
-              className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
+              className={SELECT_CLS}
             >
               <option value="">—</option>
               {(Object.keys(ELECTRICITY_TYPE_LABELS) as ElectricityType[]).map(
@@ -569,15 +513,13 @@ export function TeleproLeadForm({
             </select>
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Type de radiateur
-            </label>
+            <label className={LABEL_CLS}>Type de radiateur</label>
             <div className="flex flex-wrap gap-4">
               {RADIATOR_TYPE_OPTIONS.map((t) => {
                 const current = (lead.radiator_type as string[] | null) ?? [];
                 const checked = current.includes(t);
                 return (
-                  <label key={t} className="flex items-center gap-2">
+                  <label key={t} className="flex items-center gap-2 text-sm text-[#0b1f3a] cursor-pointer">
                     <input
                       type="checkbox"
                       checked={checked}
@@ -587,7 +529,7 @@ export function TeleproLeadForm({
                           : current.filter((x) => x !== t);
                         handleFieldChange("radiator_type", next.length ? next : null);
                       }}
-                      className="rounded border-slate-300"
+                      className="rounded border-[#e1e8f2] accent-[#2563eb]"
                     />
                     {RADIATOR_TYPE_LABELS[t]}
                   </label>
@@ -596,64 +538,63 @@ export function TeleproLeadForm({
             </div>
           </div>
         </div>
+      </div>
 
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
-            Commentaire
-          </label>
-          <textarea
-            value={(lead.commentaire as string) || ""}
-            onChange={(e) => handleFieldChange("commentaire", e.target.value)}
-            rows={3}
-            className="w-full px-4 py-2 border rounded-lg disabled:bg-slate-50"
-          />
-        </div>
-
-        {!hideStatusSection && (
-          <div className="border-t pt-6">
-            <h3 className="font-medium text-slate-800 mb-3">Statut</h3>
-            <div className="flex flex-wrap gap-2">
-                  {LEAD_STATUSES_ADMIN.map((s) => (
-                    <StatusButton
-                      key={s}
-                      status={s}
-                      currentStatus={lead.status as LeadStatus}
-                      initialCallbackAt={lead.callback_at as string | null | undefined}
-                      onSelect={(callbackAt) =>
-                        handleStatusChange(s, callbackAt)
-                      }
-                      disabled={saving}
-                    />
-                  ))}
-            </div>
-            {(lead.status as string) === "nrp" && (
-              <button
-                type="button"
-                onClick={handleNrpClick}
-                disabled={saving}
-                className="mt-3 px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200 text-sm font-medium"
-              >
-                Toujours NRP (appelé {(lead.nrp_count as number) || 0} fois)
-              </button>
-            )}
-          </div>
-        )}
-
-        <TeleproDocumentsSection
-          leadId={leadId}
-          documents={teleproDocuments}
+      {/* ── Commentaire ─────────────────────────────────── */}
+      <div className={CARD_CLS}>
+        <h2 className={SECTION_TITLE_CLS}>Commentaire</h2>
+        <Textarea
+          value={(lead.commentaire as string) || ""}
+          onChange={(e) => handleFieldChange("commentaire", e.target.value)}
+          rows={3}
         />
+      </div>
 
-        <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={handleSave}
+      {/* ── Statut ──────────────────────────────────────── */}
+      {!hideStatusSection && (
+        <div className={CARD_CLS}>
+          <h2 className={SECTION_TITLE_CLS}>Statut</h2>
+          <div className="flex flex-wrap gap-2">
+            {LEAD_STATUSES_ADMIN.map((s) => (
+              <StatusButton
+                key={s}
+                status={s}
+                currentStatus={lead.status as LeadStatus}
+                initialCallbackAt={lead.callback_at as string | null | undefined}
+                onSelect={(callbackAt) =>
+                  handleStatusChange(s, callbackAt)
+                }
                 disabled={saving}
-                className="px-6 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 disabled:opacity-50"
-              >
-                {saving ? "Enregistrement..." : "Enregistrer et retour aux leads"}
-              </button>
+              />
+            ))}
+          </div>
+          {(lead.status as string) === "nrp" && (
+            <button
+              type="button"
+              onClick={handleNrpClick}
+              disabled={saving}
+              className="mt-3 px-4 py-2 bg-[#fef9c3] text-[#a16207] rounded-[9px] hover:bg-[#fef08a] text-sm font-medium disabled:opacity-50"
+            >
+              Toujours NRP (appelé {(lead.nrp_count as number) || 0} fois)
+            </button>
+          )}
         </div>
+      )}
+
+      <TeleproDocumentsSection
+        leadId={leadId}
+        documents={teleproDocuments}
+      />
+
+      <div className="flex justify-end pt-1">
+        <Button
+          type="button"
+          onClick={handleSave}
+          disabled={saving}
+          size="lg"
+        >
+          {saving ? "Enregistrement..." : "Enregistrer et retour aux leads"}
+        </Button>
       </div>
     </div>
   );
@@ -667,20 +608,20 @@ function getDefaultCallbackDatetime(): string {
 }
 
 function getStatusButtonClass(status: LeadStatus, isSelected: boolean): string {
-  if (!isSelected) return "bg-slate-100 hover:bg-slate-200";
+  if (!isSelected) return "border border-[#e1e8f2] text-[#64748b] hover:border-[#2563eb]/40 hover:text-[#2563eb]";
   switch (status) {
-    case "nouveau": return "bg-blue-100 text-blue-800";
-    case "nrp": return "bg-yellow-100 text-yellow-800";
-    case "a_rappeler": return "bg-blue-800 text-white";
-    case "en_attente_doc": return "bg-green-100 text-green-800";
-    case "documents_recus": return "bg-green-700 text-white";
-    case "incomplet": return "bg-amber-100 text-amber-800";
-    case "bloque_mpr": return "bg-red-800 text-white";
-    case "valide": return "bg-emerald-700 text-white";
-    case "installe": return "bg-teal-200 text-teal-900";
-    case "ancien_documents_recus": return "bg-slate-500 text-white";
-    case "annule": return "bg-red-100 text-red-800";
-    default: return "bg-slate-100 text-slate-700";
+    case "nouveau": return "bg-slate-100 text-slate-700 border border-slate-200";
+    case "nrp": return "bg-[#fef9c3] text-[#a16207] border border-[#fde68a]";
+    case "a_rappeler": return "bg-[#ffedd5] text-[#c2410c] border border-[#fed7aa]";
+    case "en_attente_doc": return "bg-[#ede9fe] text-[#6d28d9] border border-[#ddd6fe]";
+    case "documents_recus": return "bg-[#e0e7ff] text-[#4338ca] border border-[#c7d2fe]";
+    case "incomplet": return "bg-[#fef3c7] text-[#b45309] border border-[#fde68a]";
+    case "bloque_mpr": return "bg-[#fee2e2] text-[#b91c1c] border border-[#fecaca]";
+    case "valide": return "bg-[#dcfce7] text-[#15803d] border border-[#bbf7d0]";
+    case "installe": return "bg-[#ccfbf1] text-[#0f766e] border border-[#99f6e4]";
+    case "ancien_documents_recus": return "bg-slate-100 text-slate-500 border border-slate-200";
+    case "annule": return "bg-[#fee2e2] text-[#b91c1c] border border-[#fecaca]";
+    default: return "bg-slate-100 text-slate-700 border border-slate-200";
   }
 }
 
@@ -726,13 +667,13 @@ function StatusButton({
               type="datetime-local"
               value={callbackAt}
               onChange={(e) => setCallbackAt(e.target.value)}
-              className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
+              className="h-9 px-3 border border-[#e1e8f2] rounded-[9px] text-sm text-[#0b1f3a] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40"
             />
             <button
               type="button"
               onClick={handleSaveCallback}
               disabled={disabled || !callbackAt}
-              className="px-4 py-2 bg-blue-800 text-white rounded-lg text-sm font-medium hover:bg-blue-900 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 h-9 bg-[#2563eb] text-white rounded-[9px] text-sm font-medium hover:bg-[#1d4ed8] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               OK
             </button>
@@ -740,7 +681,7 @@ function StatusButton({
               <button
                 type="button"
                 onClick={() => setShowCallback(false)}
-                className="text-slate-500 text-sm hover:text-slate-700"
+                className="text-[#64748b] text-sm hover:text-[#0b1f3a]"
               >
                 Annuler
               </button>
@@ -752,7 +693,7 @@ function StatusButton({
             type="button"
             onClick={() => setShowCallback(true)}
             disabled={disabled}
-            className={`px-4 py-2 rounded-lg text-sm font-medium ${getStatusButtonClass(status, currentStatus === status)}`}
+            className={`px-4 py-2 rounded-[9px] text-sm font-medium ${getStatusButtonClass(status, currentStatus === status)}`}
           >
             {LEAD_STATUS_LABELS[status]}
           </button>
@@ -766,7 +707,7 @@ function StatusButton({
       type="button"
       onClick={() => onSelect()}
       disabled={disabled}
-      className={`px-4 py-2 rounded-lg text-sm font-medium ${getStatusButtonClass(status, currentStatus === status)}`}
+      className={`px-4 py-2 rounded-[9px] text-sm font-medium ${getStatusButtonClass(status, currentStatus === status)}`}
     >
       {LEAD_STATUS_LABELS[status]}
     </button>
