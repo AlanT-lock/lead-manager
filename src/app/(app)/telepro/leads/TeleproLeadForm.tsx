@@ -57,10 +57,6 @@ interface TeleproLeadFormProps {
   onStatusChangeSuccess?: (nextId: string | null) => void;
   /** En mode téléprospection : callback après NRP */
   onNrpClickSuccess?: (nextId: string | null) => void;
-  /** Lien "Retour aux leads" - affiché en mode page */
-  showBackToLeads?: boolean;
-  /** Lien "Mode téléprospection" - affiché en mode page */
-  showTeleprospectionLink?: boolean;
   /** Masquer la section statut (affichée ailleurs, ex. mode téléprospection) */
   hideStatusSection?: boolean;
 }
@@ -72,8 +68,6 @@ export function TeleproLeadForm({
   nextLeadId,
   onStatusChangeSuccess,
   onNrpClickSuccess,
-  showBackToLeads = false,
-  showTeleprospectionLink = false,
   hideStatusSection = false,
 }: TeleproLeadFormProps) {
   const [lead, setLead] = useState<Record<string, unknown>>(initialLead);

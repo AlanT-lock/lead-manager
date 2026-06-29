@@ -45,7 +45,7 @@ export function StatsFilters() {
                 type="checkbox"
                 checked={selectedDelegataires.includes(d)}
                 onChange={() => handleDelegataireToggle(d)}
-                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-[#e1e8f2] text-[#2563eb] focus:ring-[#2563eb] accent-[#2563eb]"
               />
               <span className="text-sm text-[#64748b]">{d}</span>
             </label>
@@ -55,7 +55,7 @@ export function StatsFilters() {
               type="checkbox"
               checked={selectedDelegataires.includes("__non_assigne__")}
               onChange={() => handleDelegataireToggle("__non_assigne__")}
-              className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              className="rounded border-[#e1e8f2] text-[#2563eb] focus:ring-[#2563eb] accent-[#2563eb]"
             />
             <span className="text-sm text-[#64748b]">Non assigné</span>
           </label>

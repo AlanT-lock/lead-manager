@@ -59,7 +59,7 @@ export default async function AdminRedistributePage({
 
       <PageHeader
         title="Redistribuer les leads"
-        subtitle={`Leads de ${teleproName} à redistribuer. Sélectionnez les leads et transférez-les vers un autre télépro.`}
+        subtitle={<>Leads de <strong className="text-[#0b1f3a]">{teleproName}</strong> à redistribuer. Sélectionnez les leads et transférez-les vers un autre télépro.</>}
       />
 
       <div className="rounded-[12px] border border-amber-200 bg-amber-50 shadow-[0_1px_2px_rgba(13,38,76,.06)] p-4">

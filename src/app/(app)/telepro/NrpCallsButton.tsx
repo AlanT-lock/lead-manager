@@ -107,7 +107,7 @@ export function NrpCallsButton() {
         type="button"
         onClick={handleStartCalls}
         disabled={loading || polling}
-        className="h-auto px-6 py-3 bg-emerald-600 text-white hover:bg-emerald-700 gap-2"
+        className="h-auto px-6 py-3 bg-emerald-600 text-white hover:bg-emerald-700 gap-2 disabled:cursor-not-allowed"
       >
         <Phone className="w-4 h-4" />
         {loading

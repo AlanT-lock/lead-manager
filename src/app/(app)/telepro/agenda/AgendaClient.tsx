@@ -154,7 +154,7 @@ export function AgendaClient({ events }: AgendaClientProps) {
       </div>
 
       {events.length === 0 && (
-        <div className="px-4 pb-4 mx-4 mb-4 bg-[#f8fafc] rounded-[8px] border border-[#e1e8f2] text-center py-6">
+        <div className="px-4 mx-4 mb-4 bg-[#f8fafc] rounded-[8px] border border-[#e1e8f2] text-center py-6">
           <p className="font-medium text-[#0b1f3a] text-sm">Aucun rappel planifié</p>
           <p className="text-sm mt-1 text-[#64748b]">
             Les leads en statut &quot;À rappeler&quot; avec une date de rappel apparaîtront ici.

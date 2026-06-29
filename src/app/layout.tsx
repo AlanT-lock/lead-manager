@@ -27,7 +27,7 @@ export default function RootLayout({
 
   return (
     <html lang="fr">
-      <body className={`${inter.variable} font-sans antialiased bg-slate-50 text-slate-900`}>
+      <body className={`${inter.variable} font-sans antialiased bg-[#f4f7fb] text-[#0b1f3a]`}>
         <script dangerouslySetInnerHTML={{ __html: envScript }} />
         {children}
       </body>
