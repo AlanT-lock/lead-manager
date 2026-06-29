@@ -27,7 +27,7 @@ export function StatCard({ label, value, href, highlight }: StatCardProps) {
         {value}
       </p>
       {href && (
-        <p className="text-xs text-[#2563eb] mt-2">Voir les dossiers →</p>
+        <p className="text-xs text-[#2563eb] mt-2">Cliquer pour voir les dossiers →</p>
       )}
     </div>
   );
