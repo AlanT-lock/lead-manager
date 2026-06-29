@@ -4,6 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Trash2, Settings } from "lucide-react";
+import {
+  Table,
+  TableHeader,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
 
 const TELEPRO_CONFIG_PATH = (id: string) => `/admin/users/telepro/${id}`;
 
@@ -50,53 +58,57 @@ export function UsersTable({ users }: UsersTableProps) {
   const teleproConfigHref = (id: string) => TELEPRO_CONFIG_PATH(id);
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-      <table className="w-full">
-        <thead className="bg-slate-50 border-b border-slate-200">
-          <tr>
-            <th className="text-left py-4 px-4 text-sm font-medium text-slate-700">
+    <div className="rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_1px_2px_rgba(13,38,76,.06)] overflow-hidden">
+      <Table>
+        <TableHeader className="bg-[#f4f7fb] border-b border-[#e1e8f2]">
+          <TableRow className="border-0 hover:bg-transparent">
+            <TableHead className="py-3 px-4 text-xs font-semibold text-[#64748b] uppercase tracking-wide">
               Nom
-            </th>
-            <th className="text-left py-4 px-4 text-sm font-medium text-slate-700">
+            </TableHead>
+            <TableHead className="py-3 px-4 text-xs font-semibold text-[#64748b] uppercase tracking-wide">
               Email
-            </th>
-            <th className="text-left py-4 px-4 text-sm font-medium text-slate-700">
+            </TableHead>
+            <TableHead className="py-3 px-4 text-xs font-semibold text-[#64748b] uppercase tracking-wide">
               Rôle
-            </th>
-            <th className="text-left py-4 px-4 text-sm font-medium text-slate-700 w-24">
+            </TableHead>
+            <TableHead className="py-3 px-4 text-xs font-semibold text-[#64748b] uppercase tracking-wide w-24">
               Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody>
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {admins.map((u) => (
-            <tr key={u.id} className="border-b border-slate-100">
-              <td className="py-4 px-4 font-medium">{u.full_name || "-"}</td>
-              <td className="py-4 px-4 text-slate-600">{u.email}</td>
-              <td className="py-4 px-4">
-                <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+            <TableRow key={u.id} className="border-b border-[#e1e8f2] hover:bg-[#f4f7fb]/60">
+              <TableCell className="py-3.5 px-4 font-medium text-[#0b1f3a]">
+                {u.full_name || "-"}
+              </TableCell>
+              <TableCell className="py-3.5 px-4 text-[#64748b] text-sm">{u.email}</TableCell>
+              <TableCell className="py-3.5 px-4">
+                <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
                   Admin
                 </span>
-              </td>
-              <td className="py-4 px-4" />
-            </tr>
+              </TableCell>
+              <TableCell className="py-3.5 px-4" />
+            </TableRow>
           ))}
           {secretaires.map((u) => (
-            <tr key={u.id} className="border-b border-slate-100">
-              <td className="py-4 px-4 font-medium">{u.full_name || "-"}</td>
-              <td className="py-4 px-4 text-slate-600">{u.email}</td>
-              <td className="py-4 px-4">
-                <span className="px-2 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-800">
+            <TableRow key={u.id} className="border-b border-[#e1e8f2] hover:bg-[#f4f7fb]/60">
+              <TableCell className="py-3.5 px-4 font-medium text-[#0b1f3a]">
+                {u.full_name || "-"}
+              </TableCell>
+              <TableCell className="py-3.5 px-4 text-[#64748b] text-sm">{u.email}</TableCell>
+              <TableCell className="py-3.5 px-4">
+                <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-100 text-emerald-800">
                   Secrétaire
                 </span>
-              </td>
-              <td className="py-4 px-4" />
-            </tr>
+              </TableCell>
+              <TableCell className="py-3.5 px-4" />
+            </TableRow>
           ))}
           {telepros.map((u) => (
-            <tr
+            <TableRow
               key={u.id}
-              className="border-b border-slate-100 hover:bg-slate-50/50 group cursor-pointer"
+              className="border-b border-[#e1e8f2] hover:bg-[#f4f7fb]/80 group cursor-pointer"
               onClick={() => router.push(teleproConfigHref(u.id))}
               role="button"
               tabIndex={0}
@@ -107,36 +119,42 @@ export function UsersTable({ users }: UsersTableProps) {
                 }
               }}
             >
-              <td className="py-4 px-4 font-medium text-blue-600">{u.full_name || "-"}</td>
-              <td className="py-4 px-4 text-slate-600">{u.email}</td>
-              <td className="py-4 px-4">
-                <span className="px-2 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-700">
+              <TableCell className="py-3.5 px-4 font-medium text-[#2563eb]">
+                {u.full_name || "-"}
+              </TableCell>
+              <TableCell className="py-3.5 px-4 text-[#64748b] text-sm">{u.email}</TableCell>
+              <TableCell className="py-3.5 px-4">
+                <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-[#e1e8f2] text-[#0b1f3a]">
                   Télépro
                 </span>
-              </td>
-              <td className="py-4 px-4 flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                <Link
-                  href={teleproConfigHref(u.id)}
-                  className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg inline-flex"
-                  title="Configurer l'agent IA"
-                >
-                  <Settings className="w-4 h-4" />
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => handleDelete(u)}
-                  disabled={!!deleting}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50"
-                  title="Supprimer le télépro"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </td>
-            </tr>
+              </TableCell>
+              <TableCell
+                className="py-3.5 px-4"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center gap-1">
+                  <Link
+                    href={teleproConfigHref(u.id)}
+                    className="p-1.5 text-[#64748b] hover:bg-[#e1e8f2] rounded-[7px] inline-flex transition-colors"
+                    title="Configurer l'agent IA"
+                  >
+                    <Settings className="w-4 h-4" />
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(u)}
+                    disabled={!!deleting}
+                    className="p-1.5 text-red-500 hover:bg-red-50 rounded-[7px] disabled:opacity-50 transition-colors"
+                    title="Supprimer le télépro"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
-
+        </TableBody>
+      </Table>
     </div>
   );
 }

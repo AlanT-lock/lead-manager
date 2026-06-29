@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 
 type CreateUserRole = "telepro" | "secretaire";
 
+const INPUT_CLS =
+  "w-full h-9 px-3 border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] text-sm focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40 focus:border-[#2563eb] transition-colors";
+const LABEL_CLS = "block text-sm font-medium text-[#0b1f3a] mb-1.5";
+
 export function CreateUserForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,68 +46,69 @@ export function CreateUserForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
-      <h2 className="font-medium text-slate-800">Créer un utilisateur</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_1px_2px_rgba(13,38,76,.06)] p-6 space-y-4"
+    >
+      <h2 className="text-base font-semibold text-[#0b1f3a]">Créer un utilisateur</h2>
+
       {error && (
-        <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+        <div className="p-3 rounded-[9px] bg-red-50 border border-red-200 text-red-700 text-sm">
           {error}
         </div>
       )}
+
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">
-          Nom complet
-        </label>
+        <label className={LABEL_CLS}>Nom complet</label>
         <input
           type="text"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
-          className="w-full px-4 py-2 border border-slate-300 rounded-lg"
+          className={INPUT_CLS}
         />
       </div>
+
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">
-          Email
-        </label>
+        <label className={LABEL_CLS}>Email</label>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full px-4 py-2 border border-slate-300 rounded-lg"
+          className={INPUT_CLS}
         />
       </div>
+
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">
-          Mot de passe
-        </label>
+        <label className={LABEL_CLS}>Mot de passe</label>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
           minLength={6}
-          className="w-full px-4 py-2 border border-slate-300 rounded-lg"
+          className={INPUT_CLS}
         />
       </div>
+
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">
-          Rôle
-        </label>
+        <label className={LABEL_CLS}>Rôle</label>
         <select
           value={role}
           onChange={(e) => setRole(e.target.value as CreateUserRole)}
-          className="w-full px-4 py-2 border border-slate-300 rounded-lg"
+          className={INPUT_CLS}
         >
           <option value="telepro">Télépro</option>
           <option value="secretaire">Secrétaire</option>
         </select>
       </div>
+
       <button
         type="submit"
         disabled={loading}
-        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+        className="h-9 px-5 bg-[#2563eb] text-white text-sm font-medium rounded-[9px] hover:bg-[#1d4ed8] disabled:opacity-50 transition-colors"
       >
-        {loading ? "Création..." : `Créer le ${role === "telepro" ? "télépro" : "secrétaire"}`}
+        {loading ? "Création…" : `Créer le ${role === "telepro" ? "télépro" : "secrétaire"}`}
       </button>
     </form>
   );
