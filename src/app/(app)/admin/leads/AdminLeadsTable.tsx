@@ -14,8 +14,24 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/StatusBadge";
 import { CategoryChip } from "@/components/CategoryChip";
+
+function getStatusSelectClass(status: string): string {
+  switch (status) {
+    case "nouveau": return "bg-blue-100 text-blue-800 border-blue-200";
+    case "nrp": return "bg-yellow-100 text-yellow-800 border-yellow-200";
+    case "a_rappeler": return "bg-blue-800 text-white border-blue-900";
+    case "en_attente_doc": return "bg-green-100 text-green-800 border-green-200";
+    case "documents_recus": return "bg-green-700 text-white border-green-800";
+    case "incomplet": return "bg-amber-100 text-amber-800 border-amber-200";
+    case "bloque_mpr": return "bg-red-800 text-white border-red-900";
+    case "valide": return "bg-emerald-700 text-white border-emerald-800";
+    case "installe": return "bg-teal-200 text-teal-900 border-teal-300";
+    case "ancien_documents_recus": return "bg-slate-500 text-white border-slate-600";
+    case "annule": return "bg-red-100 text-red-800 border-red-200";
+    default: return "bg-slate-100 text-slate-700 border-slate-200";
+  }
+}
 
 type StatusSortDirection = "none" | "desc" | "asc";
 
@@ -46,6 +62,7 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
   const [targetId, setTargetId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
   const [statusSort, setStatusSort] = useState<StatusSortDirection>("none");
@@ -67,6 +84,26 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
       return "none";
     });
   };
+
+  const handleStatusChange = useCallback(async (leadId: string, newStatus: LeadStatus, oldStatus: string) => {
+    if (newStatus === oldStatus) return;
+    setUpdatingId(leadId);
+    const body: Record<string, unknown> = {
+      status: newStatus,
+      logAction: "Changement de statut",
+      logOldStatus: oldStatus,
+      logNewStatus: newStatus,
+    };
+    if (newStatus === "a_rappeler") body.callback_at = null;
+    const res = await fetch(`/api/admin/lead/${leadId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", "X-Lead-Form-Version": "2" },
+      credentials: "include",
+      body: JSON.stringify(body),
+    });
+    setUpdatingId(null);
+    if (res.ok) router.refresh();
+  }, [router]);
 
   const handleCommentSave = useCallback(async (leadId: string, value: string) => {
     setEditingCommentId(null);
@@ -381,7 +418,27 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
                     className="py-3"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <StatusBadge status={lead.status as LeadStatus} />
+                    <select
+                        value={lead.status}
+                        onChange={(e) =>
+                          handleStatusChange(
+                            lead.id,
+                            e.target.value as LeadStatus,
+                            lead.status
+                          )
+                        }
+                        disabled={updatingId === lead.id}
+                        className={`inline-flex px-2 py-1 text-xs font-medium rounded-[9px] border cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40 focus:ring-offset-1 disabled:opacity-50 ${getStatusSelectClass(lead.status)}`}
+                      >
+                        {LEAD_STATUSES_ADMIN.map((s) => (
+                          <option key={s} value={s}>
+                            {LEAD_STATUS_LABELS[s]}
+                            {s === "nrp" && lead.nrp_count > 0
+                              ? ` (${lead.nrp_count})`
+                              : ""}
+                          </option>
+                        ))}
+                      </select>
                   </TableCell>
                   <TableCell className="py-3">
                     {lead.category ? (
