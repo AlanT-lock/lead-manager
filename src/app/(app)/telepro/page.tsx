@@ -4,6 +4,8 @@ import { startOfDay, startOfWeek, startOfMonth } from "date-fns";
 import Link from "next/link";
 import { LEAD_STATUS_LABELS, type LeadStatus } from "@/lib/types";
 import { NrpCallsButton } from "./NrpCallsButton";
+import { PageHeader } from "@/components/ui-kit/PageHeader";
+import { StatCard } from "@/components/ui-kit/StatCard";
 
 export default async function TeleproDashboard() {
   const supabase = await createClient();
@@ -70,28 +72,20 @@ export default async function TeleproDashboard() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Tableau de bord</h1>
-        <p className="text-slate-600 mt-1">
-          Vue d&apos;ensemble de vos leads
-        </p>
-      </div>
+      <PageHeader
+        title="Tableau de bord"
+        subtitle="Vue d'ensemble de vos leads"
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => (
-          <div
-            key={stat.label}
-            className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm"
-          >
-            <p className="text-sm text-slate-500">{stat.label}</p>
-            <p className="text-3xl font-bold text-slate-800 mt-1">{stat.value}</p>
-          </div>
+          <StatCard key={stat.label} label={stat.label} value={stat.value} />
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-          <h2 className="font-medium text-slate-800 mb-4">Leads par statut</h2>
+        <div className="rounded-[12px] border border-[#e1e8f2] bg-white p-6 shadow-[0_1px_2px_rgba(13,38,76,.06)]">
+          <h2 className="font-medium text-[#0b1f3a] mb-4">Leads par statut</h2>
           <div className="space-y-2">
             {(
               [
@@ -112,18 +106,18 @@ export default async function TeleproDashboard() {
                 key={s}
                 className="flex justify-between text-sm"
               >
-                <span className="text-slate-600">{LEAD_STATUS_LABELS[s]}</span>
-                <span className="font-medium">{statusCounts[s] || 0}</span>
+                <span className="text-[#64748b]">{LEAD_STATUS_LABELS[s]}</span>
+                <span className="font-medium text-[#0b1f3a]">{statusCounts[s] || 0}</span>
               </div>
             ))}
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-          <h2 className="font-medium text-slate-800 mb-4">Taux de conversion</h2>
+        <div className="rounded-[12px] border border-[#e1e8f2] bg-white p-6 shadow-[0_1px_2px_rgba(13,38,76,.06)]">
+          <h2 className="font-medium text-[#0b1f3a] mb-4">Taux de conversion</h2>
           <p className="text-3xl font-bold text-emerald-600">
             {conversionRate} %
           </p>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-[#64748b] mt-1">
             Leads &quot;Documents reçus&quot; + &quot;Ancien documents reçus&quot; / Total
           </p>
         </div>
@@ -133,13 +127,13 @@ export default async function TeleproDashboard() {
         <NrpCallsButton />
         <Link
           href="/telepro/leads"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-[#2563eb] text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
         >
           Voir mes leads
         </Link>
         <Link
           href="/telepro/teleprospection"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-slate-800 text-white font-medium rounded-lg hover:bg-slate-900 transition-colors"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-[#0b1f3a] text-white font-medium rounded-lg hover:opacity-90 transition-colors"
         >
           Démarrer la téléprospection
         </Link>
