@@ -84,7 +84,7 @@ export function UsersTable({ users }: UsersTableProps) {
               </TableCell>
               <TableCell className="py-3.5 px-4 text-[#64748b] text-sm">{u.email}</TableCell>
               <TableCell className="py-3.5 px-4">
-                <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-[#e0ecfe] text-[#2563eb]">
                   Admin
                 </span>
               </TableCell>
@@ -98,7 +98,7 @@ export function UsersTable({ users }: UsersTableProps) {
               </TableCell>
               <TableCell className="py-3.5 px-4 text-[#64748b] text-sm">{u.email}</TableCell>
               <TableCell className="py-3.5 px-4">
-                <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-100 text-emerald-800">
+                <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-[#f1f5f9] text-[#64748b]">
                   Secrétaire
                 </span>
               </TableCell>
