@@ -3,6 +3,10 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { AuthShell } from "@/components/auth/AuthShell";
+import { cn } from "@/lib/utils";
 
 function ResetPasswordForm() {
   const [password, setPassword] = useState("");
@@ -78,106 +82,77 @@ function ResetPasswordForm() {
 
   if (!ready && !error) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-8 bg-slate-50">
-        <div className="text-slate-500">Vérification du lien...</div>
+      <div className="min-h-screen flex items-center justify-center bg-[#f4f7fb]">
+        <div className="text-[#64748b]">Vérification du lien...</div>
       </div>
     );
   }
 
   if (error && !password) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-8 bg-slate-50">
-        <div className="w-full max-w-md">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
-            <h1 className="text-2xl font-bold text-slate-800 mb-2">
-              Lien invalide
-            </h1>
-            <p className="text-slate-600 mb-6">{error}</p>
-            <Link
-              href="/forgot-password"
-              className="block w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 text-center transition-colors"
-            >
-              Demander un nouveau lien
-            </Link>
-            <p className="mt-6 text-center text-sm text-slate-500">
-              <Link href="/login" className="text-blue-600 hover:underline">
-                Retour à la connexion
-              </Link>
-            </p>
-          </div>
-        </div>
-      </div>
+      <AuthShell
+        title="Lien invalide"
+        footer={
+          <Link href="/login" className="text-[#2563eb] hover:underline">
+            Retour à la connexion
+          </Link>
+        }
+      >
+        <p className="mb-6 text-sm text-[#64748b]">{error}</p>
+        <Link href="/forgot-password" className={cn(buttonVariants(), "w-full justify-center")}>
+          Demander un nouveau lien
+        </Link>
+      </AuthShell>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-8 bg-slate-50">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
-          <h1 className="text-2xl font-bold text-slate-800 mb-2">
+    <AuthShell
+      title="Nouveau mot de passe"
+      subtitle="Choisissez un nouveau mot de passe (minimum 6 caractères)"
+      footer={
+        <Link href="/login" className="text-[#2563eb] hover:underline">
+          Retour à la connexion
+        </Link>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <div className="rounded-[9px] bg-[#fee2e2] px-3 py-2 text-sm text-[#b91c1c]">
+            {error}
+          </div>
+        )}
+        <div className="space-y-1.5">
+          <label htmlFor="password" className="text-sm font-medium text-[#0b1f3a]">
             Nouveau mot de passe
-          </h1>
-          <p className="text-slate-600 mb-6">
-            Choisissez un nouveau mot de passe (minimum 6 caractères)
-          </p>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-slate-700 mb-1"
-              >
-                Nouveau mot de passe
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-slate-700 mb-1"
-              >
-                Confirmer le mot de passe
-              </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                minLength={6}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
-            >
-              {loading ? "Enregistrement..." : "Réinitialiser le mot de passe"}
-            </button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-slate-500">
-            <Link href="/login" className="text-blue-600 hover:underline">
-              Retour à la connexion
-            </Link>
-          </p>
+          </label>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={6}
+          />
         </div>
-      </div>
-    </div>
+        <div className="space-y-1.5">
+          <label htmlFor="confirmPassword" className="text-sm font-medium text-[#0b1f3a]">
+            Confirmer le mot de passe
+          </label>
+          <Input
+            id="confirmPassword"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            minLength={6}
+          />
+        </div>
+        <Button type="submit" disabled={loading} className="w-full">
+          {loading ? "Enregistrement..." : "Réinitialiser le mot de passe"}
+        </Button>
+      </form>
+    </AuthShell>
   );
 }
 
@@ -185,8 +160,8 @@ export default function ResetPasswordPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center p-8 bg-slate-50">
-          <div className="text-slate-500">Chargement...</div>
+        <div className="min-h-screen flex items-center justify-center bg-[#f4f7fb]">
+          <div className="text-[#64748b]">Chargement...</div>
         </div>
       }
     >

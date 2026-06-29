@@ -45,19 +45,19 @@ export default async function TeleproConfigPage({
 
   return (
     <div className="space-y-6 max-w-xl">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         <Link
           href="/admin/users"
-          className="p-2 rounded-lg hover:bg-slate-100 text-slate-600"
+          className="p-2 rounded-[9px] hover:bg-[#e1e8f2] text-[#64748b] transition-colors"
           aria-label="Retour aux utilisateurs"
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">
+          <h1 className="text-2xl font-bold text-[#0b1f3a]">
             Configuration télépro — {telepro.full_name || telepro.email}
           </h1>
-          <p className="text-slate-600 text-sm mt-0.5">
+          <p className="text-[#64748b] text-sm mt-0.5">
             Numéro du télépro, numéro Twilio et message d&apos;accueil (lorsque le lead répond).
           </p>
         </div>

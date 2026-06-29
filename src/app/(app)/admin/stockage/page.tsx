@@ -2,6 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { StockageClient } from "./StockageClient";
+import { PageHeader } from "@/components/ui-kit/PageHeader";
 
 export default async function AdminStockagePage() {
   const supabase = await createClient();
@@ -55,12 +56,10 @@ export default async function AdminStockagePage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Stockage</h1>
-        <p className="text-slate-600 mt-1">
-          Gestion du matériel et des produits. Créez des fiches produit et gérez les quantités en stock.
-        </p>
-      </div>
+      <PageHeader
+        title="Stockage"
+        subtitle="Gestion du matériel et des produits. Créez des fiches produit et gérez les quantités en stock."
+      />
 
       <StockageClient
         initialProducts={products}

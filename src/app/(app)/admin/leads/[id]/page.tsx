@@ -1,9 +1,13 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { AdminLeadForm } from "./AdminLeadForm";
 import { DocumentsSection } from "./DocumentsSection";
 import { LeadLogsSidebar } from "@/components/LeadLogsSidebar";
+import { PageHeader } from "@/components/ui-kit/PageHeader";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default async function AdminLeadPage({
   params,
@@ -47,29 +51,30 @@ export default async function AdminLeadPage({
   }));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <Link
         href="/admin/leads"
-        className="text-blue-600 hover:underline flex items-center gap-1"
+        className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-1.5 text-[#64748b] hover:text-[#0b1f3a] -ml-1")}
       >
-        ← Retour aux leads
+        <ArrowLeft className="w-4 h-4" />
+        Retour aux leads
       </Link>
 
-      <div className="flex gap-6 items-start">
-        <div className="flex-1 min-w-0">
-          <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-            <h1 className="text-xl font-bold text-slate-800 mb-6">
-              {lead.first_name} {lead.last_name}
-              {lead.is_duplicate && (
-                <span className="ml-2 text-sm font-normal text-amber-600">
-                  (Doublon)
-                </span>
-              )}
-            </h1>
+      <PageHeader
+        title={`${lead.first_name} ${lead.last_name}`}
+        actions={
+          lead.is_duplicate ? (
+            <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-700 text-xs font-semibold px-2.5 py-0.5">
+              Doublon
+            </span>
+          ) : undefined
+        }
+      />
 
-            <AdminLeadForm lead={lead} />
-            <DocumentsSection leadId={id} documents={documents || []} />
-          </div>
+      <div className="flex gap-6 items-start">
+        <div className="flex-1 min-w-0 space-y-4">
+          <AdminLeadForm lead={lead} />
+          <DocumentsSection leadId={id} documents={documents || []} />
         </div>
         <LeadLogsSidebar logs={logEntries} />
       </div>

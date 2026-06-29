@@ -44,24 +44,24 @@ export function TeleproStatsClient({
   return (
     <div className="space-y-8">
       {/* Appels de la période */}
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 p-8">
-        <h2 className="text-lg font-semibold text-slate-800 mb-2">
+      <div className="rounded-[12px] border border-[#e1e8f2] bg-[#eff6ff] p-8 shadow-[0_1px_2px_rgba(13,38,76,.06)]">
+        <h2 className="text-lg font-semibold text-[#0b1f3a] mb-2">
           Appels (période)
         </h2>
-        <p className="text-4xl font-bold text-blue-600">{callsInPeriod}</p>
-        <p className="text-sm text-slate-500 mt-1">
+        <p className="text-4xl font-extrabold text-[#2563eb]">{callsInPeriod}</p>
+        <p className="text-sm text-[#64748b] mt-1">
           Actions enregistrées sur la période (modifications de leads)
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Camembert statuts */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-slate-100">
-            <h2 className="text-lg font-semibold text-slate-800">
+        <div className="bg-white rounded-[12px] border border-[#e1e8f2] shadow-[0_1px_2px_rgba(13,38,76,.06)] overflow-hidden">
+          <div className="p-6 border-b border-[#f1f5f9]">
+            <h2 className="text-lg font-semibold text-[#0b1f3a]">
               Répartition des leads par statut
             </h2>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-sm text-[#64748b] mt-1">
               Total : {totalLeads} leads • En %
             </p>
           </div>
@@ -103,7 +103,7 @@ export function TeleproStatsClient({
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className="h-[400px] flex items-center justify-center text-slate-400">
+              <div className="h-[400px] flex items-center justify-center text-[#94a3b8]">
                 Aucun lead
               </div>
             )}
@@ -111,12 +111,12 @@ export function TeleproStatsClient({
         </div>
 
         {/* Camembert types d'installation */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-slate-100">
-            <h2 className="text-lg font-semibold text-slate-800">
+        <div className="bg-white rounded-[12px] border border-[#e1e8f2] shadow-[0_1px_2px_rgba(13,38,76,.06)] overflow-hidden">
+          <div className="p-6 border-b border-[#f1f5f9]">
+            <h2 className="text-lg font-semibold text-[#0b1f3a]">
               Types d&apos;installation (documents reçus)
             </h2>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-sm text-[#64748b] mt-1">
               Total : {totalWithInstallation} dossiers • En %
             </p>
           </div>
@@ -158,7 +158,7 @@ export function TeleproStatsClient({
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className="h-[400px] flex items-center justify-center text-slate-400">
+              <div className="h-[400px] flex items-center justify-center text-[#94a3b8]">
                 Aucun dossier documents reçus
               </div>
             )}
@@ -168,13 +168,13 @@ export function TeleproStatsClient({
 
       {/* Tableau récapitulatif */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-4 bg-slate-50 border-b border-slate-200">
-            <h3 className="font-medium text-slate-800">Détail par statut</h3>
+        <div className="bg-white rounded-[12px] border border-[#e1e8f2] shadow-[0_1px_2px_rgba(13,38,76,.06)] overflow-hidden">
+          <div className="p-4 bg-[#f8fafc] border-b border-[#e1e8f2]">
+            <h3 className="font-semibold text-[#0b1f3a]">Détail par statut</h3>
           </div>
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-[#f1f5f9]">
             {statusData.length > 0 ? (
-              statusData.map((item, i) => (
+              statusData.map((item) => (
                 <div
                   key={item.status}
                   className="flex items-center justify-between px-6 py-4"
@@ -189,33 +189,33 @@ export function TeleproStatsClient({
                             : FALLBACK_COLOR,
                       }}
                     />
-                    <span className="text-slate-700">{item.name}</span>
+                    <span className="text-[#64748b]">{item.name}</span>
                   </div>
                   <div className="flex items-center gap-6">
-                    <span className="font-medium text-slate-800">{item.value}</span>
-                    <span className="text-sm text-slate-500 w-12 text-right">
+                    <span className="font-semibold text-[#0b1f3a]">{item.value}</span>
+                    <span className="text-sm text-[#94a3b8] w-12 text-right">
                       {item.percent}%
                     </span>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="px-6 py-8 text-center text-slate-400">
+              <div className="px-6 py-8 text-center text-[#94a3b8]">
                 Aucune donnée
               </div>
             )}
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-4 bg-slate-50 border-b border-slate-200">
-            <h3 className="font-medium text-slate-800">
+        <div className="bg-white rounded-[12px] border border-[#e1e8f2] shadow-[0_1px_2px_rgba(13,38,76,.06)] overflow-hidden">
+          <div className="p-4 bg-[#f8fafc] border-b border-[#e1e8f2]">
+            <h3 className="font-semibold text-[#0b1f3a]">
               Détail par type d&apos;installation
             </h3>
           </div>
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-[#f1f5f9]">
             {installationData.length > 0 ? (
-              installationData.map((item, i) => (
+              installationData.map((item) => (
                 <div
                   key={item.type}
                   className="flex items-center justify-between px-6 py-4"
@@ -230,18 +230,18 @@ export function TeleproStatsClient({
                             : FALLBACK_COLOR,
                       }}
                     />
-                    <span className="text-slate-700">{item.name}</span>
+                    <span className="text-[#64748b]">{item.name}</span>
                   </div>
                   <div className="flex items-center gap-6">
-                    <span className="font-medium text-slate-800">{item.value}</span>
-                    <span className="text-sm text-slate-500 w-12 text-right">
+                    <span className="font-semibold text-[#0b1f3a]">{item.value}</span>
+                    <span className="text-sm text-[#94a3b8] w-12 text-right">
                       {item.percent}%
                     </span>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="px-6 py-8 text-center text-slate-400">
+              <div className="px-6 py-8 text-center text-[#94a3b8]">
                 Aucune donnée
               </div>
             )}

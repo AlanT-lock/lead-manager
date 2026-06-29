@@ -2,6 +2,8 @@
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 function toDateStr(d: Date) {
   return d.toISOString().slice(0, 10);
@@ -33,31 +35,34 @@ export function StatsTeleproDetailFilters() {
   return (
     <div className="flex flex-wrap gap-4 items-end">
       <div className="flex gap-2">
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="sm"
           onClick={() => setPeriod(startOfDay(now), endOfDay(now))}
-          className="px-4 py-2 text-sm font-medium rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700"
         >
           Jour
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="outline"
+          size="sm"
           onClick={() => setPeriod(startOfWeek(now, { weekStartsOn: 1 }), endOfWeek(now, { weekStartsOn: 1 }))}
-          className="px-4 py-2 text-sm font-medium rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700"
         >
           Semaine
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="outline"
+          size="sm"
           onClick={() => setPeriod(startOfMonth(now), endOfMonth(now))}
-          className="px-4 py-2 text-sm font-medium rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700"
         >
           Mois
-        </button>
+        </Button>
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Du</label>
-        <input
+        <label className="block text-xs font-medium text-[#0b1f3a] mb-1">Du</label>
+        <Input
           type="date"
           value={from}
           onChange={(e) => {
@@ -65,12 +70,12 @@ export function StatsTeleproDetailFilters() {
             params.set("from", e.target.value);
             router.push(`${pathname}?${params.toString()}`);
           }}
-          className="px-4 py-2 border border-slate-300 rounded-lg"
+          className="w-[160px]"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Au</label>
-        <input
+        <label className="block text-xs font-medium text-[#0b1f3a] mb-1">Au</label>
+        <Input
           type="date"
           value={to}
           onChange={(e) => {
@@ -78,16 +83,16 @@ export function StatsTeleproDetailFilters() {
             params.set("to", e.target.value);
             router.push(`${pathname}?${params.toString()}`);
           }}
-          className="px-4 py-2 border border-slate-300 rounded-lg"
+          className="w-[160px]"
         />
       </div>
-      <button
+      <Button
         type="button"
+        size="sm"
         onClick={handleApply}
-        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
       >
         Appliquer
-      </button>
+      </Button>
     </div>
   );
 }

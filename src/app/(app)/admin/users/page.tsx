@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CreateUserForm } from "./CreateUserForm";
 import { UsersTable } from "./UsersTable";
+import { PageHeader } from "@/components/ui-kit/PageHeader";
 
 export default async function AdminUsersPage() {
   const adminClient = createAdminClient();
@@ -26,12 +27,10 @@ export default async function AdminUsersPage() {
 
   return (
     <div className="space-y-6 max-w-2xl">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Utilisateurs</h1>
-        <p className="text-slate-600 mt-1">
-          Créez des comptes télépro et gérez les utilisateurs
-        </p>
-      </div>
+      <PageHeader
+        title="Utilisateurs"
+        subtitle="Créez des comptes télépro et gérez les utilisateurs"
+      />
 
       <CreateUserForm />
 

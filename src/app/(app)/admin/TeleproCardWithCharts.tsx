@@ -10,6 +10,7 @@ import {
   Tooltip,
 } from "recharts";
 import { STATUS_CHART_COLORS, INSTALLATION_CHART_COLORS, type LeadStatus, type InstallationType } from "@/lib/types";
+import { StatCard } from "@/components/ui-kit/StatCard";
 
 interface StatusItem {
   name: string;
@@ -53,33 +54,32 @@ export function TeleproCardWithCharts({
   return (
     <Link
       href={href}
-      className="group block p-6 bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all"
+      className="group block p-6 rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_1px_2px_rgba(13,38,76,.06)] hover:shadow-md hover:border-[#bfdbfe] transition-all"
     >
       <div className="flex items-center gap-4 mb-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#eff6ff] text-[#2563eb]">
           <User className="w-6 h-6" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-slate-800 truncate">
+          <p className="font-semibold text-[#0b1f3a] truncate">
             {fullName || email}
           </p>
-          <p className="text-sm text-slate-500 truncate">{email}</p>
+          <p className="text-sm text-[#64748b] truncate">{email}</p>
         </div>
-        <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-blue-600 shrink-0" />
+        <ChevronRight className="w-5 h-5 text-[#94a3b8] group-hover:text-[#2563eb] shrink-0" />
       </div>
 
-      <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
-        <p className="text-xs font-medium text-slate-500">Appels (période)</p>
-        <p className="text-2xl font-bold text-blue-600">{callsCount}</p>
+      <div className="mb-4">
+        <StatCard label="Appels (période)" value={callsCount} />
       </div>
 
       <div className="flex flex-col gap-6">
         <div className="min-h-[200px]">
-          <p className="text-xs font-medium text-slate-500 mb-2">
+          <p className="text-xs font-medium text-[#64748b] mb-2">
             Statuts
           </p>
           {statusData.length > 0 ? (
-            <div className="h-[180px]">
+            <div className="rounded-[12px] border border-[#e1e8f2] bg-[#f8fafc] p-2 h-[180px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -112,17 +112,17 @@ export function TeleproCardWithCharts({
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="h-[180px] flex items-center justify-center text-slate-400 text-sm">
+            <div className="h-[180px] flex items-center justify-center rounded-[12px] border border-[#e1e8f2] bg-[#f8fafc] text-[#94a3b8] text-sm">
               Aucun lead
             </div>
           )}
         </div>
         <div className="min-h-[200px]">
-          <p className="text-xs font-medium text-slate-500 mb-2">
+          <p className="text-xs font-medium text-[#64748b] mb-2">
             Types d&apos;installation
           </p>
           {installationData.length > 0 ? (
-            <div className="h-[180px]">
+            <div className="rounded-[12px] border border-[#e1e8f2] bg-[#f8fafc] p-2 h-[180px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -155,7 +155,7 @@ export function TeleproCardWithCharts({
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="h-[180px] flex items-center justify-center text-slate-400 text-sm">
+            <div className="h-[180px] flex items-center justify-center rounded-[12px] border border-[#e1e8f2] bg-[#f8fafc] text-[#94a3b8] text-sm">
               Aucun doc reçu
             </div>
           )}

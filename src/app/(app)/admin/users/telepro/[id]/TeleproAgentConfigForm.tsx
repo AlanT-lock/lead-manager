@@ -14,6 +14,11 @@ interface TeleproAgentConfigFormProps {
   };
 }
 
+const INPUT_CLS =
+  "w-full h-9 px-3 border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] text-sm focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40 focus:border-[#2563eb] transition-colors";
+const LABEL_CLS = "block text-sm font-medium text-[#0b1f3a] mb-1.5";
+const HINT_CLS = "text-xs text-[#64748b] mt-1";
+
 export function TeleproAgentConfigForm({
   teleproId,
   initial,
@@ -54,44 +59,55 @@ export function TeleproAgentConfigForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-5">
+    <form
+      onSubmit={handleSubmit}
+      className="rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_1px_2px_rgba(13,38,76,.06)] p-6 space-y-5"
+    >
       {error && (
-        <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm">{error}</div>
+        <div className="p-3 rounded-[9px] bg-red-50 border border-red-200 text-red-700 text-sm">
+          {error}
+        </div>
       )}
       {success && (
-        <div className="p-3 bg-emerald-50 text-emerald-700 rounded-lg text-sm">{success}</div>
+        <div className="p-3 rounded-[9px] bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm">
+          {success}
+        </div>
       )}
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Numéro du télépro</label>
+        <label className={LABEL_CLS}>Numéro du télépro</label>
         <input
           type="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="+33612345678"
-          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className={INPUT_CLS}
         />
-        <p className="text-xs text-slate-500 mt-1">Où appeler le télépro quand un lead décroche (transfert NRP et appels entrants).</p>
+        <p className={HINT_CLS}>
+          Où appeler le télépro quand un lead décroche (transfert NRP et appels entrants).
+        </p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Numéro Twilio du télépro</label>
+        <label className={LABEL_CLS}>Numéro Twilio du télépro</label>
         <input
           type="tel"
           value={twilioPhoneNumber}
           onChange={(e) => setTwilioPhoneNumber(e.target.value)}
           placeholder="+33612345678"
-          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className={INPUT_CLS}
         />
-        <p className="text-xs text-slate-500 mt-1">Numéro Twilio E.164 utilisé pour appeler les leads et recevoir les appels entrants. Obligatoire pour le NRP.</p>
+        <p className={HINT_CLS}>
+          Numéro Twilio E.164 utilisé pour appeler les leads et recevoir les appels entrants. Obligatoire pour le NRP.
+        </p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Voix des messages Twilio</label>
+        <label className={LABEL_CLS}>Voix des messages Twilio</label>
         <select
           value={twilioSayVoice}
           onChange={(e) => setTwilioSayVoice(e.target.value)}
-          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className={INPUT_CLS}
         >
           <option value="">Défaut (secret TWILIO_SAY_VOICE ou Remi-Neural)</option>
           <optgroup label="Voix naturelles (Neural / Generative)">
@@ -105,26 +121,30 @@ export function TeleproAgentConfigForm({
             <option value="Polly.Celine">Polly.Celine (femme)</option>
           </optgroup>
         </select>
-        <p className="text-xs text-slate-500 mt-1">Préférer Neural ou Generative pour un rendu plus naturel. Voix utilisée pour le message d&apos;attente NRP et les appels entrants.</p>
+        <p className={HINT_CLS}>
+          Préférer Neural ou Generative pour un rendu plus naturel. Voix utilisée pour le message d&apos;attente NRP et les appels entrants.
+        </p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Message d&apos;accueil (lorsque le lead répond)</label>
+        <label className={LABEL_CLS}>Message d&apos;accueil (lorsque le lead répond)</label>
         <textarea
           value={welcomeMessage}
           onChange={(e) => setWelcomeMessage(e.target.value)}
           rows={3}
           placeholder="Un instant, nous vous mettons en relation avec un conseiller."
-          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] text-sm focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40 focus:border-[#2563eb] transition-colors resize-none"
         />
-        <p className="text-xs text-slate-500 mt-1">Message lu au lead dès qu&apos;il décroche, puis en boucle jusqu&apos;à ce que le télépro réponde.</p>
+        <p className={HINT_CLS}>
+          Message lu au lead dès qu&apos;il décroche, puis en boucle jusqu&apos;à ce que le télépro réponde.
+        </p>
       </div>
 
-      <div className="pt-2">
+      <div className="pt-1">
         <button
           type="submit"
           disabled={saving}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          className="h-9 px-5 bg-[#2563eb] text-white text-sm font-medium rounded-[9px] hover:bg-[#1d4ed8] disabled:opacity-50 transition-colors"
         >
           {saving ? "Enregistrement…" : "Enregistrer"}
         </button>

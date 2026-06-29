@@ -2,6 +2,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { AdminLeadsTable } from "../leads/AdminLeadsTable";
+import { PageHeader } from "@/components/ui-kit/PageHeader";
+import { ChevronLeft } from "lucide-react";
 
 export default async function AdminRedistributePage({
   searchParams,
@@ -49,22 +51,19 @@ export default async function AdminRedistributePage({
     <div className="space-y-6">
       <Link
         href="/admin/users"
-        className="text-blue-600 hover:underline flex items-center gap-1"
+        className="inline-flex items-center gap-1 text-sm text-[#2563eb] hover:text-[#1d4ed8] font-medium"
       >
-        ← Retour aux utilisateurs
+        <ChevronLeft className="w-4 h-4" />
+        Retour aux utilisateurs
       </Link>
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">
-          Redistribuer les leads
-        </h1>
-        <p className="text-slate-600 mt-1">
-          Leads de <strong>{teleproName}</strong> à redistribuer. Sélectionnez
-          les leads et transférez-les vers un autre télépro.
-        </p>
-      </div>
 
-      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-        <p className="text-amber-800 text-sm">
+      <PageHeader
+        title="Redistribuer les leads"
+        subtitle={<>Leads de <strong className="text-[#0b1f3a]">{teleproName}</strong> à redistribuer. Sélectionnez les leads et transférez-les vers un autre télépro.</>}
+      />
+
+      <div className="rounded-[12px] border border-amber-200 bg-amber-50 shadow-[0_1px_2px_rgba(13,38,76,.06)] p-4">
+        <p className="text-amber-800 text-sm font-medium">
           {leads?.length || 0} lead(s) à redistribuer
         </p>
       </div>

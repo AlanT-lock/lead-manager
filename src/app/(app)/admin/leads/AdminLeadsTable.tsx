@@ -2,9 +2,19 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, type LeadStatus } from "@/lib/types";
+import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, type LeadCategory, type LeadStatus } from "@/lib/types";
 import { formatDateParis } from "@/lib/date";
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import {
+  Table,
+  TableHeader,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { CategoryChip } from "@/components/CategoryChip";
 
 function getStatusSelectClass(status: string): string {
   switch (status) {
@@ -23,23 +33,6 @@ function getStatusSelectClass(status: string): string {
   }
 }
 
-function getRowStatusClass(status: string): string {
-  switch (status) {
-    case "nouveau": return "bg-blue-50 hover:bg-blue-100";
-    case "nrp": return "bg-yellow-50 hover:bg-yellow-100";
-    case "a_rappeler": return "bg-blue-200 hover:bg-blue-300";
-    case "en_attente_doc": return "bg-green-50 hover:bg-green-100";
-    case "documents_recus": return "bg-green-200 hover:bg-green-300";
-    case "incomplet": return "bg-amber-50 hover:bg-amber-100";
-    case "bloque_mpr": return "bg-red-100 hover:bg-red-200";
-    case "valide": return "bg-emerald-100 hover:bg-emerald-200";
-    case "installe": return "bg-teal-50 hover:bg-teal-100";
-    case "ancien_documents_recus": return "bg-slate-100 hover:bg-slate-200";
-    case "annule": return "bg-red-50 hover:bg-red-100";
-    default: return "hover:bg-slate-50";
-  }
-}
-
 type StatusSortDirection = "none" | "desc" | "asc";
 
 interface Lead {
@@ -48,6 +41,7 @@ interface Lead {
   last_name: string;
   phone: string;
   status: string;
+  category: LeadCategory | null;
   nrp_count: number;
   is_duplicate: boolean;
   profile: { full_name: string; email: string } | null;
@@ -255,20 +249,20 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
   return (
     <div className="space-y-4">
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
-          {error}
+        <div className="p-4 rounded-[12px] border border-red-200 bg-red-50 text-red-800 text-sm flex items-center gap-2">
+          <span>{error}</span>
           <button
             type="button"
             onClick={() => setError(null)}
-            className="ml-2 underline hover:no-underline"
+            className="ml-2 underline hover:no-underline text-red-700"
           >
             Fermer
           </button>
         </div>
       )}
       {selected.size > 0 && (
-        <div className="flex flex-wrap items-center gap-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
-          <span className="font-medium text-slate-800">
+        <div className="flex flex-wrap items-center gap-3 p-4 rounded-[12px] border border-[#e1e8f2] bg-[#f4f7fb]">
+          <span className="font-medium text-[#0b1f3a] text-sm">
             {selected.size} lead(s) sélectionné(s)
           </span>
           <select
@@ -277,7 +271,7 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
               setBulkStatus(e.target.value);
               setError(null);
             }}
-            className="px-4 py-2 border rounded-lg"
+            className="h-8 px-3 text-sm border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40"
           >
             <option value="">Changer le statut...</option>
             {LEAD_STATUSES_ADMIN.map((s) => (
@@ -286,20 +280,21 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
               </option>
             ))}
           </select>
-          <button
+          <Button
             onClick={handleBulkStatusChange}
             disabled={!bulkStatus || updatingStatus}
-            className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 disabled:opacity-50"
+            variant="secondary"
+            size="sm"
           >
             {updatingStatus ? "Mise à jour..." : "Appliquer statut"}
-          </button>
+          </Button>
           <select
             value={targetId}
             onChange={(e) => {
               setTargetId(e.target.value);
               setError(null);
             }}
-            className="px-4 py-2 border rounded-lg"
+            className="h-8 px-3 text-sm border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40"
           >
             <option value="">
               {targetTelepros.length === 0
@@ -312,114 +307,118 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
               </option>
             ))}
           </select>
-          <button
+          <Button
             onClick={handleTransfer}
             disabled={!targetId || loading || targetTelepros.length === 0}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            size="sm"
           >
             {loading ? "Transfert..." : "Transférer"}
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleDelete}
             disabled={deleting}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+            variant="destructive"
+            size="sm"
           >
             {deleting ? "Suppression..." : "Supprimer"}
-          </button>
+          </Button>
           <button
+            type="button"
             onClick={() => {
               setSelected(new Set());
               setError(null);
             }}
-            className="text-slate-600 hover:text-slate-800"
+            className="text-sm text-[#64748b] hover:text-[#0b1f3a]"
           >
             Annuler
           </button>
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="text-left py-3 px-2">
-                  <input
-                    type="checkbox"
-                    checked={selected.size === leads.length && leads.length > 0}
-                    onChange={toggleAll}
-                    className="rounded"
-                  />
-                </th>
-                <th className="text-left py-3 px-2 text-sm font-medium text-slate-700">
-                  Nom
-                </th>
-                <th className="text-left py-3 px-2 text-sm font-medium text-slate-700">
-                  Téléphone
-                </th>
-                <th className="text-left py-4 px-4 text-sm font-medium text-slate-700">
-                  <button
-                    type="button"
-                    onClick={toggleStatusSort}
-                    className="inline-flex items-center gap-1 hover:text-slate-900 transition-colors"
+      <div className="rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_1px_2px_rgba(13,38,76,.06)] overflow-hidden">
+        <Table>
+          <TableHeader className="bg-[#f4f7fb] border-b border-[#e1e8f2]">
+            <TableRow className="hover:bg-transparent border-0">
+              <TableHead className="w-10 py-3">
+                <input
+                  type="checkbox"
+                  checked={selected.size === leads.length && leads.length > 0}
+                  onChange={toggleAll}
+                  className="rounded border-[#e1e8f2]"
+                />
+              </TableHead>
+              <TableHead className="py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">
+                Nom
+              </TableHead>
+              <TableHead className="py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">
+                Téléphone
+              </TableHead>
+              <TableHead className="py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">
+                <button
+                  type="button"
+                  onClick={toggleStatusSort}
+                  className="inline-flex items-center gap-1 hover:text-[#0b1f3a] transition-colors"
+                >
+                  Statut
+                  {statusSort === "none" && <ArrowUpDown className="w-3.5 h-3.5 text-[#64748b]" />}
+                  {statusSort === "desc" && <ArrowDown className="w-3.5 h-3.5 text-[#2563eb]" />}
+                  {statusSort === "asc" && <ArrowUp className="w-3.5 h-3.5 text-[#2563eb]" />}
+                </button>
+              </TableHead>
+              <TableHead className="py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">
+                Catégorie
+              </TableHead>
+              <TableHead className="py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">
+                Télépro
+              </TableHead>
+              <TableHead className="py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">
+                Date ajout
+              </TableHead>
+              <TableHead className="py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide min-w-[180px]">
+                Commentaires
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sortedLeads.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} className="py-12 text-center text-[#64748b]">
+                  Aucun lead trouvé
+                </TableCell>
+              </TableRow>
+            ) : (
+              sortedLeads.map((lead) => (
+                <TableRow
+                  key={lead.id}
+                  onClick={() => router.push(`/admin/leads/${lead.id}`)}
+                  className="border-b border-[#e1e8f2] cursor-pointer hover:bg-[#f4f7fb] transition-colors"
+                  data-testid="lead-row"
+                  data-lead-id={lead.id}
+                >
+                  <TableCell className="py-3 w-10" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      checked={selected.has(lead.id)}
+                      onChange={() => toggleSelect(lead.id)}
+                      className="rounded border-[#e1e8f2]"
+                    />
+                  </TableCell>
+                  <TableCell className="py-3">
+                    <span className="font-medium text-[#0b1f3a]">
+                      {lead.first_name} {lead.last_name}
+                      {lead.is_duplicate && (
+                        <span className="ml-2 text-xs text-amber-600">
+                          Doublon
+                        </span>
+                      )}
+                    </span>
+                  </TableCell>
+                  <TableCell className="py-3 text-[#64748b]">{lead.phone}</TableCell>
+                  <TableCell
+                    className="py-3"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    Statut
-                    {statusSort === "none" && <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />}
-                    {statusSort === "desc" && <ArrowDown className="w-3.5 h-3.5 text-blue-600" />}
-                    {statusSort === "asc" && <ArrowUp className="w-3.5 h-3.5 text-blue-600" />}
-                  </button>
-                </th>
-                <th className="text-left py-4 px-4 text-sm font-medium text-slate-700">
-                  Télépro
-                </th>
-                <th className="text-left py-4 px-4 text-sm font-medium text-slate-700">
-                  Date ajout
-                </th>
-                <th className="text-left py-4 px-4 text-sm font-medium text-slate-700 min-w-[180px]">
-                  Commentaires
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedLeads.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-500">
-                    Aucun lead trouvé
-                  </td>
-                </tr>
-              ) : (
-                sortedLeads.map((lead) => (
-                  <tr
-                    key={lead.id}
-                    onClick={() => router.push(`/admin/leads/${lead.id}`)}
-                    className={`border-b border-slate-100 cursor-pointer transition-colors ${getRowStatusClass(lead.status)}`}
-                    data-testid="lead-row"
-                    data-lead-id={lead.id}
-                  >
-                    <td className="py-3 px-2" onClick={(e) => e.stopPropagation()}>
-                      <input
-                        type="checkbox"
-                        checked={selected.has(lead.id)}
-                        onChange={() => toggleSelect(lead.id)}
-                        className="rounded"
-                      />
-                    </td>
-                    <td className="py-3 px-2">
-                      <span className="font-medium text-slate-800">
-                        {lead.first_name} {lead.last_name}
-                        {lead.is_duplicate && (
-                          <span className="ml-2 text-xs text-amber-600">
-                            Doublon
-                          </span>
-                        )}
-                      </span>
-                    </td>
-                    <td className="py-3 px-2 text-slate-700">{lead.phone}</td>
-                    <td
-                      className="py-3 px-4"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <select
+                    <select
                         value={lead.status}
                         onChange={(e) =>
                           handleStatusChange(
@@ -429,7 +428,7 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
                           )
                         }
                         disabled={updatingId === lead.id}
-                        className={`inline-flex px-2 py-1 text-xs font-medium rounded-full border cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-1 disabled:opacity-50 ${getStatusSelectClass(lead.status)}`}
+                        className={`inline-flex px-2 py-1 text-xs font-medium rounded-[9px] border cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40 focus:ring-offset-1 disabled:opacity-50 ${getStatusSelectClass(lead.status)}`}
                       >
                         {LEAD_STATUSES_ADMIN.map((s) => (
                           <option key={s} value={s}>
@@ -440,66 +439,72 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
                           </option>
                         ))}
                       </select>
-                    </td>
-                    <td className="py-3 px-4 text-slate-600">
-                      {lead.profile?.full_name || lead.profile?.email || "-"}
-                    </td>
-                    <td className="py-3 px-4 text-slate-600 text-sm">
-                      {lead.added_at
-                        ? formatDateParis(lead.added_at)
-                        : "-"}
-                    </td>
-                    <td
-                      className="py-3 px-4 min-w-[180px]"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {editingCommentId === lead.id ? (
-                        <input
-                          type="text"
-                          value={commentDrafts[lead.id] ?? lead.commentaire ?? ""}
-                          onChange={(e) =>
-                            setCommentDrafts((d) => ({
-                              ...d,
-                              [lead.id]: e.target.value,
-                            }))
+                  </TableCell>
+                  <TableCell className="py-3">
+                    {lead.category ? (
+                      <CategoryChip category={lead.category} />
+                    ) : (
+                      <span className="text-[#64748b] text-xs">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="py-3 text-[#64748b]">
+                    {lead.profile?.full_name || lead.profile?.email || "-"}
+                  </TableCell>
+                  <TableCell className="py-3 text-[#64748b] text-sm">
+                    {lead.added_at
+                      ? formatDateParis(lead.added_at)
+                      : "-"}
+                  </TableCell>
+                  <TableCell
+                    className="py-3 min-w-[180px]"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {editingCommentId === lead.id ? (
+                      <input
+                        type="text"
+                        value={commentDrafts[lead.id] ?? lead.commentaire ?? ""}
+                        onChange={(e) =>
+                          setCommentDrafts((d) => ({
+                            ...d,
+                            [lead.id]: e.target.value,
+                          }))
+                        }
+                        onBlur={() =>
+                          handleCommentSave(
+                            lead.id,
+                            commentDrafts[lead.id] ?? lead.commentaire ?? ""
+                          )
+                        }
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.currentTarget.blur();
                           }
-                          onBlur={() =>
-                            handleCommentSave(
-                              lead.id,
-                              commentDrafts[lead.id] ?? lead.commentaire ?? ""
-                            )
-                          }
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.currentTarget.blur();
-                            }
-                          }}
-                          autoFocus
-                          className="w-full px-2 py-1 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingCommentId(lead.id);
-                            setCommentDrafts((d) => ({
-                              ...d,
-                              [lead.id]: lead.commentaire ?? "",
-                            }));
-                          }}
-                          className="w-full text-left px-2 py-1 text-sm text-slate-600 hover:bg-slate-100 rounded truncate block"
-                          title={lead.commentaire ?? "Cliquer pour ajouter un commentaire"}
-                        >
-                          {lead.commentaire || "—"}
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                        }}
+                        autoFocus
+                        className="w-full px-2 py-1 text-sm border border-[#e1e8f2] rounded-[9px] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40"
+                      />
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingCommentId(lead.id);
+                          setCommentDrafts((d) => ({
+                            ...d,
+                            [lead.id]: lead.commentaire ?? "",
+                          }));
+                        }}
+                        className="w-full text-left px-2 py-1 text-sm text-[#64748b] hover:bg-[#f4f7fb] rounded-[9px] truncate block"
+                        title={lead.commentaire ?? "Cliquer pour ajouter un commentaire"}
+                      >
+                        {lead.commentaire || "—"}
+                      </button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

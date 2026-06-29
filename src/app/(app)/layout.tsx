@@ -85,7 +85,7 @@ export default async function AppLayout({
   return (
     <SaveOnLeaveProvider>
       <div className="min-h-screen flex">
-        <Suspense fallback={<div className="hidden lg:block w-64 shrink-0" />}>
+        <Suspense fallback={<div className="hidden lg:block w-64 shrink-0 bg-gradient-to-b from-[#0b1f3a] to-[#13294b]" />}>
           <Drawer
             role={role === "admin" || role === "secretaire" ? (role as "admin" | "secretaire") : "telepro"}
             userName={profile?.full_name || user.email || undefined}
@@ -93,7 +93,7 @@ export default async function AppLayout({
             statusCounts={statusCounts}
           />
         </Suspense>
-        <main className="flex-1 lg:ml-64 min-h-screen pt-4 pb-8 px-4 lg:px-8">
+        <main className="flex-1 lg:ml-64 min-h-screen pt-4 pb-8 px-4 lg:px-8 bg-[#f4f7fb]">
           {children}
         </main>
       </div>

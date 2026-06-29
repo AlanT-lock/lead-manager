@@ -4,6 +4,9 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { AuthShell } from "@/components/auth/AuthShell";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -71,86 +74,38 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-8 bg-slate-50">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
-          <h1 className="text-2xl font-bold text-slate-800 mb-2">
-            Connexion
-          </h1>
-          <p className="text-slate-600 mb-6">
-            Connectez-vous à votre espace
-          </p>
-
-          <form onSubmit={handleSubmit} className="space-y-4" data-testid="login-form">
-            {error && (
-              <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
-            {success && (
-              <div className="p-3 bg-green-50 text-green-700 rounded-lg text-sm">
-                {success}
-              </div>
-            )}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1">
-                Mot de passe
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
-            >
-              {loading ? "Connexion..." : "Se connecter"}
-            </button>
-            <p className="text-center">
-              <Link
-                href="/forgot-password"
-                className="text-sm text-blue-600 hover:underline font-medium"
-              >
-                Mot de passe oublié ?
-              </Link>
-            </p>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-slate-500">
-            <Link href="/" className="text-blue-600 hover:underline">
-              Retour à l&apos;accueil
-            </Link>
-          </p>
+    <AuthShell
+      title="Connexion"
+      subtitle="Connectez-vous à votre espace"
+      footer={<Link href="/" className="text-[#2563eb] hover:underline">Retour à l&apos;accueil</Link>}
+    >
+      <form onSubmit={handleSubmit} data-testid="login-form" className="space-y-4">
+        {error && <div className="rounded-[9px] bg-[#fee2e2] px-3 py-2 text-sm text-[#b91c1c]">{error}</div>}
+        {success && <div className="rounded-[9px] bg-[#dcfce7] px-3 py-2 text-sm text-[#15803d]">{success}</div>}
+        <div className="space-y-1.5">
+          <label htmlFor="email" className="text-sm font-medium text-[#0b1f3a]">Email</label>
+          <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
-      </div>
-    </div>
+        <div className="space-y-1.5">
+          <label htmlFor="password" className="text-sm font-medium text-[#0b1f3a]">Mot de passe</label>
+          <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        </div>
+        <Button type="submit" disabled={loading} className="w-full">
+          {loading ? "Connexion..." : "Se connecter"}
+        </Button>
+        <p className="text-center">
+          <Link href="/forgot-password" className="text-sm font-medium text-[#2563eb] hover:underline">Mot de passe oublié ?</Link>
+        </p>
+      </form>
+    </AuthShell>
   );
 }
 
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center p-8 bg-slate-50">
-        <div className="text-slate-500">Chargement...</div>
+      <div className="min-h-screen flex items-center justify-center p-8 bg-[#f4f7fb]">
+        <div className="text-[#64748b]">Chargement...</div>
       </div>
     }>
       <LoginForm />

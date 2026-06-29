@@ -13,12 +13,12 @@ export function DelegataireRow({ label, count, href, isLast }: DelegataireRowPro
   return (
     <Link
       href={href}
-      className={`flex justify-between items-center py-3 px-2 -mx-2 rounded-lg hover:bg-slate-50 transition-colors ${
-        !isLast ? "border-b border-slate-100" : "border-t border-slate-200 mt-2"
+      className={`flex justify-between items-center py-3 px-2 -mx-2 rounded-lg hover:bg-[#f8fafc] transition-colors ${
+        !isLast ? "border-b border-[#f1f5f9]" : "border-t border-[#e1e8f2] mt-2"
       }`}
     >
-      <span className="text-slate-700">{label}</span>
-      <span className="font-medium text-slate-800">{count}</span>
+      <span className="text-[#64748b]">{label}</span>
+      <span className="font-semibold text-[#0b1f3a]">{count}</span>
     </Link>
   );
 }

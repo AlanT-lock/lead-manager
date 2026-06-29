@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Phone } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
 
 const POLL_INTERVAL_MS = 1500;
 const POLL_MAX_DURATION_MS = 120000;
@@ -102,11 +103,11 @@ export function NrpCallsButton() {
 
   return (
     <div className="flex flex-col gap-2">
-      <button
+      <Button
         type="button"
         onClick={handleStartCalls}
         disabled={loading || polling}
-        className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="h-auto px-6 py-3 bg-emerald-600 text-white hover:bg-emerald-700 gap-2 disabled:cursor-not-allowed"
       >
         <Phone className="w-4 h-4" />
         {loading
@@ -114,7 +115,7 @@ export function NrpCallsButton() {
           : polling
             ? "En attente d'un décrochage…"
             : "Lancer les appels NRP (2 numéros)"}
-      </button>
+      </Button>
       {error && (
         <p className="text-sm text-red-600">{error}</p>
       )}
@@ -124,7 +125,7 @@ export function NrpCallsButton() {
         </p>
       )}
       {success && !error && !noAnswer && (
-        <p className="text-sm text-slate-600">{success}</p>
+        <p className="text-sm text-[#64748b]">{success}</p>
       )}
     </div>
   );

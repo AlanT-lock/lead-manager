@@ -1,8 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { TeleproLeadForm } from "../TeleproLeadForm";
 import { LeadLogsSidebar } from "@/components/LeadLogsSidebar";
+import { PageHeader } from "@/components/ui-kit/PageHeader";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default async function TeleproLeadPage({
   params,
@@ -51,15 +56,40 @@ export default async function TeleproLeadPage({
   }));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
+      <div className="flex items-center justify-between">
+        <Link
+          href="/telepro/leads"
+          className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-1.5 text-[#64748b] hover:text-[#0b1f3a] -ml-1")}
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Retour aux leads
+        </Link>
+        <Link
+          href={`/telepro/teleprospection?lead=${id}`}
+          className={cn(buttonVariants({ variant: "default", size: "sm" }))}
+        >
+          Mode téléprospection
+        </Link>
+      </div>
+
+      <PageHeader
+        title={`${lead.first_name} ${lead.last_name}`}
+        actions={
+          lead.is_duplicate ? (
+            <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-700 text-xs font-semibold px-2.5 py-0.5">
+              Doublon
+            </span>
+          ) : undefined
+        }
+      />
+
       <div className="flex gap-6 items-start">
         <div className="flex-1 min-w-0">
           <TeleproLeadForm
             lead={lead}
             leadId={id}
             teleproDocuments={teleproDocs || []}
-            showBackToLeads
-            showTeleprospectionLink
           />
         </div>
         <LeadLogsSidebar logs={logEntries} />

@@ -4,6 +4,22 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, X, Calendar as CalendarIcon } from "lucide-react";
 import { formatDateParis, fromDatetimeLocalValueParis, toDatetimeLocalValueParis } from "@/lib/date";
+import { PageHeader } from "@/components/ui-kit/PageHeader";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableHeader,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+
+const SELECT_CLS =
+  "w-full h-8 px-2.5 text-sm border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40";
+
+const LABEL_CLS = "block text-sm font-medium text-[#0b1f3a] mb-1";
 
 interface CodeCourrier {
   id: string;
@@ -131,117 +147,111 @@ export function CodeCourrierClient({ codeCourriers, telepros }: CodeCourrierClie
   };
 
   return (
-    <>
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">Code courrier</h1>
-          <p className="text-slate-600 mt-1">
-            Gestion des codes courrier
-          </p>
-        </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
-        >
-          <Plus className="w-4 h-4" />
-          Nouveau code courrier
-        </button>
-      </div>
+      <PageHeader
+        title="Code courrier"
+        subtitle="Gestion des codes courrier"
+        actions={
+          <Button onClick={() => setShowCreateModal(true)}>
+            <Plus />
+            Nouveau code courrier
+          </Button>
+        }
+      />
 
       {/* Tableau */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">Nom</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">Prénom</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">N° de tél</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">Télépro</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">Date de création</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">Jours</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-slate-700">NRP / Rappel</th>
-                <th className="text-right py-3 px-4 text-sm font-medium text-slate-700">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {codeCourriers.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-500">
-                    Aucun code courrier
-                  </td>
-                </tr>
-              ) : (
-                codeCourriers.map((cc) => {
-                  const dayCount = getDaysSinceCreation(cc.created_at);
-                  const dayColor = getDayCounterColor(dayCount);
-                  return (
-                    <tr
-                      key={cc.id}
-                      onClick={() => openDetail(cc)}
-                      className="border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors"
-                    >
-                      <td className="py-3 px-4 font-medium text-slate-800">{cc.last_name}</td>
-                      <td className="py-3 px-4 text-slate-700">{cc.first_name}</td>
-                      <td className="py-3 px-4 text-slate-700">{cc.phone}</td>
-                      <td className="py-3 px-4 text-slate-600 text-sm">{getTeleproLabel(cc)}</td>
-                      <td className="py-3 px-4 text-slate-600 text-sm">{formatDateParis(cc.created_at)}</td>
-                      <td className="py-3 px-4">
-                        <span
-                          className="inline-flex items-center justify-center w-10 h-10 rounded-full text-white text-sm font-bold"
-                          style={{ backgroundColor: dayColor }}
-                        >
-                          {dayCount}
+      <div className="rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_1px_2px_rgba(13,38,76,.06)] overflow-hidden">
+        <Table>
+          <TableHeader className="bg-[#f8fafd]">
+            <TableRow>
+              <TableHead className="py-3 px-4 text-xs font-semibold text-[#64748b] uppercase tracking-wide">Nom</TableHead>
+              <TableHead className="py-3 px-4 text-xs font-semibold text-[#64748b] uppercase tracking-wide">Prénom</TableHead>
+              <TableHead className="py-3 px-4 text-xs font-semibold text-[#64748b] uppercase tracking-wide">N° de tél</TableHead>
+              <TableHead className="py-3 px-4 text-xs font-semibold text-[#64748b] uppercase tracking-wide">Télépro</TableHead>
+              <TableHead className="py-3 px-4 text-xs font-semibold text-[#64748b] uppercase tracking-wide">Date de création</TableHead>
+              <TableHead className="py-3 px-4 text-xs font-semibold text-[#64748b] uppercase tracking-wide">Jours</TableHead>
+              <TableHead className="py-3 px-4 text-xs font-semibold text-[#64748b] uppercase tracking-wide">NRP / Rappel</TableHead>
+              <TableHead className="py-3 px-4 text-xs font-semibold text-[#64748b] uppercase tracking-wide text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {codeCourriers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} className="py-12 text-center text-[#64748b]">
+                  Aucun code courrier
+                </TableCell>
+              </TableRow>
+            ) : (
+              codeCourriers.map((cc) => {
+                const dayCount = getDaysSinceCreation(cc.created_at);
+                const dayColor = getDayCounterColor(dayCount);
+                return (
+                  <TableRow
+                    key={cc.id}
+                    onClick={() => openDetail(cc)}
+                    className="cursor-pointer"
+                  >
+                    <TableCell className="py-3 px-4 font-medium text-[#0b1f3a]">{cc.last_name}</TableCell>
+                    <TableCell className="py-3 px-4 text-[#0b1f3a]">{cc.first_name}</TableCell>
+                    <TableCell className="py-3 px-4 text-[#64748b]">{cc.phone}</TableCell>
+                    <TableCell className="py-3 px-4 text-[#64748b] text-sm">{getTeleproLabel(cc)}</TableCell>
+                    <TableCell className="py-3 px-4 text-[#64748b] text-sm">{formatDateParis(cc.created_at)}</TableCell>
+                    <TableCell className="py-3 px-4">
+                      <span
+                        className="inline-flex items-center justify-center w-9 h-9 rounded-full text-white text-sm font-bold"
+                        style={{ backgroundColor: dayColor }}
+                      >
+                        {dayCount}
+                      </span>
+                    </TableCell>
+                    <TableCell className="py-3 px-4 text-sm">
+                      {cc.callback_at ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#dbeafe] text-[#1e40af] text-xs font-medium">
+                          <CalendarIcon className="w-3 h-3" />
+                          {formatDateParis(cc.callback_at)}
                         </span>
-                      </td>
-                      <td className="py-3 px-4 text-sm">
-                        {cc.callback_at ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-medium">
-                            <CalendarIcon className="w-3 h-3" />
-                            {formatDateParis(cc.callback_at)}
-                          </span>
-                        ) : (
-                          <span className="text-slate-600">
-                            {cc.nrp_count > 0 ? `${cc.nrp_count} NRP` : "—"}
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          onClick={() => handleDelete(cc.id)}
-                          className="p-2 rounded-lg text-red-500 hover:bg-red-50 hover:text-red-700 transition-colors"
-                          title="Supprimer"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                      ) : (
+                        <span className="text-[#64748b]">
+                          {cc.nrp_count > 0 ? `${cc.nrp_count} NRP` : "—"}
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        variant="destructive"
+                        size="icon-sm"
+                        onClick={() => handleDelete(cc.id)}
+                        title="Supprimer"
+                      >
+                        <Trash2 />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
       </div>
 
       {/* Modal création */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between p-4 border-b border-slate-200">
-              <h3 className="text-lg font-semibold text-slate-800">Nouveau code courrier</h3>
-              <button onClick={() => setShowCreateModal(false)} className="p-1 rounded-lg hover:bg-slate-100">
-                <X className="w-5 h-5" />
-              </button>
+          <div className="rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_1px_2px_rgba(13,38,76,.06)] w-full max-w-md">
+            <div className="flex items-center justify-between p-4 border-b border-[#e1e8f2]">
+              <h3 className="text-lg font-semibold text-[#0b1f3a]">Nouveau code courrier</h3>
+              <Button variant="ghost" size="icon-sm" onClick={() => setShowCreateModal(false)}>
+                <X />
+              </Button>
             </div>
             <div className="p-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Télépro assigné</label>
+                <label className={LABEL_CLS}>Télépro assigné</label>
                 <select
                   value={assignedTo}
                   onChange={(e) => setAssignedTo(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={SELECT_CLS}
                 >
                   <option value="">— Sélectionner —</option>
                   {telepros.map((t) => (
@@ -254,50 +264,46 @@ export function CodeCourrierClient({ codeCourriers, telepros }: CodeCourrierClie
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Nom</label>
-                <input
+                <label className={LABEL_CLS}>Nom</label>
+                <Input
                   type="text"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Nom de famille"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Prénom</label>
-                <input
+                <label className={LABEL_CLS}>Prénom</label>
+                <Input
                   type="text"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Prénom"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">N° de téléphone</label>
-                <input
+                <label className={LABEL_CLS}>N° de téléphone</label>
+                <Input
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="06 12 34 56 78"
                 />
               </div>
             </div>
-            <div className="p-4 border-t border-slate-200 flex justify-end gap-3">
-              <button
+            <div className="p-4 border-t border-[#e1e8f2] flex justify-end gap-3">
+              <Button
+                variant="outline"
                 onClick={() => setShowCreateModal(false)}
-                className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium"
               >
                 Annuler
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleCreate}
                 disabled={creating || !firstName.trim() || !lastName.trim() || !phone.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
               >
                 {creating ? "Enregistrement..." : "Enregistrer"}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -306,59 +312,60 @@ export function CodeCourrierClient({ codeCourriers, telepros }: CodeCourrierClie
       {/* Modal détail / suivi */}
       {showDetailModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between p-4 border-b border-slate-200">
-              <h3 className="text-lg font-semibold text-slate-800">Code courrier</h3>
-              <button
+          <div className="rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_1px_2px_rgba(13,38,76,.06)] w-full max-w-md">
+            <div className="flex items-center justify-between p-4 border-b border-[#e1e8f2]">
+              <h3 className="text-lg font-semibold text-[#0b1f3a]">Code courrier</h3>
+              <Button
+                variant="ghost"
+                size="icon-sm"
                 onClick={() => { setShowDetailModal(null); setFollowUpAction(""); setCallbackDate(""); }}
-                className="p-1 rounded-lg hover:bg-slate-100"
               >
-                <X className="w-5 h-5" />
-              </button>
+                <X />
+              </Button>
             </div>
             <div className="p-4 space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-xs text-slate-500">Nom</p>
-                  <p className="font-medium text-slate-800">{showDetailModal.last_name}</p>
+                  <p className="text-xs text-[#64748b]">Nom</p>
+                  <p className="font-medium text-[#0b1f3a]">{showDetailModal.last_name}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500">Prénom</p>
-                  <p className="font-medium text-slate-800">{showDetailModal.first_name}</p>
+                  <p className="text-xs text-[#64748b]">Prénom</p>
+                  <p className="font-medium text-[#0b1f3a]">{showDetailModal.first_name}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500">Téléphone</p>
-                  <p className="font-medium text-slate-800">{showDetailModal.phone}</p>
+                  <p className="text-xs text-[#64748b]">Téléphone</p>
+                  <p className="font-medium text-[#0b1f3a]">{showDetailModal.phone}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500">Télépro</p>
-                  <p className="font-medium text-slate-800">{getTeleproLabel(showDetailModal)}</p>
+                  <p className="text-xs text-[#64748b]">Télépro</p>
+                  <p className="font-medium text-[#0b1f3a]">{getTeleproLabel(showDetailModal)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500">Date de création</p>
-                  <p className="font-medium text-slate-800">{formatDateParis(showDetailModal.created_at)}</p>
+                  <p className="text-xs text-[#64748b]">Date de création</p>
+                  <p className="font-medium text-[#0b1f3a]">{formatDateParis(showDetailModal.created_at)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500">Jours écoulés</p>
-                  <p className="font-medium text-slate-800">{getDaysSinceCreation(showDetailModal.created_at)} jour(s)</p>
+                  <p className="text-xs text-[#64748b]">Jours écoulés</p>
+                  <p className="font-medium text-[#0b1f3a]">{getDaysSinceCreation(showDetailModal.created_at)} jour(s)</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500">NRP</p>
-                  <p className="font-medium text-slate-800">{showDetailModal.nrp_count}</p>
+                  <p className="text-xs text-[#64748b]">NRP</p>
+                  <p className="font-medium text-[#0b1f3a]">{showDetailModal.nrp_count}</p>
                 </div>
               </div>
 
               {showDetailModal.callback_at && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <p className="text-sm text-blue-800">
+                <div className="bg-[#eff6ff] border border-[#bfdbfe] rounded-[10px] p-3">
+                  <p className="text-sm text-[#1e40af]">
                     <CalendarIcon className="w-4 h-4 inline mr-1" />
                     Rappel prévu le {formatDateParis(showDetailModal.callback_at)}
                   </p>
                 </div>
               )}
 
-              <div className="border-t border-slate-200 pt-3">
-                <label className="block text-sm font-medium text-slate-700 mb-2">Suivi</label>
+              <div className="border-t border-[#e1e8f2] pt-3">
+                <label className="block text-sm font-medium text-[#0b1f3a] mb-2">Suivi</label>
                 <select
                   value={followUpAction}
                   onChange={(e) => {
@@ -369,7 +376,7 @@ export function CodeCourrierClient({ codeCourriers, telepros }: CodeCourrierClie
                       setCallbackDate("");
                     }
                   }}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={SELECT_CLS}
                 >
                   <option value="">Sélectionner une action...</option>
                   <option value="nrp">NRP</option>
@@ -379,35 +386,33 @@ export function CodeCourrierClient({ codeCourriers, telepros }: CodeCourrierClie
 
                 {followUpAction === "a_rappeler" && (
                   <div className="mt-3">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Date et heure du rappel</label>
-                    <input
+                    <label className={LABEL_CLS}>Date et heure du rappel</label>
+                    <Input
                       type="datetime-local"
                       value={callbackDate}
                       onChange={(e) => setCallbackDate(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 )}
               </div>
             </div>
-            <div className="p-4 border-t border-slate-200 flex justify-end gap-3">
-              <button
+            <div className="p-4 border-t border-[#e1e8f2] flex justify-end gap-3">
+              <Button
+                variant="outline"
                 onClick={() => { setShowDetailModal(null); setFollowUpAction(""); setCallbackDate(""); }}
-                className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium"
               >
                 Fermer
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleFollowUp}
                 disabled={actionLoading || !followUpAction || (followUpAction === "a_rappeler" && !callbackDate)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
               >
                 {actionLoading ? "En cours..." : "Valider"}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

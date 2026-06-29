@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { AgendaClient } from "./AgendaClient";
+import { PageHeader } from "@/components/ui-kit/PageHeader";
 
 export default async function TeleproAgendaPage() {
   const supabase = await createClient();
@@ -26,13 +27,11 @@ export default async function TeleproAgendaPage() {
   }));
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Agenda</h1>
-        <p className="text-slate-600 mt-1">
-          Visualisez vos rappels à effectuer
-        </p>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        title="Agenda"
+        subtitle="Visualisez vos rappels à effectuer"
+      />
 
       <AgendaClient events={events} />
     </div>

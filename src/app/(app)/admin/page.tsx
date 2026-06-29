@@ -8,6 +8,7 @@ import {
 } from "@/lib/types";
 import { StatsTeleproFilters } from "./StatsTeleproFilters";
 import { startOfMonth, endOfMonth } from "date-fns";
+import { PageHeader } from "@/components/ui-kit/PageHeader";
 
 function getDateRange(from?: string, to?: string) {
   const now = new Date();
@@ -153,12 +154,10 @@ export default async function AdminDashboard({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Tableau de bord</h1>
-        <p className="text-slate-600 mt-1">
-          Consultez les statistiques détaillées de chaque télépro
-        </p>
-      </div>
+      <PageHeader
+        title="Tableau de bord"
+        subtitle="Consultez les statistiques détaillées de chaque télépro"
+      />
 
       <StatsTeleproFilters />
 
@@ -179,8 +178,8 @@ export default async function AdminDashboard({
       </div>
 
       {activeTelepros.length === 0 && (
-        <div className="text-center py-12 bg-slate-50 rounded-xl border border-slate-200">
-          <p className="text-slate-600">Aucun télépro actif</p>
+        <div className="text-center py-12 rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_1px_2px_rgba(13,38,76,.06)]">
+          <p className="text-[#64748b]">Aucun télépro actif</p>
         </div>
       )}
     </div>

@@ -29,6 +29,9 @@ import {
 } from "@/lib/date";
 import { MaterialCostSection, type SelectedMaterial } from "./MaterialCostSection";
 import { useSaveOnLeave } from "@/contexts/SaveOnLeaveContext";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 interface AdminLeadFormProps {
   lead: Record<string, unknown>;
@@ -84,6 +87,17 @@ function buildUpdates(lead: Record<string, unknown>) {
     updated_at: new Date().toISOString(),
   };
 }
+
+const SELECT_CLS =
+  "h-9 w-full px-3 border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] text-sm focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40";
+
+const CARD_CLS =
+  "rounded-[12px] border border-[#e1e8f2] bg-white shadow-[0_1px_2px_rgba(13,38,76,.06)] p-5";
+
+const SECTION_TITLE_CLS =
+  "text-xs font-semibold text-[#64748b] uppercase tracking-wide mb-4";
+
+const LABEL_CLS = "block text-sm font-medium text-[#0b1f3a] mb-1.5";
 
 export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
   const [lead, setLead] = useState(initialLead);
@@ -244,90 +258,92 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
   const isDocumentsRecus = lead.status === "documents_recus" || lead.status === "ancien_documents_recus" || lead.status === "installe";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      <div>
-        <h2 className="font-medium text-slate-800 mb-4">Coordonnées</h2>
+    <form onSubmit={handleSubmit} className="space-y-4">
+
+      {/* ── Coordonnées ─────────────────────────────────── */}
+      <div className={CARD_CLS}>
+        <h2 className={SECTION_TITLE_CLS}>Coordonnées</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Prénom</label>
-            <input
+            <label className={LABEL_CLS}>Prénom</label>
+            <Input
               type="text"
               value={(lead.first_name as string) || ""}
               onChange={(e) => updateField("first_name", e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg"
             />
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Nom</label>
-            <input
+            <label className={LABEL_CLS}>Nom</label>
+            <Input
               type="text"
               value={(lead.last_name as string) || ""}
               onChange={(e) => updateField("last_name", e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg"
             />
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Téléphone</label>
-            <input
+            <label className={LABEL_CLS}>Téléphone</label>
+            <Input
               type="tel"
               value={(lead.phone as string) || ""}
               onChange={(e) => updateField("phone", e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg"
             />
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Email</label>
-            <input
+            <label className={LABEL_CLS}>Email</label>
+            <Input
               type="email"
               value={(lead.email as string) || ""}
               onChange={(e) => updateField("email", e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg"
             />
           </div>
         </div>
       </div>
 
-      <div>
-        <h2 className="font-medium text-slate-800 mb-4">Statut</h2>
-        <select
-          value={(lead.status as string) || ""}
-          onChange={(e) => updateField("status", e.target.value)}
-          className="px-4 py-2 border rounded-lg"
-        >
-          {(Object.keys(LEAD_STATUS_LABELS) as LeadStatus[]).map((s) => (
-            <option key={s} value={s}>
-              {LEAD_STATUS_LABELS[s]}
-            </option>
-          ))}
-        </select>
-        {lead.status === "a_rappeler" && (
-          <div className="mt-2">
-            <label className="block text-sm text-slate-600 mb-1">
-              Date/heure rappel
-            </label>
-            <input
-              type="datetime-local"
-              value={
-                lead.callback_at
-                  ? toDatetimeLocalValueParis(lead.callback_at as string)
-                  : ""
-              }
-              onChange={(e) => {
-                const iso = e.target.value ? fromDatetimeLocalValueParis(e.target.value) : "";
-                updateField("callback_at", iso || null);
-              }}
-              className="w-full px-4 py-2 border rounded-lg"
-            />
-          </div>
-        )}
+      {/* ── Statut ──────────────────────────────────────── */}
+      <div className={CARD_CLS}>
+        <h2 className={SECTION_TITLE_CLS}>Statut</h2>
+        <div className="space-y-3">
+          <select
+            value={(lead.status as string) || ""}
+            onChange={(e) => updateField("status", e.target.value)}
+            className="h-9 w-full max-w-xs px-3 border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] text-sm focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40"
+          >
+            {(Object.keys(LEAD_STATUS_LABELS) as LeadStatus[]).map((s) => (
+              <option key={s} value={s}>
+                {LEAD_STATUS_LABELS[s]}
+              </option>
+            ))}
+          </select>
+          {lead.status === "a_rappeler" && (
+            <div>
+              <label className={LABEL_CLS}>
+                Date/heure rappel
+              </label>
+              <Input
+                type="datetime-local"
+                value={
+                  lead.callback_at
+                    ? toDatetimeLocalValueParis(lead.callback_at as string)
+                    : ""
+                }
+                onChange={(e) => {
+                  const iso = e.target.value ? fromDatetimeLocalValueParis(e.target.value) : "";
+                  updateField("callback_at", iso || null);
+                }}
+                className="max-w-xs"
+              />
+            </div>
+          )}
+        </div>
       </div>
 
-      <div>
-        <h2 className="font-medium text-slate-800 mb-4">Adresse</h2>
+      {/* ── Profil & Logement ───────────────────────────── */}
+      <div className={CARD_CLS}>
+        <h2 className={SECTION_TITLE_CLS}>Profil & Logement</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Nombre de m²</label>
-            <input
+            <label className={LABEL_CLS}>Nombre de m²</label>
+            <Input
               type="number"
               step="0.01"
               min="0"
@@ -338,12 +354,11 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
                   e.target.value ? parseFloat(e.target.value) : null
                 )
               }
-              className="w-full px-4 py-2 border rounded-lg"
             />
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Revenu fiscal de référence</label>
-            <input
+            <label className={LABEL_CLS}>Revenu fiscal de référence</label>
+            <Input
               type="number"
               step="0.01"
               min="0"
@@ -354,67 +369,61 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
                   e.target.value ? parseFloat(e.target.value) : null
                 )
               }
-              className="w-full px-4 py-2 border rounded-lg"
             />
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Numéro fiscal</label>
-            <input
+            <label className={LABEL_CLS}>Numéro fiscal</label>
+            <Input
               type="text"
               value={(lead.numero_fiscal as string) || ""}
               onChange={(e) => updateField("numero_fiscal", e.target.value || null)}
               placeholder="13 chiffres"
-              className="w-full px-4 py-2 border rounded-lg"
             />
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Date de naissance</label>
-            <input
+            <label className={LABEL_CLS}>Date de naissance</label>
+            <Input
               type="date"
               value={(lead.date_of_birth as string) || ""}
               onChange={(e) => updateField("date_of_birth", e.target.value || null)}
-              className="w-full px-4 py-2 border rounded-lg"
             />
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Code postal</label>
-            <input
+            <label className={LABEL_CLS}>Code postal</label>
+            <Input
               type="text"
               value={(lead.postal_code as string) || ""}
               onChange={(e) => updateField("postal_code", e.target.value)}
               onBlur={fetchCity}
               placeholder="75001"
-              className="w-full px-4 py-2 border rounded-lg"
             />
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Ville</label>
-            <input
+            <label className={LABEL_CLS}>Ville</label>
+            <Input
               type="text"
               value={(lead.city as string) || ""}
               onChange={(e) => updateField("city", e.target.value)}
               placeholder={cityLoading ? "Chargement…" : undefined}
               readOnly={cityLoading}
-              className="w-full px-4 py-2 border rounded-lg"
             />
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm text-slate-600 mb-1">Adresse</label>
-            <input
+            <label className={LABEL_CLS}>Adresse</label>
+            <Input
               type="text"
               value={(lead.address as string) || ""}
               onChange={(e) => updateField("address", e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg"
             />
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Mode chauffage</label>
+            <label className={LABEL_CLS}>Mode chauffage</label>
             <select
               value={(lead.heating_mode as string) || ""}
               onChange={(e) =>
                 updateField("heating_mode", e.target.value || null)
               }
-              className="w-full px-4 py-2 border rounded-lg"
+              className={SELECT_CLS}
             >
               <option value="">—</option>
               {(Object.keys(HEATING_MODE_LABELS) as HeatingMode[]).map((m) => (
@@ -425,11 +434,12 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
             </select>
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Catégorie</label>
+            <label className={LABEL_CLS}>Catégorie</label>
             <select
+              data-testid="lead-category-select"
               value={(lead.category as string) || "fenetre"}
               onChange={(e) => updateField("category", e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg"
+              className={SELECT_CLS}
             >
               {LEAD_CATEGORIES.map((c) => (
                 <option key={c} value={c}>
@@ -439,11 +449,11 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
             </select>
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Couleur</label>
+            <label className={LABEL_CLS}>Couleur</label>
             <select
               value={(lead.color as string) || ""}
               onChange={(e) => updateField("color", e.target.value || null)}
-              className="w-full px-4 py-2 border rounded-lg"
+              className={SELECT_CLS}
             >
               <option value="">—</option>
               {(Object.keys(LEAD_COLOR_LABELS) as LeadColor[]).map((c) => (
@@ -454,7 +464,7 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
             </select>
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">
+            <label className={LABEL_CLS}>
               Propriétaire / Locataire
             </label>
             <select
@@ -471,7 +481,7 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
                   e.target.value === "" ? null : e.target.value === "owner"
                 )
               }
-              className="w-full px-4 py-2 border rounded-lg"
+              className={SELECT_CLS}
             >
               <option value="">—</option>
               <option value="owner">Propriétaire</option>
@@ -479,7 +489,7 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
             </select>
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">
+            <label className={LABEL_CLS}>
               Type installation
             </label>
             <select
@@ -487,7 +497,7 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
               onChange={(e) =>
                 updateField("installation_type", e.target.value || null)
               }
-              className="w-full px-4 py-2 border rounded-lg"
+              className={SELECT_CLS}
             >
               <option value="">—</option>
               {(Object.keys(INSTALLATION_TYPE_LABELS) as InstallationType[]).map(
@@ -500,7 +510,7 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
             </select>
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">
+            <label className={LABEL_CLS}>
               Type d&apos;électricité
             </label>
             <select
@@ -508,7 +518,7 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
               onChange={(e) =>
                 updateField("electricity_type", e.target.value || null)
               }
-              className="w-full px-4 py-2 border rounded-lg"
+              className={SELECT_CLS}
             >
               <option value="">—</option>
               {(Object.keys(ELECTRICITY_TYPE_LABELS) as ElectricityType[]).map(
@@ -521,7 +531,7 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
             </select>
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm text-slate-600 mb-1">
+            <label className={LABEL_CLS}>
               Type de radiateur
             </label>
             <div className="flex flex-wrap gap-4">
@@ -529,7 +539,7 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
                 const current = (lead.radiator_type as string[] | null) ?? [];
                 const checked = current.includes(t);
                 return (
-                  <label key={t} className="flex items-center gap-2">
+                  <label key={t} className="flex items-center gap-2 text-sm text-[#0b1f3a] cursor-pointer">
                     <input
                       type="checkbox"
                       checked={checked}
@@ -539,7 +549,7 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
                           : current.filter((x) => x !== t);
                         updateField("radiator_type", next.length ? next : null);
                       }}
-                      className="rounded border-slate-300"
+                      className="rounded border-[#e1e8f2] accent-[#2563eb]"
                     />
                     {RADIATOR_TYPE_LABELS[t]}
                   </label>
@@ -550,29 +560,31 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
         </div>
       </div>
 
-      <div>
-        <h2 className="font-medium text-slate-800 mb-4">Commentaire</h2>
-        <textarea
+      {/* ── Commentaire ─────────────────────────────────── */}
+      <div className={CARD_CLS}>
+        <h2 className={SECTION_TITLE_CLS}>Commentaire</h2>
+        <Textarea
           value={(lead.commentaire as string) || ""}
           onChange={(e) => updateField("commentaire", e.target.value)}
           rows={3}
-          className="w-full px-4 py-2 border rounded-lg"
         />
       </div>
 
       {isDocumentsRecus && (
         <>
-          <div>
-            <h2 className="font-medium text-slate-800 mb-4">
+          {/* ── Statut chantier ─────────────────────────── */}
+          <div className={CARD_CLS}>
+            <h2 className={SECTION_TITLE_CLS}>
               Statut chantier (cumulables)
             </h2>
             <div className="flex flex-wrap gap-4">
               {CHANTIER_STATUS_FIELDS.map(({ field, label }) => (
-                <label key={field} className="flex items-center gap-2">
+                <label key={field} className="flex items-center gap-2 text-sm text-[#0b1f3a] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={!!(lead[field as keyof typeof lead] as boolean)}
                     onChange={(e) => updateField(field, e.target.checked)}
+                    className="rounded border-[#e1e8f2] accent-[#2563eb]"
                   />
                   {label}
                 </label>
@@ -580,17 +592,18 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
             </div>
           </div>
 
-          <div>
-            <h2 className="font-medium text-slate-800 mb-4">Finances</h2>
+          {/* ── Finances ────────────────────────────────── */}
+          <div className={CARD_CLS}>
+            <h2 className={SECTION_TITLE_CLS}>Finances</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-slate-600 mb-1">
+                <label className={LABEL_CLS}>
                   Installateur
                 </label>
                 <select
                   value={(lead.installateur as string) || ""}
                   onChange={(e) => updateField("installateur", e.target.value || null)}
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className={SELECT_CLS}
                 >
                   <option value="">—</option>
                   {INSTALLATEUR_OPTIONS.map((opt) => (
@@ -601,10 +614,10 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-slate-600 mb-1">
+                <label className={LABEL_CLS}>
                   Coût installation (€)
                 </label>
-                <input
+                <Input
                   type="number"
                   step="0.01"
                   value={(lead.installation_cost as number) || ""}
@@ -614,7 +627,6 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
                       e.target.value ? parseFloat(e.target.value) : null
                     )
                   }
-                  className="w-full px-4 py-2 border rounded-lg"
                 />
               </div>
               <div className="md:col-span-2">
@@ -631,10 +643,10 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-600 mb-1">
+                <label className={LABEL_CLS}>
                   Coût régie (€)
                 </label>
-                <input
+                <Input
                   type="number"
                   step="0.01"
                   value={(lead.regie_cost as number) ?? 0}
@@ -644,14 +656,13 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
                       parseFloat(e.target.value) || 0
                     )
                   }
-                  className="w-full px-4 py-2 border rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-600 mb-1">
+                <label className={LABEL_CLS}>
                   Bénéfice CEE (€)
                 </label>
-                <input
+                <Input
                   type="number"
                   step="0.01"
                   value={(lead.benefit_cee as number) || ""}
@@ -661,14 +672,13 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
                       e.target.value ? parseFloat(e.target.value) : null
                     )
                   }
-                  className="w-full px-4 py-2 border rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-600 mb-1">
+                <label className={LABEL_CLS}>
                   Bénéfice MPR (€)
                 </label>
-                <input
+                <Input
                   type="number"
                   step="0.01"
                   value={(lead.benefit_mpr as number) || ""}
@@ -678,14 +688,13 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
                       e.target.value ? parseFloat(e.target.value) : null
                     )
                   }
-                  className="w-full px-4 py-2 border rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-600 mb-1">
+                <label className={LABEL_CLS}>
                   Bénéfice apporteur d&apos;affaires (€)
                 </label>
-                <input
+                <Input
                   type="number"
                   step="0.01"
                   value={(lead.benefit_apporteur_affaires as number) || ""}
@@ -695,35 +704,33 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
                       e.target.value ? parseFloat(e.target.value) : null
                     )
                   }
-                  className="w-full px-4 py-2 border rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-600 mb-1">
-                  Rentabilité (€) - auto
+                <label className={LABEL_CLS}>
+                  Rentabilité (€) — auto
                 </label>
-                <input
+                <Input
                   type="text"
                   value={(lead.profitability as number)?.toFixed(2) ?? ""}
                   readOnly
-                  className="w-full px-4 py-2 border rounded-lg bg-slate-50"
+                  className="bg-[#f4f7fb] cursor-default"
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm text-slate-600 mb-1">
+                <label className={LABEL_CLS}>
                   Commentaire chantier
                 </label>
-                <textarea
+                <Textarea
                   value={(lead.chantier_comment as string) || ""}
                   onChange={(e) =>
                     updateField("chantier_comment", e.target.value)
                   }
                   rows={3}
-                  className="w-full px-4 py-2 border rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-600 mb-1">
+                <label className={LABEL_CLS}>
                   Groupe délégataire
                 </label>
                 <select
@@ -731,7 +738,7 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
                   onChange={(e) =>
                     updateField("delegataire_group", e.target.value || null)
                   }
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className={SELECT_CLS}
                 >
                   <option value="">—</option>
                   {DELEGATAIRE_GROUPS.map((g) => (
@@ -746,13 +753,11 @@ export function AdminLeadForm({ lead: initialLead }: AdminLeadFormProps) {
         </>
       )}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-      >
-        {loading ? "Enregistrement..." : "Enregistrer"}
-      </button>
+      <div className="flex justify-end pt-1">
+        <Button type="submit" disabled={loading} size="lg">
+          {loading ? "Enregistrement..." : "Enregistrer"}
+        </Button>
+      </div>
     </form>
   );
 }

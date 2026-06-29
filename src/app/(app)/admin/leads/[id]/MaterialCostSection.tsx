@@ -38,6 +38,9 @@ interface MaterialCostSectionProps {
   selectedMaterials: SelectedMaterial[];
 }
 
+const INPUT_CLS =
+  "h-9 w-full px-3 border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] text-sm focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40";
+
 export function MaterialCostSection({
   leadId,
   materialCost,
@@ -132,8 +135,8 @@ export function MaterialCostSection({
   if (loading) {
     return (
       <div className="animate-pulse">
-        <div className="h-10 bg-slate-200 rounded mb-2" />
-        <div className="h-10 bg-slate-200 rounded" />
+        <div className="h-10 bg-[#f4f7fb] rounded-[9px] mb-2" />
+        <div className="h-10 bg-[#f4f7fb] rounded-[9px]" />
       </div>
     );
   }
@@ -141,7 +144,7 @@ export function MaterialCostSection({
   return (
     <div className="space-y-3">
       <div>
-        <label className="block text-sm text-slate-600 mb-1">
+        <label className="block text-sm font-medium text-[#0b1f3a] mb-1.5">
           Matériaux sélectionnés
         </label>
         <div className="flex gap-2 flex-wrap">
@@ -155,7 +158,7 @@ export function MaterialCostSection({
                 if (p) addMaterial(p);
               }
             }}
-            className="px-4 py-2 border rounded-lg flex-1 min-w-[200px]"
+            className="h-9 px-3 border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] text-sm focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40 flex-1 min-w-[200px]"
           >
             <option value="">Ajouter un matériel...</option>
             {availableProducts.map((p) => (
@@ -171,12 +174,12 @@ export function MaterialCostSection({
             {selectedMaterials.map((m) => (
               <li
                 key={m.product_id}
-                className="flex items-center gap-2 py-2 px-3 bg-slate-50 rounded-lg"
+                className="flex items-center gap-2 py-2 px-3 bg-[#f4f7fb] rounded-[9px] border border-[#e1e8f2]"
               >
-                <span className="flex-1 text-slate-700">
+                <span className="flex-1 text-sm text-[#0b1f3a]">
                   {m.product?.name ?? "—"}
                 </span>
-                <span className="text-slate-500 text-sm">
+                <span className="text-[#64748b] text-sm">
                   {Number(m.product?.price ?? 0).toFixed(2)} € ×
                 </span>
                 <input
@@ -187,15 +190,15 @@ export function MaterialCostSection({
                     const v = parseInt(e.target.value, 10);
                     if (!isNaN(v)) updateQuantity(m.product_id, v);
                   }}
-                  className="w-14 px-2 py-1 border rounded text-center"
+                  className="w-14 px-2 py-1 border border-[#e1e8f2] rounded-[9px] text-center text-sm bg-white text-[#0b1f3a] focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40"
                 />
-                <span className="text-slate-600 font-medium">
+                <span className="text-[#0b1f3a] font-medium text-sm">
                   = {(Number(m.product?.price ?? 0) * m.quantity).toFixed(2)} €
                 </span>
                 <button
                   type="button"
                   onClick={() => removeMaterial(m.product_id)}
-                  className="p-1 rounded hover:bg-slate-200"
+                  className="p-1 rounded-[6px] hover:bg-[#e1e8f2] transition-colors text-[#64748b]"
                   title="Retirer"
                 >
                   <X className="w-4 h-4" />
@@ -206,14 +209,14 @@ export function MaterialCostSection({
         )}
 
         {selectedMaterials.length > 0 && (
-          <p className="text-sm text-slate-500 mt-1">
-            Total calculé : {calculatedTotal.toFixed(2)} €
+          <p className="text-sm text-[#64748b] mt-1.5">
+            Total calculé : <span className="font-medium text-[#0b1f3a]">{calculatedTotal.toFixed(2)} €</span>
           </p>
         )}
       </div>
 
       <div>
-        <label className="block text-sm text-slate-600 mb-1">
+        <label className="block text-sm font-medium text-[#0b1f3a] mb-1.5">
           Coût matériel (€)
         </label>
         <input
@@ -225,15 +228,15 @@ export function MaterialCostSection({
               e.target.value ? parseFloat(e.target.value) : null
             )
           }
-          className="w-full px-4 py-2 border rounded-lg"
+          className={INPUT_CLS}
         />
-        <p className="text-xs text-slate-500 mt-1">
+        <p className="text-xs text-[#64748b] mt-1">
           Modifiable manuellement si besoin
         </p>
       </div>
 
       <div>
-        <label className="block text-sm text-slate-600 mb-1">
+        <label className="block text-sm font-medium text-[#0b1f3a] mb-1.5">
           Commentaire
         </label>
         <input
@@ -241,7 +244,7 @@ export function MaterialCostSection({
           placeholder="Commentaire"
           value={materialCostComment}
           onChange={(e) => onMaterialCostCommentChange(e.target.value)}
-          className="w-full px-4 py-2 border rounded-lg"
+          className={INPUT_CLS}
         />
       </div>
     </div>
