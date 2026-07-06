@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, type LeadStatus } from "@/lib/types";
+import { LEAD_STATUS_LABELS, LEAD_STATUSES_TELEPRO_SELECTABLE, type LeadStatus } from "@/lib/types";
 import {
   toDatetimeLocalValueParis,
   fromDatetimeLocalValueParis,
@@ -30,6 +30,7 @@ function getStatusButtonClass(status: LeadStatus, isSelected: boolean): string {
     case "a_rappeler": return "bg-[#1e3a5f] text-white border border-[#1e3a5f]";
     case "en_attente_doc": return "bg-[#d1fae5] text-[#065f46] border border-[#6ee7b7]";
     case "documents_recus": return "bg-[#065f46] text-white border border-[#065f46]";
+    case "devis_envoye": return "bg-[#fce7f3] text-[#be185d] border border-[#f9a8d4]";
     case "incomplet": return "bg-[#fef3c7] text-[#b45309] border border-[#fcd34d]";
     case "bloque_mpr": return "bg-[#7f1d1d] text-white border border-[#7f1d1d]";
     case "valide": return "bg-[#14532d] text-white border border-[#14532d]";
@@ -217,7 +218,7 @@ export function TeleprospectionStatusBar({
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {LEAD_STATUSES_ADMIN.map((s) => (
+          {LEAD_STATUSES_TELEPRO_SELECTABLE.map((s) => (
             <StatusButton
               key={s}
               status={s}

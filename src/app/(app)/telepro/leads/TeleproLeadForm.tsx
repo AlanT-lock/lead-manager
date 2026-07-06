@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   LEAD_STATUS_LABELS,
-  LEAD_STATUSES_ADMIN,
+  LEAD_STATUSES_TELEPRO_SELECTABLE,
   LEAD_COLOR_LABELS_SIMPLE,
   INSTALLATION_TYPE_LABELS,
   ELECTRICITY_TYPE_LABELS,
@@ -549,7 +549,7 @@ export function TeleproLeadForm({
         <div className={CARD_CLS}>
           <h2 className={SECTION_TITLE_CLS}>Statut</h2>
           <div className="flex flex-wrap gap-2">
-            {LEAD_STATUSES_ADMIN.map((s) => (
+            {LEAD_STATUSES_TELEPRO_SELECTABLE.map((s) => (
               <StatusButton
                 key={s}
                 status={s}
@@ -609,6 +609,7 @@ function getStatusButtonClass(status: LeadStatus, isSelected: boolean): string {
     case "a_rappeler": return "bg-[#ffedd5] text-[#c2410c] border border-[#fed7aa]";
     case "en_attente_doc": return "bg-[#ede9fe] text-[#6d28d9] border border-[#ddd6fe]";
     case "documents_recus": return "bg-[#e0e7ff] text-[#4338ca] border border-[#c7d2fe]";
+    case "devis_envoye": return "bg-[#fce7f3] text-[#be185d] border border-[#f9a8d4]";
     case "incomplet": return "bg-[#fef3c7] text-[#b45309] border border-[#fde68a]";
     case "bloque_mpr": return "bg-[#fee2e2] text-[#b91c1c] border border-[#fecaca]";
     case "valide": return "bg-[#dcfce7] text-[#15803d] border border-[#bbf7d0]";

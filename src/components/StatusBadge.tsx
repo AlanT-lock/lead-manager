@@ -6,6 +6,7 @@ const STATUS_BADGE: Record<LeadStatus, string> = {
   a_rappeler: "bg-[#ffedd5] text-[#c2410c]",
   en_attente_doc: "bg-[#ede9fe] text-[#6d28d9]",
   documents_recus: "bg-[#e0e7ff] text-[#4338ca]",
+  devis_envoye: "bg-[#fce7f3] text-[#be185d]",
   incomplet: "bg-[#fef3c7] text-[#b45309]",
   bloque_mpr: "bg-[#fee2e2] text-[#b91c1c]",
   valide: "bg-[#dcfce7] text-[#15803d]",
