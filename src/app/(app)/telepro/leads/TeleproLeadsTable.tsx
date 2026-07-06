@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, type LeadStatus } from "@/lib/types";
+import { LEAD_STATUS_LABELS, LEAD_STATUSES_TELEPRO_SELECTABLE, type LeadStatus } from "@/lib/types";
 import { formatDateParis, formatFullDateTimeParis } from "@/lib/date";
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import {
@@ -21,6 +21,7 @@ function getStatusSelectClass(status: string): string {
     case "a_rappeler": return "bg-blue-800 text-white border-blue-900";
     case "en_attente_doc": return "bg-green-100 text-green-800 border-green-200";
     case "documents_recus": return "bg-green-700 text-white border-green-800";
+    case "devis_envoye": return "bg-[#fce7f3] text-[#be185d] border-[#f9a8d4]";
     case "incomplet": return "bg-amber-100 text-amber-800 border-amber-200";
     case "bloque_mpr": return "bg-red-800 text-white border-red-900";
     case "valide": return "bg-emerald-700 text-white border-emerald-800";
@@ -199,7 +200,7 @@ export function TeleproLeadsTable({ leads }: TeleproLeadsTableProps) {
                         {LEAD_STATUS_LABELS.ancien_documents_recus}
                       </option>
                     )}
-                    {LEAD_STATUSES_ADMIN.map((s) => (
+                    {LEAD_STATUSES_TELEPRO_SELECTABLE.map((s) => (
                       <option key={s} value={s}>
                         {LEAD_STATUS_LABELS[s]}
                         {s === "nrp" && lead.nrp_count > 0
