@@ -21,6 +21,7 @@ function getStatusSelectClass(status: string): string {
     case "a_rappeler": return "bg-blue-800 text-white border-blue-900";
     case "en_attente_doc": return "bg-green-100 text-green-800 border-green-200";
     case "documents_recus": return "bg-green-700 text-white border-green-800";
+    case "devis_a_envoyer": return "bg-[#f3e8ff] text-[#7e22ce] border-[#e9d5ff]";
     case "devis_envoye": return "bg-[#fce7f3] text-[#be185d] border-[#f9a8d4]";
     case "incomplet": return "bg-amber-100 text-amber-800 border-amber-200";
     case "bloque_mpr": return "bg-red-800 text-white border-red-900";

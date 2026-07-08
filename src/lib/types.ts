@@ -6,6 +6,7 @@ export type LeadStatus =
   | 'a_rappeler'
   | 'en_attente_doc'
   | 'documents_recus'
+  | 'devis_a_envoyer'
   | 'devis_envoye'
   | 'incomplet'
   | 'bloque_mpr'
@@ -21,12 +22,12 @@ export const LEAD_STATUSES_TELEPRO: LeadStatus[] = [
 
 /** Tous les statuts (admin) */
 export const LEAD_STATUSES_ADMIN: LeadStatus[] = [
-  'nouveau', 'nrp', 'a_rappeler', 'en_attente_doc', 'documents_recus', 'devis_envoye', 'incomplet', 'bloque_mpr', 'valide', 'installe', 'ancien_documents_recus', 'annule',
+  'nouveau', 'nrp', 'a_rappeler', 'en_attente_doc', 'documents_recus', 'devis_a_envoyer', 'devis_envoye', 'incomplet', 'bloque_mpr', 'valide', 'installe', 'ancien_documents_recus', 'annule',
 ];
 
-/** Statuts que les télépros peuvent SÉLECTIONNER dans leurs écrans (tous sauf devis_envoye, admin/secrétaire seulement). */
+/** Statuts que les télépros peuvent SÉLECTIONNER dans leurs écrans (tous sauf devis_a_envoyer/devis_envoye, admin/secrétaire seulement). */
 export const LEAD_STATUSES_TELEPRO_SELECTABLE: LeadStatus[] = LEAD_STATUSES_ADMIN.filter(
-  (s) => s !== 'devis_envoye',
+  (s) => s !== 'devis_a_envoyer' && s !== 'devis_envoye',
 );
 
 export type LeadCategory = 'fenetre' | 'clim_1euro' | 'clim_3990euros';
@@ -79,6 +80,7 @@ export const LEAD_STATUS_LABELS: Record<LeadStatus, string> = {
   a_rappeler: 'À rappeler',
   en_attente_doc: 'En attente de doc',
   documents_recus: 'Documents reçus',
+  devis_a_envoyer: 'Devis à envoyer',
   devis_envoye: 'Devis envoyé',
   incomplet: 'Incomplet',
   bloque_mpr: 'Bloqué MPR',
@@ -96,6 +98,7 @@ export const STATUS_CHART_COLORS: Record<LeadStatus, string> = {
   a_rappeler: '#f97316',    // orange
   en_attente_doc: '#8b5cf6', // violet
   documents_recus: '#22c55e', // vert
+  devis_a_envoyer: '#a855f7', // violet/purple
   devis_envoye: '#db2777',  // fuchsia
   incomplet: '#f59e0b',     // amber
   bloque_mpr: '#dc2626',    // red-600
