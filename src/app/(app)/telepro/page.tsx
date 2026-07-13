@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { startOfDay, startOfWeek, startOfMonth } from "date-fns";
 import Link from "next/link";
-import { LEAD_STATUS_LABELS, type LeadStatus } from "@/lib/types";
+import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, type LeadStatus } from "@/lib/types";
 import { NrpCallsButton } from "./NrpCallsButton";
 import { PageHeader } from "@/components/ui-kit/PageHeader";
 import { StatCard } from "@/components/ui-kit/StatCard";
@@ -87,21 +87,7 @@ export default async function TeleproDashboard() {
         <div className="rounded-[12px] border border-[#e1e8f2] bg-white p-6 shadow-[0_1px_2px_rgba(13,38,76,.06)]">
           <h2 className="font-medium text-[#0b1f3a] mb-4">Leads par statut</h2>
           <div className="space-y-2">
-            {(
-              [
-                "nouveau",
-                "nrp",
-                "a_rappeler",
-                "en_attente_doc",
-                "documents_recus",
-                "incomplet",
-                "bloque_mpr",
-                "valide",
-                "installe",
-                "ancien_documents_recus",
-                "annule",
-              ] as LeadStatus[]
-            ).map((s) => (
+            {LEAD_STATUSES_ADMIN.map((s) => (
               <div
                 key={s}
                 className="flex justify-between text-sm"

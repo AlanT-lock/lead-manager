@@ -37,6 +37,7 @@ function getStatusButtonClass(status: LeadStatus, isSelected: boolean): string {
     case "valide": return "bg-[#14532d] text-white border border-[#14532d]";
     case "installe": return "bg-[#99f6e4] text-[#134e4a] border border-[#5eead4]";
     case "ancien_documents_recus": return "bg-[#94a3b8] text-white border border-[#94a3b8]";
+    case "transfert": return "bg-[#e0f2fe] text-[#0369a1] border border-[#bae6fd]";
     case "annule": return "bg-[#fee2e2] text-[#b91c1c] border border-[#fca5a5]";
     default: return "bg-[#f8fafc] text-[#64748b] border border-[#e1e8f2]";
   }

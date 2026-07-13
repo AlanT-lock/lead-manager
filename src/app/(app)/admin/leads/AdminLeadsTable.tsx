@@ -30,6 +30,7 @@ function getStatusSelectClass(status: string): string {
     case "valide": return "bg-emerald-700 text-white border-emerald-800";
     case "installe": return "bg-teal-200 text-teal-900 border-teal-300";
     case "ancien_documents_recus": return "bg-slate-500 text-white border-slate-600";
+    case "transfert": return "bg-sky-100 text-sky-800 border-sky-200";
     case "annule": return "bg-red-100 text-red-800 border-red-200";
     default: return "bg-slate-100 text-slate-700 border-slate-200";
   }

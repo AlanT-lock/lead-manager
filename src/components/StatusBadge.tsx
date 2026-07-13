@@ -13,6 +13,7 @@ const STATUS_BADGE: Record<LeadStatus, string> = {
   valide: "bg-[#dcfce7] text-[#15803d]",
   installe: "bg-[#ccfbf1] text-[#0f766e]",
   ancien_documents_recus: "bg-slate-100 text-slate-500",
+  transfert: "bg-[#e0f2fe] text-[#0369a1]",
   annule: "bg-[#fee2e2] text-[#b91c1c]",
 };
 

@@ -1,24 +1,12 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { CHANTIER_STATUS_FIELDS, DELEGATAIRE_GROUPS, INSTALLATION_TYPE_LABELS, INSTALLATION_TYPES, LEAD_STATUS_LABELS, type LeadStatus } from "@/lib/types";
+import { CHANTIER_STATUS_FIELDS, DELEGATAIRE_GROUPS, INSTALLATION_TYPE_LABELS, INSTALLATION_TYPES, LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, type LeadStatus } from "@/lib/types";
 import { StatsFilters } from "./StatsFilters";
 import { StatCard } from "./StatCard";
 import { DelegataireRow } from "./DelegataireRow";
 import { StatusRow } from "./StatusRow";
 import { PageHeader } from "@/components/ui-kit/PageHeader";
 
-const STATUSES: LeadStatus[] = [
-  "nouveau",
-  "nrp",
-  "a_rappeler",
-  "en_attente_doc",
-  "documents_recus",
-  "incomplet",
-  "bloque_mpr",
-  "valide",
-  "installe",
-  "ancien_documents_recus",
-  "annule",
-];
+const STATUSES: LeadStatus[] = LEAD_STATUSES_ADMIN;
 
 
 export default async function AdminStatsPage({

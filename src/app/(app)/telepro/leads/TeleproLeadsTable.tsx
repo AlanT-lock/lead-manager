@@ -28,6 +28,7 @@ function getStatusSelectClass(status: string): string {
     case "valide": return "bg-emerald-700 text-white border-emerald-800";
     case "installe": return "bg-teal-200 text-teal-900 border-teal-300";
     case "ancien_documents_recus": return "bg-slate-500 text-white border-slate-600";
+    case "transfert": return "bg-sky-100 text-sky-800 border-sky-200";
     case "annule": return "bg-red-100 text-red-800 border-red-200";
     default: return "bg-slate-100 text-slate-700 border-slate-200";
   }
@@ -95,7 +96,6 @@ export function TeleproLeadsTable({ leads }: TeleproLeadsTableProps) {
 
   const handleStatusChange = async (leadId: string, newStatus: LeadStatus, oldStatus: string) => {
     if (newStatus === oldStatus) return;
-    if (newStatus === "ancien_documents_recus") return; // Non sélectionnable par télépro
     setUpdatingId(leadId);
 
     const body: Record<string, unknown> = {
@@ -196,11 +196,6 @@ export function TeleproLeadsTable({ leads }: TeleproLeadsTableProps) {
                     disabled={updatingId === lead.id}
                     className={`inline-flex px-2 py-1 text-xs font-medium rounded-[9px] border cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40 focus:ring-offset-1 disabled:opacity-50 ${getStatusSelectClass(lead.status)}`}
                   >
-                    {lead.status === "ancien_documents_recus" && (
-                      <option value="ancien_documents_recus" disabled>
-                        {LEAD_STATUS_LABELS.ancien_documents_recus}
-                      </option>
-                    )}
                     {LEAD_STATUSES_TELEPRO_SELECTABLE.map((s) => (
                       <option key={s} value={s}>
                         {LEAD_STATUS_LABELS[s]}

@@ -13,22 +13,17 @@ export type LeadStatus =
   | 'valide'
   | 'installe'
   | 'ancien_documents_recus'
+  | 'transfert'
   | 'annule';
 
-/** Statuts sélectionnables par les télépros (exclut ancien_documents_recus, incomplet, bloque_mpr, valide, installe) */
-export const LEAD_STATUSES_TELEPRO: LeadStatus[] = [
-  'nouveau', 'nrp', 'a_rappeler', 'en_attente_doc', 'documents_recus', 'annule',
-];
-
-/** Tous les statuts (admin) */
+/** Tous les statuts (accessibles par tous les rôles, partout) */
 export const LEAD_STATUSES_ADMIN: LeadStatus[] = [
-  'nouveau', 'nrp', 'a_rappeler', 'en_attente_doc', 'documents_recus', 'devis_a_envoyer', 'devis_envoye', 'incomplet', 'bloque_mpr', 'valide', 'installe', 'ancien_documents_recus', 'annule',
+  'nouveau', 'nrp', 'a_rappeler', 'en_attente_doc', 'documents_recus', 'devis_a_envoyer', 'devis_envoye', 'incomplet', 'bloque_mpr', 'valide', 'installe', 'ancien_documents_recus', 'transfert', 'annule',
 ];
 
-/** Statuts que les télépros peuvent SÉLECTIONNER dans leurs écrans (tous sauf devis_a_envoyer/devis_envoye, admin/secrétaire seulement). */
-export const LEAD_STATUSES_TELEPRO_SELECTABLE: LeadStatus[] = LEAD_STATUSES_ADMIN.filter(
-  (s) => s !== 'devis_a_envoyer' && s !== 'devis_envoye',
-);
+/** Tous les statuts sont désormais accessibles par tous les rôles : ces alias pointent sur la liste complète. */
+export const LEAD_STATUSES_TELEPRO: LeadStatus[] = LEAD_STATUSES_ADMIN;
+export const LEAD_STATUSES_TELEPRO_SELECTABLE: LeadStatus[] = LEAD_STATUSES_ADMIN;
 
 export type LeadCategory = 'fenetre' | 'clim_1euro' | 'clim_3990euros';
 
@@ -87,6 +82,7 @@ export const LEAD_STATUS_LABELS: Record<LeadStatus, string> = {
   valide: 'Validé',
   installe: 'Installé',
   ancien_documents_recus: 'Ancien documents reçus',
+  transfert: 'Transfert',
   annule: 'Annulé',
 };
 
@@ -105,6 +101,7 @@ export const STATUS_CHART_COLORS: Record<LeadStatus, string> = {
   valide: '#10b981',        // emerald-500
   installe: '#0ABAB5',      // Bleu Tiffany
   ancien_documents_recus: '#64748b', // slate (archivé)
+  transfert: '#0ea5e9',     // sky-500
 };
 
 export const LEAD_COLOR_LABELS: Record<LeadColor, string> = {
