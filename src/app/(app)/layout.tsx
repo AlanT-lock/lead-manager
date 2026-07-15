@@ -4,7 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { Drawer } from "@/components/Drawer";
 import { SaveOnLeaveProvider } from "@/contexts/SaveOnLeaveContext";
-import { LEAD_STATUSES_ADMIN, LEAD_CATEGORIES } from "@/lib/types";
+import { buildStatusCounts } from "@/lib/status-counts";
 
 export default async function AppLayout({
   children,
@@ -42,45 +42,28 @@ export default async function AppLayout({
 
   const role = profile?.role?.toString().trim().toLowerCase() as "admin" | "telepro" | "secretaire" | undefined;
 
-  const { count } = await supabase
-    .from("notifications")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", user.id)
-    .eq("read", false);
-
   const adminClient = createAdminClient();
   const isAdminOrSecretaire = role === "admin" || role === "secretaire";
-  let statusCounts: Record<string, Record<string, number>> = {};
-  try {
-    const counts: Record<string, Record<string, number>> = {};
-    for (const cat of LEAD_CATEGORIES) {
-      counts[cat] = {};
-      for (const s of LEAD_STATUSES_ADMIN) counts[cat][s] = 0;
-    }
-    // PostgREST limite chaque requête à 1000 lignes : on pagine pour compter
-    // TOUS les leads (sinon les compteurs plafonnent à 1000).
-    const PAGE = 1000;
-    for (let from = 0; ; from += PAGE) {
-      let rowsQuery = adminClient
-        .from("leads")
-        .select("status, category")
-        .range(from, from + PAGE - 1);
-      if (!isAdminOrSecretaire) {
-        rowsQuery = rowsQuery.eq("assigned_to", user.id);
-      }
-      const { data: rows, error } = await rowsQuery;
-      if (error || !rows || rows.length === 0) break;
-      for (const row of rows) {
-        const cat = row.category as string;
-        const s = row.status as string;
-        if (cat in counts && s in counts[cat]) counts[cat][s]++;
-      }
-      if (rows.length < PAGE) break;
-    }
-    statusCounts = counts;
-  } catch {
-    // Ignore errors, counts will be empty
-  }
+
+  // Ces deux requêtes ne dépendent que de user.id / role : les enchaîner coûtait
+  // un aller-retour pour rien.
+  const [notifRes, countsRes] = await Promise.all([
+    supabase
+      .from("notifications")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("read", false),
+    adminClient.rpc("lead_status_counts", {
+      p_assigned_to: isAdminOrSecretaire ? null : user.id,
+    }),
+  ]);
+
+  const count = notifRes.count;
+  // Compteurs vides plutôt qu'une page en erreur : le menu perd ses badges, le
+  // reste de l'app fonctionne. C'est le comportement du try/catch d'origine.
+  const statusCounts = countsRes.error
+    ? {}
+    : buildStatusCounts(countsRes.data ?? []);
 
   return (
     <SaveOnLeaveProvider>
