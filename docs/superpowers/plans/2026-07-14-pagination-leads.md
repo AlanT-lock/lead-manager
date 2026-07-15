@@ -657,17 +657,16 @@ export function LeadsPagination({ page, per, total }: LeadsPaginationProps) {
 Run: `npx tsc --noEmit`
 Expected: aucune sortie.
 
-- [ ] **Step 3: Vérifier le lint**
-
-Run: `npm run lint`
-Expected: aucune erreur sur le nouveau fichier.
-
-- [ ] **Step 4: Commit**
+- [ ] **Step 3: Commit**
 
 ```bash
 git add src/components/ui-kit/LeadsPagination.tsx
 git commit -m "feat(pagination): composant LeadsPagination"
 ```
+
+> `npm run lint` est cassé dans ce repo indépendamment de ce plan (ESLint 8 installé vs config
+> attendant ESLint 9) : il échoue à l'identique sur des fichiers non touchés. Ne pas chercher à le
+> réparer ici — hors périmètre. `npx tsc --noEmit` reste le filet.
 
 ---
 
@@ -915,10 +914,16 @@ par :
   }, [currentStatus, currentTelepro, currentChantier, currentDelegataire, search, from, to, currentCategory, searchParams]);
 ```
 
-- [ ] **Step 3: Vérifier les types et le lint**
+- [ ] **Step 3: Vérifier les types**
 
-Run: `npx tsc --noEmit && npm run lint`
-Expected: aucune sortie / aucune erreur (notamment aucun avertissement `react-hooks/exhaustive-deps`).
+Run: `npx tsc --noEmit`
+Expected: aucune sortie.
+
+> `npm run lint` est **cassé dans ce repo, indépendamment de ce plan** : `eslint.config.mjs` importe
+> `eslint/config` (ESLint 9) alors que `package.json` épingle `"eslint": "^8"`. La commande échoue
+> de la même façon sur des fichiers que personne n'a touchés. Ne pas tenter de la réparer ici :
+> hors périmètre. Conséquence à connaître : `react-hooks/exhaustive-deps` ne peut pas nous avertir
+> d'un oubli de dépendance — la liste du `useCallback` doit donc être relue à l'œil.
 
 - [ ] **Step 4: Vérifier manuellement**
 
@@ -1356,8 +1361,12 @@ identique aux specs existantes).
 
 - [ ] **Step 3: Lancer toute la suite de non-régression**
 
-Run: `npm test && npx tsc --noEmit && npm run lint && npm run test:e2e`
-Expected: unitaires PASS, aucune erreur de type, aucune erreur de lint, e2e PASS (ou skipped).
+Run: `npm test && npx tsc --noEmit && npm run test:e2e`
+Expected: unitaires PASS, aucune erreur de type, e2e PASS (ou skipped).
+
+> `npm run lint` est volontairement exclu : il est cassé dans ce repo indépendamment de ce plan
+> (ESLint 8 installé vs `eslint.config.mjs` attendant ESLint 9) et échoue sur des fichiers non
+> touchés. À signaler à la revue finale, pas à réparer ici.
 
 - [ ] **Step 4: Commit**
 
