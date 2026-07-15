@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { PER_PAGE_COOKIE, PER_PAGE_OPTIONS, pageCount, pageNumbers } from "@/lib/pagination";
+import { PER_PAGE_COOKIE, PER_PAGE_OPTIONS, clampPage, pageCount, pageNumbers } from "@/lib/pagination";
 import { cn } from "@/lib/utils";
 
 type LeadsPaginationProps = {
@@ -17,6 +18,7 @@ export function LeadsPagination({ page, per, total }: LeadsPaginationProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [gotoValue, setGotoValue] = useState("");
 
   const count = pageCount(total, per);
 
@@ -41,6 +43,24 @@ export function LeadsPagination({ page, per, total }: LeadsPaginationProps) {
       params.set("per", value);
       params.delete("page");
     });
+  };
+
+  const handleGoto = (event: React.FormEvent) => {
+    event.preventDefault();
+
+    const target = Number(gotoValue);
+    // Saisie vide ou non numérique : l'intention est ambiguë, on s'abstient plutôt que de deviner.
+    // `Number("")` vaut 0 et passerait `Number.isInteger` — d'où le test sur la chaîne elle-même,
+    // sans lequel un champ vide validé par inadvertance enverrait sur la page 1.
+    if (!gotoValue.trim() || !Number.isInteger(target)) return;
+
+    // Même règle de bornage que le serveur : 9999 mène à la dernière page, 0 à la première.
+    goToPage(clampPage(target, count));
+
+    // Next.js ne remonte PAS les Client Components quand seuls les search params changent (il patche
+    // l'arbre RSC). Sans ce reset, le champ garderait « 6 » après le saut, puis continuerait de
+    // l'afficher après un clic sur le numéro 3 — un chiffre qui ne veut plus rien dire.
+    setGotoValue("");
   };
 
   // Une seule page : la barre n'apporterait rien.
@@ -112,6 +132,25 @@ export function LeadsPagination({ page, per, total }: LeadsPaginationProps) {
             <ChevronRight className="h-4 w-4" />
           </button>
         </nav>
+
+        <form
+          data-testid="pagination-goto-form"
+          onSubmit={handleGoto}
+          className="flex items-center gap-2 text-sm text-[#64748b]"
+        >
+          <label htmlFor="pagination-goto">Aller à</label>
+          <input
+            id="pagination-goto"
+            data-testid="pagination-goto"
+            type="number"
+            min={1}
+            max={count}
+            value={gotoValue}
+            onChange={(event) => setGotoValue(event.target.value)}
+            aria-label="Aller à la page"
+            className="h-8 w-16 rounded-md border border-[#e2e8f0] bg-white px-2 text-sm text-[#0b1f3a]"
+          />
+        </form>
 
         <label className="flex items-center gap-2 text-sm text-[#64748b]">
           Par page
