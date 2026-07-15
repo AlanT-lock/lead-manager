@@ -247,7 +247,7 @@ export function clampPage(page: number, count: number): number {
 - [ ] **Step 7: Lancer les tests pour vérifier qu'ils passent**
 
 Run: `npm test`
-Expected: PASS — 4 suites, 10 tests.
+Expected: PASS — 4 suites (`parsePerPage`, `parsePage`, `pageCount`, `clampPage`), 8 tests.
 
 - [ ] **Step 8: Vérifier les types**
 
@@ -274,7 +274,9 @@ seule page (il prendrait autant de place que le numéro lui-même).
 
 **Interfaces:**
 - Consumes: rien de Task 1 (fonction indépendante, même module).
-- Produces: `pageNumbers(current: number, total: number): (number | "ellipsis")[]`
+- Produces:
+  - `pageNumbers(current: number, total: number): (number | "ellipsis")[]`
+  - `fetchPaginatedLeads<T>(fetchPage, requestedPage, per): Promise<{ leads: T[]; page: number; total: number }>`
 
 **Règle :** ≤ 8 pages ⇒ tous les numéros. Au-delà ⇒ toujours la première et la dernière, plus les
 deux voisines de part et d'autre de la page courante ; les trous deviennent `"ellipsis"`, sauf un trou
@@ -379,13 +381,121 @@ export function pageNumbers(current: number, total: number): (number | "ellipsis
 - [ ] **Step 4: Lancer les tests pour vérifier qu'ils passent**
 
 Run: `npm test`
-Expected: PASS — 5 suites, 16 tests.
+Expected: PASS — 5 suites (les 4 de Task 1 + `pageNumbers`), 14 tests.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Écrire les tests du helper de récupération paginée**
+
+Les deux pages paginées (Tasks 4 et 6) partagent exactement la même danse : récupérer la page
+demandée, découvrir le total, et re-récupérer si la page demandée n'existe plus. Seuls leurs filtres
+diffèrent. On extrait donc cette danse ici, une fois, testable sans Supabase.
+
+Ajouter à `src/lib/pagination.test.ts` (et compléter l'import en tête avec `fetchPaginatedLeads`) :
+
+```ts
+describe("fetchPaginatedLeads", () => {
+  /** Faux fetcher : renvoie `per` numéros de page factices et le total demandé. */
+  const fakeFetcher = (total: number, per: number) => {
+    const calls: number[] = [];
+    const fetchPage = async (page: number) => {
+      calls.push(page);
+      const start = (page - 1) * per;
+      const data = Array.from(
+        { length: Math.max(0, Math.min(per, total - start)) },
+        (_, index) => ({ id: String(start + index) })
+      );
+      return { data, count: total };
+    };
+    return { fetchPage, calls };
+  };
+
+  it("renvoie la page demandée sans seconde requête", async () => {
+    const { fetchPage, calls } = fakeFetcher(120, 50);
+    const result = await fetchPaginatedLeads(fetchPage, 2, 50);
+    expect(result.page).toBe(2);
+    expect(result.total).toBe(120);
+    expect(result.leads).toHaveLength(50);
+    expect(calls).toEqual([2]);
+  });
+
+  it("re-récupère la dernière page réelle si la page demandée n'existe plus", async () => {
+    const { fetchPage, calls } = fakeFetcher(120, 50);
+    const result = await fetchPaginatedLeads(fetchPage, 9, 50);
+    expect(result.page).toBe(3);
+    expect(result.leads).toHaveLength(20);
+    expect(calls).toEqual([9, 3]);
+  });
+
+  it("gère un résultat vide sans seconde requête", async () => {
+    const { fetchPage, calls } = fakeFetcher(0, 50);
+    const result = await fetchPaginatedLeads(fetchPage, 1, 50);
+    expect(result.page).toBe(1);
+    expect(result.total).toBe(0);
+    expect(result.leads).toEqual([]);
+    expect(calls).toEqual([1]);
+  });
+
+  it("traite un count nul comme un total de 0", async () => {
+    const result = await fetchPaginatedLeads(async () => ({ data: null, count: null }), 1, 50);
+    expect(result.total).toBe(0);
+    expect(result.leads).toEqual([]);
+  });
+});
+```
+
+- [ ] **Step 6: Lancer les tests pour vérifier qu'ils échouent**
+
+Run: `npm test`
+Expected: FAIL — `fetchPaginatedLeads is not a function` / erreur d'import.
+
+- [ ] **Step 7: Écrire le helper**
+
+Ajouter à la fin de `src/lib/pagination.ts` :
+
+```ts
+type PageResult<T> = { data: T[] | null; count: number | null };
+
+/**
+ * Récupère une page de leads en corrigeant une page hors bornes.
+ *
+ * Le nombre de pages n'est connu qu'après le `count` de la première requête : si la page demandée
+ * n'existe plus (URL manipulée, filtre resserré, leads supprimés), on re-récupère la dernière page
+ * réelle plutôt que d'afficher un tableau vide.
+ *
+ * `fetchPage` reçoit un numéro de page 1-indexé et applique lui-même filtres, tri et `.range()`.
+ */
+export async function fetchPaginatedLeads<T>(
+  fetchPage: (page: number) => PromiseLike<PageResult<T>>,
+  requestedPage: number,
+  per: number
+): Promise<{ leads: T[]; page: number; total: number }> {
+  const first = await fetchPage(requestedPage);
+  const total = first.count ?? 0;
+  const page = clampPage(requestedPage, pageCount(total, per));
+
+  if (page === requestedPage) {
+    return { leads: first.data ?? [], page, total };
+  }
+
+  const corrected = await fetchPage(page);
+  return { leads: corrected.data ?? [], page, total };
+}
+```
+
+- [ ] **Step 8: Lancer les tests pour vérifier qu'ils passent**
+
+Run: `npm test`
+Expected: PASS — 6 suites, 18 tests.
+
+- [ ] **Step 9: Vérifier les types**
+
+Run: `npx tsc --noEmit`
+Expected: aucune sortie.
+
+- [ ] **Step 10: Commit**
 
 ```bash
 git add src/lib/pagination.ts src/lib/pagination.test.ts
-git commit -m "feat(pagination): séquence de numéros de page avec ellipses"
+git commit -m "feat(pagination): séquence de numéros avec ellipses + récupération paginée"
 ```
 
 ---
@@ -567,7 +677,7 @@ git commit -m "feat(pagination): composant LeadsPagination"
 - Modify: `src/app/(app)/admin/leads/page.tsx`
 
 **Interfaces:**
-- Consumes (Tasks 1-3) : `PER_PAGE_COOKIE`, `parsePage`, `parsePerPage`, `pageCount`, `clampPage`,
+- Consumes (Tasks 1-3) : `PER_PAGE_COOKIE`, `parsePage`, `parsePerPage`, `fetchPaginatedLeads`,
   `LeadsPagination`.
 - Produces: le contrat d'URL `?page&per` sur `/admin/leads`. Task 5 s'appuie dessus.
 
@@ -580,7 +690,7 @@ En tête de `src/app/(app)/admin/leads/page.tsx`, ajouter :
 ```ts
 import { cookies } from "next/headers";
 import { LeadsPagination } from "@/components/ui-kit/LeadsPagination";
-import { PER_PAGE_COOKIE, clampPage, pageCount, parsePage, parsePerPage } from "@/lib/pagination";
+import { PER_PAGE_COOKIE, fetchPaginatedLeads, parsePage, parsePerPage } from "@/lib/pagination";
 ```
 
 - [ ] **Step 2: Étendre le type de `searchParams`**
@@ -693,8 +803,8 @@ les mêmes filtres, dans le même ordre, à une requête neuve :
 Remplacer le bloc `Promise.all` existant (`const [{ data: leads }, { data: allTelepros }, { data: activeTelepros }] = await Promise.all([query, ...])`) par :
 
 ```ts
-  const [leadsResult, { data: allTelepros }, { data: activeTelepros }] = await Promise.all([
-    fetchPage(requestedPage),
+  const [{ leads, page, total }, { data: allTelepros }, { data: activeTelepros }] = await Promise.all([
+    fetchPaginatedLeads(fetchPage, requestedPage, per),
     adminClient
       .from("profiles")
       .select("id, full_name, email, deleted_at")
@@ -707,17 +817,10 @@ Remplacer le bloc `Promise.all` existant (`const [{ data: leads }, { data: allTe
       .is("deleted_at", null)
       .order("full_name"),
   ]);
-
-  let leads = leadsResult.data;
-  const total = leadsResult.count ?? 0;
-
-  // Page hors bornes (URL manipulée, filtre resserré, leads supprimés) : afficher la dernière
-  // page réelle plutôt qu'un tableau vide. Le nombre de pages n'est connu qu'après le count.
-  const page = clampPage(requestedPage, pageCount(total, per));
-  if (page !== requestedPage) {
-    leads = (await fetchPage(page)).data;
-  }
 ```
+
+> `fetchPaginatedLeads` (Task 2) porte la correction de page hors bornes ; `leads` est déjà un
+> tableau, jamais `null`.
 
 - [ ] **Step 6: Rendre la barre sous les deux tableaux**
 
@@ -731,13 +834,13 @@ Remplacer le bloc final :
       )}
 ```
 
-par :
+par (noter la disparition des `|| []` : `fetchPaginatedLeads` renvoie toujours un tableau) :
 
 ```tsx
       {status === "documents_recus" ? (
-        <DocumentsRecusTable leads={leads || []} />
+        <DocumentsRecusTable leads={leads} />
       ) : (
-        <AdminLeadsTable leads={leads || []} telepros={activeTelepros || []} />
+        <AdminLeadsTable leads={leads} telepros={activeTelepros || []} />
       )}
 
       <LeadsPagination page={page} per={per} total={total} />
@@ -849,7 +952,7 @@ Même traitement que Task 4, avec les spécificités de cette page : tri `update
 ```ts
 import { cookies } from "next/headers";
 import { LeadsPagination } from "@/components/ui-kit/LeadsPagination";
-import { PER_PAGE_COOKIE, clampPage, pageCount, parsePage, parsePerPage } from "@/lib/pagination";
+import { PER_PAGE_COOKIE, fetchPaginatedLeads, parsePage, parsePerPage } from "@/lib/pagination";
 ```
 
 - [ ] **Step 2: Étendre le type de `searchParams`**
@@ -922,14 +1025,7 @@ Remplacer le bloc allant de `let query = adminClient` (l. ~32) jusqu'à la fin d
   const fetchPage = (target: number) =>
     buildQuery().range((target - 1) * per, target * per - 1);
 
-  const leadsResult = await fetchPage(requestedPage);
-  let leads = leadsResult.data;
-  const total = leadsResult.count ?? 0;
-
-  const page = clampPage(requestedPage, pageCount(total, per));
-  if (page !== requestedPage) {
-    leads = (await fetchPage(page)).data;
-  }
+  const { leads, page, total } = await fetchPaginatedLeads(fetchPage, requestedPage, per);
 ```
 
 > Vérifier ensuite qu'il ne reste plus aucun `await query` ni `const { data: leads } = await query;`
@@ -937,9 +1033,12 @@ Remplacer le bloc allant de `let query = adminClient` (l. ~32) jusqu'à la fin d
 
 - [ ] **Step 5: Rendre la barre sous le tableau**
 
-Sous `<DocumentsRecusTable leads={leads || []} />`, ajouter :
+Remplacer `<DocumentsRecusTable leads={leads || []} />` par (le `|| []` n'a plus lieu d'être,
+`fetchPaginatedLeads` renvoyant toujours un tableau) :
 
 ```tsx
+      <DocumentsRecusTable leads={leads} />
+
       <LeadsPagination page={page} per={per} total={total} />
 ```
 
@@ -1104,7 +1203,7 @@ Dans `buildQuery`, remplacer le `return query.order(...)` final par :
 Passer la prop à la table :
 
 ```tsx
-        <AdminLeadsTable leads={leads || []} telepros={activeTelepros || []} statusSort={statusSort} />
+        <AdminLeadsTable leads={leads} telepros={activeTelepros || []} statusSort={statusSort} />
 ```
 
 - [ ] **Step 5: Réparer le tri sur `/admin/redistribute`**
