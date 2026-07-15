@@ -29,6 +29,9 @@ export function DocumentsRecusFilters() {
     if (q) params.set("q", q);
     if (f) params.set("from", f);
     if (t) params.set("to", t);
+    // Préservés à travers les changements de filtre ; `page` volontairement omis (retour page 1).
+    const per = searchParams.get("per");
+    if (per) params.set("per", per);
     return params;
   };
 
