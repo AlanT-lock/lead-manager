@@ -157,3 +157,59 @@ describe("fetchPaginatedLeads", () => {
     expect(result.leads).toEqual([]);
   });
 });
+
+describe("fetchPaginatedLeads — page hors bornes (416 PostgREST)", () => {
+  /**
+   * Faux fetcher fidèle à PostgREST : quand l'offset dépasse le total et qu'un count est demandé,
+   * la réponse est un 416 et postgrest-js rend `data: null, count: null` (le total est perdu).
+   */
+  const postgrestFetcher = (total: number, per: number) => {
+    const calls: number[] = [];
+    const fetchPage = async (page: number) => {
+      calls.push(page);
+      const start = (page - 1) * per;
+      if (start > 0 && start >= total) return { data: null, count: null };
+      const data = Array.from(
+        { length: Math.max(0, Math.min(per, total - start)) },
+        (_, index) => ({ id: String(start + index) })
+      );
+      return { data, count: total };
+    };
+    return { fetchPage, calls };
+  };
+
+  it("revient sur la DERNIÈRE page réelle et conserve le total", async () => {
+    const { fetchPage, calls } = postgrestFetcher(120, 50);
+    const result = await fetchPaginatedLeads(fetchPage, 9999, 50);
+    expect(result.page).toBe(3);
+    expect(result.total).toBe(120);
+    expect(result.leads).toHaveLength(20);
+    // 9999 -> 416, sonde page 1 -> total, puis page 3
+    expect(calls).toEqual([9999, 1, 3]);
+  });
+
+  it("s'arrête à la page 1 si c'est la dernière page réelle", async () => {
+    const { fetchPage, calls } = postgrestFetcher(30, 50);
+    const result = await fetchPaginatedLeads(fetchPage, 8, 50);
+    expect(result.page).toBe(1);
+    expect(result.total).toBe(30);
+    expect(result.leads).toHaveLength(30);
+    expect(calls).toEqual([8, 1]);
+  });
+
+  it("gère un résultat totalement vide sans boucler", async () => {
+    const { fetchPage } = postgrestFetcher(0, 50);
+    const result = await fetchPaginatedLeads(fetchPage, 5, 50);
+    expect(result.page).toBe(1);
+    expect(result.total).toBe(0);
+    expect(result.leads).toEqual([]);
+  });
+
+  it("ne sonde pas quand la page demandée est valide", async () => {
+    const { fetchPage, calls } = postgrestFetcher(120, 50);
+    const result = await fetchPaginatedLeads(fetchPage, 2, 50);
+    expect(result.page).toBe(2);
+    expect(result.total).toBe(120);
+    expect(calls).toEqual([2]);
+  });
+});

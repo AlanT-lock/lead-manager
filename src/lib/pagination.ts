@@ -66,8 +66,13 @@ type PageResult<T> = { data: T[] | null; count: number | null };
  * Récupère une page de leads en corrigeant une page hors bornes.
  *
  * Le nombre de pages n'est connu qu'après le `count` de la première requête : si la page demandée
- * n'existe plus (URL manipulée, filtre resserré, leads supprimés), on re-récupère la dernière page
+ * n'existe plus (URL manipulée, filtre resserré, leads supprimés), on va chercher la dernière page
  * réelle plutôt que d'afficher un tableau vide.
+ *
+ * Subtilité PostgREST : quand l'offset dépasse le total et qu'un `count=exact` est demandé, la
+ * réponse est un 416, et postgrest-js ne lit `content-range` que sur une réponse `ok` — `data` ET
+ * `count` reviennent donc à `null`, et le total est perdu. Dans ce cas on sonde la page 1, toujours
+ * satisfiable, pour récupérer le vrai total.
  *
  * `fetchPage` reçoit un numéro de page 1-indexé et applique lui-même filtres, tri et `.range()`.
  */
@@ -77,11 +82,27 @@ export async function fetchPaginatedLeads<T>(
   per: number
 ): Promise<{ leads: T[]; page: number; total: number }> {
   const first = await fetchPage(requestedPage);
-  const total = first.count ?? 0;
+
+  if (first.count !== null) {
+    const total = first.count;
+    const page = clampPage(requestedPage, pageCount(total, per));
+
+    if (page === requestedPage) {
+      return { leads: first.data ?? [], page, total };
+    }
+
+    const corrected = await fetchPage(page);
+    return { leads: corrected.data ?? [], page, total };
+  }
+
+  // Pas de count exploitable : page hors bornes (416) ou requête en erreur.
+  // La page 1 est toujours satisfiable et nous rend le vrai total.
+  const probe = await fetchPage(1);
+  const total = probe.count ?? 0;
   const page = clampPage(requestedPage, pageCount(total, per));
 
-  if (page === requestedPage) {
-    return { leads: first.data ?? [], page, total };
+  if (page === 1) {
+    return { leads: probe.data ?? [], page, total };
   }
 
   const corrected = await fetchPage(page);
