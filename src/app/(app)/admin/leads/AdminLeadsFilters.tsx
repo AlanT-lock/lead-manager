@@ -67,6 +67,11 @@ export function AdminLeadsFilters({ basePath = "/admin/leads", telepros = [] }: 
     if (f) params.set("from", f);
     if (toVal) params.set("to", toVal);
     // Préservés à travers les changements de filtre.
+    // `installation_type` n'a pas de contrôle dans ce panneau, mais la page le lit et filtre
+    // dessus : les liens des stats (/admin/stats) arrivent avec. Sans cette préservation, il
+    // disparaissait silencieusement dès le premier changement de filtre.
+    const installationType = searchParams.get("installation_type");
+    if (installationType) params.set("installation_type", installationType);
     const per = searchParams.get("per");
     if (per) params.set("per", per);
     const sort = searchParams.get("sort");
