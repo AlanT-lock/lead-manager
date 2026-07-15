@@ -16,7 +16,7 @@ export function AuthShell({
     <div className="min-h-screen flex items-center justify-center p-6 bg-[#f4f7fb]">
       <div className="w-full max-w-md">
         <div className="mb-6 flex justify-center">
-          <Image src="/logo.png" alt="RS ÉCOLOGIE" width={320} height={114} className="h-16 w-auto object-contain" priority />
+          <Image src="/logo.png" alt="RS ÉCOLOGIE" width={1024} height={1024} className="h-14 w-auto object-contain" priority />
         </div>
         <div className="rounded-[12px] border border-[#e1e8f2] bg-white p-8 shadow-[0_10px_30px_rgba(11,31,58,.10)]">
           <h1 className="text-2xl font-bold text-[#0b1f3a]">{title}</h1>

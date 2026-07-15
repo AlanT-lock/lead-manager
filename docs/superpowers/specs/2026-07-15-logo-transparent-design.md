@@ -43,34 +43,44 @@ l'espace mort reste.
 
 C'est corrigé ici parce que c'est le code même que l'on modifie.
 
+## Le problème découvert en cours de route : le texte devient illisible
+
+**Mesuré, pas supposé.** Le texte « RS ÉCOLOGIE » du logo est en vert très foncé (`rgb(9,59,35)`).
+Rapports de contraste :
+
+| Contexte | Contraste | Verdict |
+|---|---|---|
+| Texte sur le carré blanc **actuel** | **12,64:1** | lisible |
+| Texte sur l'écran de connexion (fond clair) | **11,76:1** | lisible |
+| Texte sur le menu latéral, une fois transparent | **1,31:1** | **invisible** |
+
+Seuil WCAG AA pour du texte : 4,5:1. Le carré blanc rendait donc un service que personne n'avait
+identifié : il donnait au texte son contraste sur le fond bleu marine. Le supprimer transforme le nom
+de la marque en tache sombre.
+
+Le symbole (feuille, soleil, arc) reste lui parfaitement lisible sur le bleu — c'est uniquement le
+texte qui pose problème.
+
 ## Décisions (validées avec l'utilisateur)
 
-1. **Fichier** : `Untitled Project-4.png` remplace `public/logo.png`, **même nom**.
-2. **Dimensions déclarées** : `width={320} height={114}` ⇒ `width={1024} height={1024}` dans les deux
-   composants. **Le rendu ne change pas** (`object-contain` ajustait déjà l'image carrée) ; seul
-   l'espace mort disparaît.
-3. **Réduction** : menu latéral `h-28` ⇒ `h-24` (112 ⇒ 96 px) ; connexion `h-16` ⇒ `h-14` (64 ⇒ 56 px).
-   Environ 13 % de moins de chaque côté.
-
-## Ce qui va changer visuellement, et pourquoi
-
-Deux effets se cumulent, et il faut les distinguer pour ne pas être surpris :
-
-- **La réduction des boîtes (−13 %)** diminue l'encombrement réel, c'est-à-dire la place prise dans la
-  mise en page. C'est ce que demandait l'utilisateur.
-- **La transparence diminue en plus la taille *apparente***, indépendamment de toute valeur CSS.
-  Aujourd'hui, le pourtour blanc est opaque : c'est le carré entier de 112 px qui « fait » le logo à
-  l'œil. Une fois transparent, seul le dessin reste visible — environ 63 % de la boîte, soit ~60 px
-  dans le menu latéral après réduction.
-
-Cumulé, le logo occupera visuellement à peu près **moitié moins** qu'aujourd'hui. C'est assumé. Si le
-résultat est trop discret, remonter `h-24` d'un cran suffit (une ligne).
+1. **Fichier** : `Untitled Project-4.png` remplace `public/logo.png`, **même nom** (logo complet,
+   transparent). Utilisé tel quel sur l'écran de connexion, où le contraste est bon.
+2. **Menu latéral : symbole seul.** Nouveau `public/logo-symbole.png` (509×498), obtenu en découpant
+   le logo complet aux lignes 186→683 — le texte commence à la ligne 725, après une bande vide de
+   41 px, la coupe est donc franche et ne rogne rien. Le menu affiche déjà « Espace administrateur »
+   juste en dessous : l'identification reste claire sans le texte du logo.
+3. **Dimensions déclarées** : `width={320} height={114}` ⇒ les vraies dimensions de chaque fichier
+   (1024×1024 pour le logo complet, 509×498 pour le symbole). **Le rendu ne change pas**
+   (`object-contain` ajustait déjà l'image) ; seul l'espace mort disparaît.
+4. **Tailles** : menu latéral `h-28` ⇒ `h-14` (112 ⇒ 56 px) ; connexion `h-16` ⇒ `h-14` (64 ⇒ 56 px).
+   Dans le menu, le symbole apparaissait déjà à ~54 px (noyé dans le carré blanc de 112 px) : il garde
+   donc sa taille visible, tandis que l'encombrement du logo est **divisé par deux**.
 
 ## Hors périmètre (YAGNI)
 
-- Ne pas recadrer le fichier pour supprimer sa marge transparente : elle fait partie de l'asset fourni,
-  et la recadrer rendrait la taille du dessin dépendante d'un traitement maison.
-- Ne pas renommer le fichier, ni introduire de variantes (SVG, plusieurs tailles, mode sombre).
+- Ne pas produire de version claire du logo pour fonds sombres (elle réglerait le problème de
+  contraste proprement, mais elle n'existe pas — le symbole seul répond au besoin sans nouvel asset).
+- Ne pas introduire de variantes SVG, de multiples tailles, ni de mode sombre.
 - Ne pas toucher au reste du menu latéral ni de l'écran de connexion.
 - Ne pas ajouter de favicon (il n'y en a pas aujourd'hui ; ce n'est pas la demande).
 
@@ -90,9 +100,21 @@ Le rendu du fichier transparent y est donc vérifiable directement.
 
 ## Critères de réussite
 
-1. `public/logo.png` a un fond transparent (coins à alpha 0) et pèse ~338 Ko au lieu de ~1 Mo.
-2. Sur `/login`, le logo apparaît **sans carré blanc** sur le fond clair, à 56 px de haut.
-3. Dans le menu latéral, le logo apparaît **sans carré blanc** sur le fond bleu marine, à 96 px de haut.
-4. Aucun espace mort horizontal autour du logo (dimensions déclarées cohérentes avec le fichier).
-5. Le logo n'est ni déformé ni rogné (rapport 1:1 préservé).
+1. `public/logo.png` a un fond transparent (coins à alpha 0) et pèse ~331 Ko au lieu de ~1 Mo.
+2. Sur `/login`, le logo **complet** (texte inclus) apparaît sans carré blanc sur le fond clair,
+   à 56 px de haut.
+3. Dans le menu latéral, le **symbole seul** apparaît sans carré blanc sur le fond bleu marine,
+   à 56 px de haut, sans trace du texte illisible.
+4. Aucun espace mort horizontal autour du logo (dimensions déclarées cohérentes avec chaque fichier).
+5. Ni logo ni symbole n'est déformé (rapports respectifs préservés).
 6. `npx tsc --noEmit` = 0 erreur.
+
+## Vérification effectuée
+
+- **`/login`, au navigateur** (route publique, aucune authentification requise) : fichier `logo.png`
+  servi, rendu **56×56 px**, coin à alpha 0 après passage par l'optimiseur d'images de Next
+  (la transparence survit), ~30 000 pixels opaques aux couleurs de la marque — l'image n'est pas vide.
+- **Menu latéral** : inatteignable sans session. Vérifié par composition du fichier réel sur le vrai
+  dégradé `#0b1f3a`→`#13294b` aux dimensions exactes — le symbole ressort nettement aux trois tailles
+  testées (64/56/48 px).
+- Contrastes calculés selon la formule WCAG (voir tableau ci-dessus).

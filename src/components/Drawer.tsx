@@ -110,12 +110,15 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
           <div className="p-4 border-b border-white/10 flex items-center justify-between">
             <div className="flex flex-col gap-1">
               <Link href={isAdminSpace ? (role === "secretaire" ? "/admin/documents-recus" : "/admin") : "/telepro"} className="block">
+                {/* Symbole seul : le texte « RS ÉCOLOGIE » du logo complet est en vert foncé et
+                    tombe à 1,3:1 de contraste sur ce fond bleu marine (illisible). Le carré blanc
+                    du logo d'origine le rendait lisible ; il n'existe plus. */}
                 <Image
-                  src="/logo.png"
+                  src="/logo-symbole.png"
                   alt="RS ÉCOLOGIE"
-                  width={320}
-                  height={114}
-                  className="h-28 w-auto object-contain"
+                  width={509}
+                  height={498}
+                  className="h-14 w-auto object-contain"
                   priority
                 />
               </Link>
