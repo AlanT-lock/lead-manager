@@ -66,8 +66,16 @@ export function AdminLeadsFilters({ basePath = "/admin/leads", telepros = [] }: 
     if (q) params.set("q", q);
     if (f) params.set("from", f);
     if (toVal) params.set("to", toVal);
+    // Préservés à travers les changements de filtre.
+    const per = searchParams.get("per");
+    if (per) params.set("per", per);
+    const sort = searchParams.get("sort");
+    if (sort) params.set("sort", sort);
+    const dir = searchParams.get("dir");
+    if (dir) params.set("dir", dir);
+    // `page` est volontairement omis : changer un filtre ramène en page 1.
     return params;
-  }, [currentStatus, currentTelepro, currentChantier, currentDelegataire, search, from, to, currentCategory]);
+  }, [currentStatus, currentTelepro, currentChantier, currentDelegataire, search, from, to, currentCategory, searchParams]);
 
   // Recherche automatique avec debounce (300ms)
   useEffect(() => {
