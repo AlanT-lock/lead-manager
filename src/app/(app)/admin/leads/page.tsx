@@ -135,6 +135,13 @@ export default async function AdminLeadsPage({
       : t.full_name || t.email,
   }));
 
+  // Identité de la table : tout changement de page/taille/filtre change le jeu de leads affiché.
+  // Sans ce `key`, React conserverait l'instance (même type, même position) et donc la sélection —
+  // on pourrait alors supprimer ou transférer des leads d'une autre page, invisibles à l'écran.
+  const tableKey = new URLSearchParams(
+    Object.entries(params).filter((entry): entry is [string, string] => typeof entry[1] === "string")
+  ).toString();
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -156,7 +163,12 @@ export default async function AdminLeadsPage({
       {status === "documents_recus" ? (
         <DocumentsRecusTable leads={leads} />
       ) : (
-        <AdminLeadsTable leads={leads} telepros={activeTelepros || []} statusSort={statusSort} />
+        <AdminLeadsTable
+          key={tableKey}
+          leads={leads}
+          telepros={activeTelepros || []}
+          statusSort={statusSort}
+        />
       )}
 
       <LeadsPagination page={page} per={per} total={total} />
