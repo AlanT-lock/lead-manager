@@ -44,8 +44,17 @@ export function LeadsFilters() {
     if (q) params.set("q", q);
     if (f) params.set("from", f);
     if (t) params.set("to", t);
+    // Préservés à travers les changements de filtre : sans eux, changer un filtre
+    // ramènerait la taille de page au défaut et perdrait l'ordre choisi.
+    const per = searchParams.get("per");
+    if (per) params.set("per", per);
+    const sort = searchParams.get("sort");
+    if (sort) params.set("sort", sort);
+    const dir = searchParams.get("dir");
+    if (dir) params.set("dir", dir);
+    // `page` est volontairement omis : changer un filtre ramène en page 1.
     return params;
-  }, [currentStatus, search, from, to, currentCategory]);
+  }, [currentStatus, search, from, to, currentCategory, searchParams]);
 
   // Recherche automatique avec debounce (300ms)
   useEffect(() => {
