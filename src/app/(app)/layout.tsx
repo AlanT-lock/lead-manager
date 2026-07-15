@@ -59,8 +59,9 @@ export default async function AppLayout({
   ]);
 
   const count = notifRes.count;
-  // Compteurs vides plutôt qu'une page en erreur : le menu perd ses badges, le
-  // reste de l'app fonctionne. C'est le comportement du try/catch d'origine.
+  // Sur erreur RPC, retour sur compteurs vides plutôt qu'une page cassée.
+  // Le Drawer étant défensif (statusCounts[cat] ?? {} et statusCounts[cat]?.[s] ?? 0),
+  // il affiche les mêmes zéros que l'ancien repli d'erreur, sans interrompre l'app.
   const statusCounts = countsRes.error
     ? {}
     : buildStatusCounts(countsRes.data ?? []);
