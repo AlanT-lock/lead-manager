@@ -109,6 +109,7 @@ Entre la fermeture du `</nav>` (l. 114) et le `<label>` du sélecteur « Par pag
         <form
           data-testid="pagination-goto-form"
           onSubmit={handleGoto}
+          noValidate
           className="flex items-center gap-2 text-sm text-[#64748b]"
         >
           <label htmlFor="pagination-goto">Aller à</label>
@@ -126,8 +127,16 @@ Entre la fermeture du `</nav>` (l. 114) et le `<label>` du sélecteur « Par pag
         </form>
 ```
 
-> `min`/`max` ouvrent le clavier numérique sur mobile et documentent l'intervalle, mais n'empêchent
-> **pas** la saisie hors bornes : c'est `clampPage` à la soumission qui fait foi.
+> **`noValidate` est indispensable, pas cosmétique.** Sans lui, la validation HTML5 native du
+> navigateur **bloque l'événement `submit`** dès que la valeur sort de `[min, max]` : `handleGoto` —
+> et donc `clampPage` — ne s'exécuterait jamais. Taper `9999` puis Entrée n'afficherait qu'une bulle
+> d'erreur native et ne mènerait nulle part, au lieu d'aller à la dernière page comme l'exige la
+> spec. Vérifié au navigateur sur une reproduction isolée du markup.
+>
+> `min`/`max` sont conservés pour le clavier numérique mobile et pour documenter l'intervalle, mais
+> avec `noValidate` ils deviennent purement indicatifs : **c'est `clampPage` à la soumission qui fait
+> foi**, ce qui est bien l'intention. Une saisie décimale (`3.5`) est alors soumise, puis rejetée par
+> le garde `Number.isInteger` — sans bulle d'erreur, conformément à « aucun état d'erreur ».
 
 - [ ] **Step 4: Vérifier les types**
 
@@ -144,6 +153,8 @@ Expected: PASS — 25 tests (aucun ne couvre ce composant ; on vérifie l'absenc
 
 Run: `git diff src/components/ui-kit/LeadsPagination.tsx`
 Vérifier à l'œil :
+- `noValidate` est bien sur le `<form>` — sans lui, le cas principal (saut hors bornes) ne fonctionne
+  pas du tout ;
 - `setGotoValue("")` est bien présent dans `handleGoto` (c'est le point le plus facile à oublier, et
   le plus difficile à voir sans navigateur) ;
 - le `<form>` est bien **entre** `</nav>` et le `<label>` « Par page » ;

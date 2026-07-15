@@ -41,8 +41,17 @@ sélecteur « Par page »**. Libellé « Aller à ».
 et accessible. `onSubmit` fait `event.preventDefault()` puis navigue.
 
 L'input est `type="number"` avec `min={1}` et `max={count}` : cela ouvre le clavier numérique sur
-mobile et documente l'intervalle attendu. `min`/`max` n'empêchent toutefois **pas** la saisie d'une
-valeur hors bornes — c'est le clamp à la soumission qui fait foi, pas l'attribut.
+mobile et documente l'intervalle attendu.
+
+**Le `<form>` porte `noValidate`, et ce n'est pas cosmétique.** Sans lui, la validation HTML5 native
+bloque l'événement `submit` dès que la valeur sort de `[min, max]` : `handleGoto` — donc `clampPage` —
+ne s'exécuterait jamais, et taper `9999` puis Entrée n'afficherait qu'une bulle d'erreur du navigateur
+sans mener nulle part. Ce serait la négation du critère de réussite n°3. Avec `noValidate`, `min`/`max`
+deviennent purement indicatifs et **c'est le clamp à la soumission qui fait foi**, ce qui est bien
+l'intention.
+
+> Cette subtilité a été trouvée en revue, après qu'une première version de la spec ait affirmé
+> l'inverse. Ne pas retirer `noValidate` en le croyant superflu.
 
 ### Le comportement à la soumission
 
@@ -91,10 +100,18 @@ remontage forcé.
 
 - La **logique de bornage est déjà testée** : `clampPage` est couverte par `src/lib/pagination.test.ts`
   (cas hors bornes haut, bas, et dans l'intervalle). Le champ ne fait que l'appeler.
-- Un **test e2e serait fragile et muet** : la revue finale de la pagination a établi que les tests e2e
-  touchant la barre dépendent du volume de la base de test (le champ, comme la barre, n'existe que
-  s'il y a plus d'une page). Ils sont par ailleurs **toujours « skipped »** faute de `.env.test.local`.
-  Ajouter un test qui ne s'exécute jamais donnerait une fausse impression de couverture.
+- Un **test e2e *de l'application* serait fragile et muet** : la revue finale de la pagination a établi
+  que les tests e2e touchant la barre dépendent du volume de la base de test (le champ, comme la
+  barre, n'existe que s'il y a plus d'une page). Ils sont par ailleurs **toujours « skipped »** faute
+  de `.env.test.local`. Ajouter un test qui ne s'exécute jamais donnerait une fausse impression de
+  couverture.
+
+> **Nuance apprise en revue.** Le bug `noValidate` ci-dessus a été trouvé au navigateur **sans session
+> admin ni base de test** : il suffisait d'isoler le `<form>`/`<input>` dans une page HTML statique et
+> de la piloter avec Playwright. « Pas de session authentifiée » n'est donc pas une excuse valable
+> pour ne rien vérifier au navigateur — le comportement natif d'un formulaire se teste hors de
+> l'application. À garder en tête pour toute prochaine fonctionnalité reposant sur des mécanismes
+> natifs du navigateur.
 - Il n'y a **pas de runner de test de composants React** dans ce repo (Vitest y est configuré en
   `environment: "node"`, sans jsdom ni Testing Library). En introduire un pour un champ de 15 lignes
   serait disproportionné.
