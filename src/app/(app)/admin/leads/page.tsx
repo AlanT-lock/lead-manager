@@ -17,7 +17,7 @@ const CHANTIER_FIELDS = CHANTIER_STATUS_FIELDS.map((f) => f.field);
 export default async function AdminLeadsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; q?: string; telepro?: string; from?: string; to?: string; chantier?: string; delegataire?: string; installation_type?: string; category?: string; page?: string; per?: string }>;
+  searchParams: Promise<{ status?: string; q?: string; telepro?: string; from?: string; to?: string; chantier?: string; delegataire?: string; installation_type?: string; category?: string; page?: string; per?: string; sort?: string; dir?: string }>;
 }) {
   const adminClient = createAdminClient();
   const params = await searchParams;
@@ -37,6 +37,10 @@ export default async function AdminLeadsPage({
     ? parsePerPage(params.per)
     : parsePerPage(cookieStore.get(PER_PAGE_COOKIE)?.value);
   const requestedPage = parsePage(params.page);
+
+  const statusSort = params.sort === "status_changed_at" && (params.dir === "asc" || params.dir === "desc")
+    ? params.dir
+    : "none";
 
   // Parsing en heure locale pour éviter les décalages de fuseau
   const fromDate = from ? new Date(`${from}T00:00:00`) : null;
@@ -95,6 +99,12 @@ export default async function AdminLeadsPage({
 
     // `.order("id")` garantit un ordre total : sans lui, deux leads de même created_at
     // peuvent changer de place entre deux requêtes et donc apparaître deux fois ou être sautés.
+    if (statusSort !== "none") {
+      return query
+        .order("status_changed_at", { ascending: statusSort === "asc", nullsFirst: false })
+        .order("id", { ascending: false });
+    }
+
     return query
       .order("created_at", { ascending: false })
       .order("id", { ascending: false });
@@ -146,7 +156,7 @@ export default async function AdminLeadsPage({
       {status === "documents_recus" ? (
         <DocumentsRecusTable leads={leads} />
       ) : (
-        <AdminLeadsTable leads={leads} telepros={activeTelepros || []} />
+        <AdminLeadsTable leads={leads} telepros={activeTelepros || []} statusSort={statusSort} />
       )}
 
       <LeadsPagination page={page} per={per} total={total} />

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useCallback } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, type LeadCategory, type LeadStatus } from "@/lib/types";
 import { formatDateParis } from "@/lib/date";
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
@@ -36,7 +36,7 @@ function getStatusSelectClass(status: string): string {
   }
 }
 
-type StatusSortDirection = "none" | "desc" | "asc";
+export type StatusSortDirection = "none" | "desc" | "asc";
 
 interface Lead {
   id: string;
@@ -58,9 +58,10 @@ interface AdminLeadsTableProps {
   telepros: { id: string; full_name: string | null; email: string }[];
   /** Exclure ce télépro de la liste des cibles (ex: page redistribution) */
   excludeTeleproId?: string;
+  statusSort: StatusSortDirection;
 }
 
-export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLeadsTableProps) {
+export function AdminLeadsTable({ leads, telepros, excludeTeleproId, statusSort }: AdminLeadsTableProps) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [targetId, setTargetId] = useState("");
   const [loading, setLoading] = useState(false);
@@ -68,24 +69,29 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
-  const [statusSort, setStatusSort] = useState<StatusSortDirection>("none");
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const sortedLeads = useMemo(() => {
-    if (statusSort === "none") return leads;
-    return [...leads].sort((a, b) => {
-      const dateA = a.status_changed_at ? new Date(a.status_changed_at).getTime() : 0;
-      const dateB = b.status_changed_at ? new Date(b.status_changed_at).getTime() : 0;
-      return statusSort === "desc" ? dateB - dateA : dateA - dateB;
-    });
-  }, [leads, statusSort]);
-
+  // Cycle inchangé pour l'utilisateur (aucun → décroissant → croissant), mais l'ordre est
+  // désormais appliqué par le serveur sur l'ensemble du résultat, pas sur la seule page affichée.
   const toggleStatusSort = () => {
-    setStatusSort((prev) => {
-      if (prev === "none") return "desc";
-      if (prev === "desc") return "asc";
-      return "none";
-    });
+    const next: StatusSortDirection =
+      statusSort === "none" ? "desc" : statusSort === "desc" ? "asc" : "none";
+
+    const params = new URLSearchParams(searchParams.toString());
+    if (next === "none") {
+      params.delete("sort");
+      params.delete("dir");
+    } else {
+      params.set("sort", "status_changed_at");
+      params.set("dir", next);
+    }
+    // Changer l'ordre invalide la position courante.
+    params.delete("page");
+
+    const query = params.toString();
+    router.push(query ? `${pathname}?${query}` : pathname);
   };
 
   const handleStatusChange = useCallback(async (leadId: string, newStatus: LeadStatus, oldStatus: string) => {
@@ -383,14 +389,14 @@ export function AdminLeadsTable({ leads, telepros, excludeTeleproId }: AdminLead
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedLeads.length === 0 ? (
+            {leads.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="py-12 text-center text-[#64748b]">
                   Aucun lead trouvé
                 </TableCell>
               </TableRow>
             ) : (
-              sortedLeads.map((lead) => (
+              leads.map((lead) => (
                 <TableRow
                   key={lead.id}
                   onClick={() => router.push(`/admin/leads/${lead.id}`)}

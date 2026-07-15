@@ -8,10 +8,14 @@ import { ChevronLeft } from "lucide-react";
 export default async function AdminRedistributePage({
   searchParams,
 }: {
-  searchParams: Promise<{ telepro?: string }>;
+  searchParams: Promise<{ telepro?: string; sort?: string; dir?: string }>;
 }) {
   const params = await searchParams;
   const teleproId = params.telepro;
+
+  const statusSort = params.sort === "status_changed_at" && (params.dir === "asc" || params.dir === "desc")
+    ? params.dir
+    : "none";
 
   if (!teleproId) {
     redirect("/admin/leads");
@@ -29,14 +33,17 @@ export default async function AdminRedistributePage({
     redirect("/admin/leads");
   }
 
-  const { data: leads } = await adminClient
+  const leadsQuery = adminClient
     .from("leads")
     .select(`
       *,
       profile:profiles!assigned_to(full_name, email)
     `)
-    .eq("assigned_to", teleproId)
-    .order("created_at", { ascending: false });
+    .eq("assigned_to", teleproId);
+
+  const { data: leads } = await (statusSort !== "none"
+    ? leadsQuery.order("status_changed_at", { ascending: statusSort === "asc", nullsFirst: false })
+    : leadsQuery.order("created_at", { ascending: false }));
 
   const { data: activeTelepros } = await adminClient
     .from("profiles")
@@ -72,6 +79,7 @@ export default async function AdminRedistributePage({
         leads={leads || []}
         telepros={activeTelepros || []}
         excludeTeleproId={teleproId}
+        statusSort={statusSort}
       />
     </div>
   );
