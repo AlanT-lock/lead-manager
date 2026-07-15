@@ -8,8 +8,6 @@ import { Input } from "@/components/ui/input";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { cn } from "@/lib/utils";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://crm-rs-ecologie.netlify.app";
-
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -22,8 +20,11 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     const supabase = createClient();
+    // window.location.origin : toujours le domaine réellement servi (prod, preview ou local).
+    // Une URL en dur ou une variable d'env se désynchronise du domaine sans rien casser
+    // visiblement — Supabase refuse alors la redirection et renvoie sur le Site URL.
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${SITE_URL}/reset-password`,
+      redirectTo: `${window.location.origin}/auth/confirm`,
     });
 
     setLoading(false);

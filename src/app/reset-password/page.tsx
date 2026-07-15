@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -8,48 +9,34 @@ import { Input } from "@/components/ui/input";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { cn } from "@/lib/utils";
 
+const LIEN_INVALIDE =
+  "Lien invalide ou expiré. Veuillez demander un nouveau lien de réinitialisation.";
+
 function ResetPasswordForm() {
+  const searchParams = useSearchParams();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
 
+  // /auth/confirm a déjà validé le lien et posé la session en cookie avant de rediriger ici :
+  // il suffit de la lire, sans attendre ni réessayer.
   useEffect(() => {
-    const supabase = createClient();
-    const hasHash = typeof window !== "undefined" && window.location.hash.length > 0;
-
-    const checkSession = () => {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-          setReady(true);
-          setError(null);
-        } else if (!hasHash) {
-          setError("Lien invalide ou expiré. Veuillez demander un nouveau lien de réinitialisation.");
-          setReady(true);
-        }
-      });
-    };
-
-    checkSession();
-    if (hasHash) {
-      const timer = setTimeout(checkSession, 500);
-      const timeout = setTimeout(() => {
-        setReady((r) => {
-          if (!r) {
-            setError("Lien invalide ou expiré. Veuillez demander un nouveau lien de réinitialisation.");
-          }
-          return true;
-        });
-      }, 3000);
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(() => checkSession());
-      return () => {
-        clearTimeout(timer);
-        clearTimeout(timeout);
-        subscription.unsubscribe();
-      };
+    if (searchParams.get("error")) {
+      setError(LIEN_INVALIDE);
+      setReady(true);
+      return;
     }
-  }, []);
+
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        setError(LIEN_INVALIDE);
+      }
+      setReady(true);
+    });
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

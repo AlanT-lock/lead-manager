@@ -1,10 +1,9 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { isPublicAuthPath } from '@/lib/auth-paths';
 
 export async function updateSession(request: NextRequest) {
-  const isAuthPage = request.nextUrl.pathname.startsWith('/login')
-    || request.nextUrl.pathname.startsWith('/forgot-password')
-    || request.nextUrl.pathname.startsWith('/reset-password');
+  const isAuthPage = isPublicAuthPath(request.nextUrl.pathname);
   const isSetupPage = request.nextUrl.pathname.startsWith('/setup');
   const isSetupApi = request.nextUrl.pathname.startsWith('/api/setup');
 
@@ -44,8 +43,11 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    const isResetPassword = request.nextUrl.pathname.startsWith('/reset-password');
-    if (user && (isAuthPage || isSetupPage) && !isResetPassword) {
+    // Un utilisateur déjà connecté qui clique sur un lien de réinitialisation doit
+    // pouvoir atteindre /auth/confirm et /reset-password, pas être renvoyé sur son dashboard.
+    const isPasswordRecovery = request.nextUrl.pathname.startsWith('/reset-password')
+      || request.nextUrl.pathname.startsWith('/auth/');
+    if (user && (isAuthPage || isSetupPage) && !isPasswordRecovery) {
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
