@@ -93,7 +93,7 @@ export default async function AppLayout({
             statusCounts={statusCounts}
           />
         </Suspense>
-        <main className="flex-1 lg:ml-64 min-h-screen pt-4 pb-8 px-4 lg:px-8 bg-[#f4f7fb]">
+        <main className="flex-1 min-w-0 lg:ml-64 min-h-screen pt-4 pb-8 px-4 lg:px-8 bg-[#f4f7fb]">
           {children}
         </main>
       </div>
