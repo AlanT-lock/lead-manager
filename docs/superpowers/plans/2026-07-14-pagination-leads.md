@@ -1346,6 +1346,10 @@ test("changer un filtre préserve la taille et ramène en page 1", async ({ page
 test("la barre de pagination est absente quand il n'y a qu'une page", async ({ page }) => {
   // Un filtre très restrictif : au plus quelques leads, donc une seule page de 200.
   await page.goto("/admin/leads?per=200&q=zzzzzzzzzzzz");
+  // Prouve d'abord qu'on est bien arrivé sur la page de leads. Sans cette ligne, le test
+  // passerait aussi si la session expirait (redirection vers /login) ou si la page plantait :
+  // la barre serait absente pour une tout autre raison que « une seule page ».
+  await expect(page.getByTestId("filter-search")).toBeVisible();
   await expect(page.getByTestId("pagination")).toHaveCount(0);
 });
 ```
