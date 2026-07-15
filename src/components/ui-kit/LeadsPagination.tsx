@@ -136,6 +136,7 @@ export function LeadsPagination({ page, per, total }: LeadsPaginationProps) {
         <form
           data-testid="pagination-goto-form"
           onSubmit={handleGoto}
+          noValidate
           className="flex items-center gap-2 text-sm text-[#64748b]"
         >
           <label htmlFor="pagination-goto">Aller à</label>
