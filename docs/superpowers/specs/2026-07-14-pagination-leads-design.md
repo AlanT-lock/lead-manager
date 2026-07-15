@@ -114,6 +114,13 @@ Les filtres existants (`status`, `q`, `telepro`, `from`/`to`, `chantier`, `deleg
 `installation_type`, `category`) s'appliquent **avant** `.range()` : le `count` reflète le résultat
 filtré, et paginer un résultat filtré fonctionne naturellement. Aucun filtre n'est modifié.
 
+**Départage obligatoire (`.order("id")` en dernier)** : une pagination n'est déterministe que si
+l'ordre est total. Deux leads partageant la même valeur de tri peuvent sinon être renvoyés dans un
+ordre différent d'une requête à l'autre — un même lead apparaîtrait alors deux fois, ou serait sauté,
+entre la page 1 et la page 2. Le risque est réel ici : `status_changed_at` est nul pour tous les leads
+jamais modifiés, et un import CSV peut produire des `created_at` identiques. Chaque requête paginée se
+termine donc par `.order("id", { ascending: false })`.
+
 **Clamp de la page hors bornes** : le nombre de pages n'est connu qu'après la requête (`count`). Si
 `page` dépasse le dernier index (ex. un filtre resserre le résultat à 12 leads alors que l'URL dit
 `page=8`), on **re-exécute la requête sur la dernière page réelle** plutôt que d'afficher un tableau
@@ -141,9 +148,10 @@ Point unique de vérité, importé par les pages et par le composant de paginati
   `DEFAULT_PER_PAGE`. Traite `undefined`, `"abc"`, `"37"`, `"-5"`.
 - `parsePage(value): number` — entier ≥ 1, sinon 1.
 - `pageCount(total, per): number` — au moins 1 (une liste vide = 1 page).
-- `pageNumbers(current, total): (number | "…")[]` — la séquence à afficher (voir règle ci-dessous).
+- `clampPage(page, count): number` — ramène dans `[1, count]`.
+- `pageNumbers(current, total): (number | "ellipsis")[]` — la séquence à afficher (règle ci-dessous).
 
-Ce module est du calcul pur, sans dépendance à Next ni à Supabase : testable directement.
+Ce module est du calcul pur, sans dépendance à Next ni à Supabase : testable directement (Vitest).
 
 ### `src/components/ui-kit/LeadsPagination.tsx` (nouveau, `"use client"`)
 
@@ -152,12 +160,14 @@ reçoit sa position et son total, et pousse les nouveaux paramètres dans l'URL.
 
 ```ts
 type LeadsPaginationProps = {
-  page: number;      // page courante (1-indexée, déjà clampée)
-  per: number;       // taille de page courante
-  total: number;     // nombre total de leads pour le filtre courant
-  basePath: string;  // "/admin/leads" | "/admin/documents-recus"
+  page: number;   // page courante (1-indexée, déjà clampée)
+  per: number;    // taille de page courante
+  total: number;  // nombre total de leads pour le filtre courant
 };
 ```
+
+Pas de prop `basePath` : le composant lit `usePathname()` et réécrit les `useSearchParams()` courants,
+comme le toggle de tri. Il préserve ainsi tous les filtres sans les connaître.
 
 Contenu : compteur « 51–100 sur 1 234 », boutons précédent/suivant (désactivés aux extrémités), liste
 horizontale des numéros par ordre croissant, sélecteur `<select>` natif 25/50/100/200.
@@ -223,6 +233,15 @@ Lire `sort`/`dir` et appliquer l'ordre, pour que le bouton de tri de la table pa
 fonctionnel. **Pas de pagination** (hors périmètre).
 
 ## Tests
+
+**Unitaires (Vitest, nouveau dans le repo)** — le repo n'avait aucun runner unitaire. On ajoute
+**Vitest** (`vitest.config.ts`, script `npm test`, `include: ["src/**/*.test.ts"]` pour ne pas
+empiéter sur `e2e/` qui appartient à Playwright). Justification : `src/lib/pagination.ts` est du
+calcul pur, et la séquence à ellipses est un classique à erreurs de bornes — un e2e la testerait très
+mal (il faudrait un navigateur et un volume de données réel). `src/lib/pagination.test.ts` couvre :
+`parsePerPage` (valide / absent / `"37"` / `"abc"`), `parsePage` (`"0"`, `"-5"`, `"abc"`),
+`pageCount` (total 0 ⇒ 1 page), `clampPage`, et `pageNumbers` (≤ 8 pages sans ellipse ; page 6/25 ⇒
+`1 … 4 5 6 7 8 … 25` ; premières et dernières pages ; comblement d'un trou d'une seule page).
 
 **e2e (`e2e/leads-pagination.admin.spec.ts`, nouveau)** — dans le style de
 `e2e/leads-filters.admin.spec.ts` (`data-testid` + assertion sur l'URL, `test.skip(!hasAuthEnv)`) :
