@@ -23,3 +23,67 @@ export function pageCount(total: number, per: number): number {
 export function clampPage(page: number, count: number): number {
   return Math.min(Math.max(page, 1), count);
 }
+
+/** Nombre de pages en deçà duquel on affiche tous les numéros, sans ellipse. */
+const FULL_LIST_MAX_PAGES = 8;
+
+/** Nombre de voisines affichées de part et d'autre de la page courante. */
+const NEIGHBOURS = 2;
+
+/**
+ * Séquence de numéros à afficher, avec ellipses.
+ * Exemple : pageNumbers(6, 25) -> [1, "ellipsis", 4, 5, 6, 7, 8, "ellipsis", 25]
+ */
+export function pageNumbers(current: number, total: number): (number | "ellipsis")[] {
+  if (total <= FULL_LIST_MAX_PAGES) {
+    return Array.from({ length: total }, (_, index) => index + 1);
+  }
+
+  const shown = new Set<number>([1, total]);
+  for (let page = current - NEIGHBOURS; page <= current + NEIGHBOURS; page++) {
+    if (page >= 1 && page <= total) shown.add(page);
+  }
+
+  const sorted = [...shown].sort((a, b) => a - b);
+  const result: (number | "ellipsis")[] = [];
+
+  for (const [index, page] of sorted.entries()) {
+    if (index > 0) {
+      const gap = page - sorted[index - 1];
+      // Un trou d'une seule page : l'ellipse ne ferait rien gagner, on affiche le numéro.
+      if (gap === 2) result.push(page - 1);
+      else if (gap > 2) result.push("ellipsis");
+    }
+    result.push(page);
+  }
+
+  return result;
+}
+
+type PageResult<T> = { data: T[] | null; count: number | null };
+
+/**
+ * Récupère une page de leads en corrigeant une page hors bornes.
+ *
+ * Le nombre de pages n'est connu qu'après le `count` de la première requête : si la page demandée
+ * n'existe plus (URL manipulée, filtre resserré, leads supprimés), on re-récupère la dernière page
+ * réelle plutôt que d'afficher un tableau vide.
+ *
+ * `fetchPage` reçoit un numéro de page 1-indexé et applique lui-même filtres, tri et `.range()`.
+ */
+export async function fetchPaginatedLeads<T>(
+  fetchPage: (page: number) => PromiseLike<PageResult<T>>,
+  requestedPage: number,
+  per: number
+): Promise<{ leads: T[]; page: number; total: number }> {
+  const first = await fetchPage(requestedPage);
+  const total = first.count ?? 0;
+  const page = clampPage(requestedPage, pageCount(total, per));
+
+  if (page === requestedPage) {
+    return { leads: first.data ?? [], page, total };
+  }
+
+  const corrected = await fetchPage(page);
+  return { leads: corrected.data ?? [], page, total };
+}
