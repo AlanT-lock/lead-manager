@@ -12,7 +12,18 @@ const db = createClient(
 
 const ms = (t) => Math.round(performance.now() - t);
 
-// Reproduction fidèle de la boucle actuelle (layout.tsx:62-79).
+// Reproduction fidèle de la boucle actuelle (layout.tsx:62-79), à une exception
+// près, volontaire : la boucle réelle applique un garde à la ligne 76
+// (`if (cat in counts && s in counts[cat]) counts[cat][s]++;`) qui ignore toute
+// ligne dont `category`/`status` ne figure pas dans `LEAD_CATEGORIES` /
+// `LEAD_STATUSES_ADMIN` (src/lib/types.ts). `loopCounts()` ci-dessous compte
+// TOUTE ligne, sans ce garde. Aujourd'hui c'est un no-op : ces listes couvrent
+// exhaustivement les valeurs des enums Postgres `lead_category` / `lead_status`,
+// donc rien ne peut tomber en dehors. La preuve reste valide malgré cette
+// omission : si les compteurs bruts (sans garde) coïncident entre boucle et RPC,
+// les compteurs filtrés par le même garde coïncident forcément aussi, puisque ce
+// garde s'applique identiquement des deux côtés — avant, dans layout.tsx:76 ;
+// après, dans buildStatusCounts (Task 2) qui consommera le résultat de la RPC.
 async function loopCounts(assignedTo) {
   const counts = {};
   const PAGE = 1000;
