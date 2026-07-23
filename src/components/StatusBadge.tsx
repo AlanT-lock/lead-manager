@@ -10,6 +10,7 @@ const STATUS_BADGE: Record<LeadStatus, string> = {
   devis_envoye: "bg-[#fce7f3] text-[#be185d]",
   incomplet: "bg-[#fef3c7] text-[#b45309]",
   bloque_mpr: "bg-[#fee2e2] text-[#b91c1c]",
+  avis_2025_bloque: "bg-[#ffe4e6] text-[#9f1239]",
   valide: "bg-[#dcfce7] text-[#15803d]",
   installe: "bg-[#ccfbf1] text-[#0f766e]",
   ancien_documents_recus: "bg-slate-100 text-slate-500",
