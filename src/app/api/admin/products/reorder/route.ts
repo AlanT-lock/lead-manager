@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   const role = profile?.role?.toString().trim().toLowerCase();
-  if (role !== "admin") {
+  if (role !== "admin" && role !== "stockage") {
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
   }
 

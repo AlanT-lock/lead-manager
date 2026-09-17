@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'telepro' | 'secretaire';
+export type UserRole = 'admin' | 'telepro' | 'secretaire' | 'stockage';
 
 export type LeadStatus =
   | 'nouveau'

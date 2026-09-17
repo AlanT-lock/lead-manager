@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { Drawer } from "@/components/Drawer";
 import { SaveOnLeaveProvider } from "@/contexts/SaveOnLeaveContext";
 import { buildStatusCounts } from "@/lib/status-counts";
+import { normalizeRole } from "@/lib/roles";
 
 export default async function AppLayout({
   children,
@@ -40,7 +41,7 @@ export default async function AppLayout({
     redirect("/login?message=Compte désactivé");
   }
 
-  const role = profile?.role?.toString().trim().toLowerCase() as "admin" | "telepro" | "secretaire" | undefined;
+  const role = normalizeRole(profile?.role);
 
   const adminClient = createAdminClient();
   const isAdminOrSecretaire = role === "admin" || role === "secretaire";
@@ -71,7 +72,7 @@ export default async function AppLayout({
       <div className="min-h-screen flex">
         <Suspense fallback={<div className="hidden lg:block w-64 shrink-0 bg-gradient-to-b from-[#0b1f3a] to-[#13294b]" />}>
           <Drawer
-            role={role === "admin" || role === "secretaire" ? (role as "admin" | "secretaire") : "telepro"}
+            role={role ?? "telepro"}
             userName={profile?.full_name || user.email || undefined}
             unreadNotifications={count || 0}
             statusCounts={statusCounts}

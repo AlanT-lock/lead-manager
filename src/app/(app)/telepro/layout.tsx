@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { CallbackNotifications } from "./teleprospection/CallbackNotifications";
+import { normalizeRole, roleLandingPath, usesAdminSpace } from "@/lib/roles";
 
 export default async function TeleproLayout({
   children,
@@ -31,12 +32,9 @@ export default async function TeleproLayout({
     profile = res.data;
   }
 
-  const role = profile?.role?.toString().trim().toLowerCase();
-  if (role === "admin") {
-    redirect("/admin");
-  }
-  if (role === "secretaire") {
-    redirect("/admin/documents-recus");
+  const role = normalizeRole(profile?.role);
+  if (usesAdminSpace(role)) {
+    redirect(roleLandingPath(role));
   }
 
   return (

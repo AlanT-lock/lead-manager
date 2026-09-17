@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { StockageClient } from "./StockageClient";
 import { PageHeader } from "@/components/ui-kit/PageHeader";
+import { normalizeRole, roleLandingPath } from "@/lib/roles";
 
 export default async function AdminStockagePage() {
   const supabase = await createClient();
@@ -17,9 +18,10 @@ export default async function AdminStockagePage() {
     .eq("id", user.id)
     .single();
 
-  const role = profile?.role?.toString().trim().toLowerCase();
-  if (role !== "admin") {
-    redirect("/admin");
+  // Même page pour l'admin et pour le rôle stockage, dont c'est le seul écran.
+  const role = normalizeRole(profile?.role);
+  if (role !== "admin" && role !== "stockage") {
+    redirect(roleLandingPath(role));
   }
 
   const [productsRes, typesRes, suppliersRes] = await Promise.all([

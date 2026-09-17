@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     .single();
 
   const role = profile?.role?.toString().trim().toLowerCase();
-  if (role !== "admin" && role !== "secretaire") {
+  if (role !== "admin" && role !== "secretaire" && role !== "stockage") {
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
   }
 
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   const role = profile?.role?.toString().trim().toLowerCase();
-  if (role !== "admin") {
+  if (role !== "admin" && role !== "stockage") {
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
   }
 

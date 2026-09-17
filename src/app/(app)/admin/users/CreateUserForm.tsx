@@ -3,7 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-type CreateUserRole = "telepro" | "secretaire";
+type CreateUserRole = "telepro" | "secretaire" | "stockage";
+
+const ROLE_LABELS: Record<CreateUserRole, string> = {
+  telepro: "télépro",
+  secretaire: "secrétaire",
+  stockage: "stockage",
+};
 
 const INPUT_CLS =
   "w-full h-9 px-3 border border-[#e1e8f2] rounded-[9px] bg-white text-[#0b1f3a] text-sm focus:outline-none focus:ring-2 focus:ring-[#2563eb]/40 focus:border-[#2563eb] transition-colors";
@@ -100,6 +106,7 @@ export function CreateUserForm() {
         >
           <option value="telepro">Télépro</option>
           <option value="secretaire">Secrétaire</option>
+          <option value="stockage">Stockage</option>
         </select>
       </div>
 
@@ -108,7 +115,7 @@ export function CreateUserForm() {
         disabled={loading}
         className="h-9 px-5 bg-[#2563eb] text-white text-sm font-medium rounded-[9px] hover:bg-[#1d4ed8] disabled:opacity-50 transition-colors"
       >
-        {loading ? "Création…" : `Créer le ${role === "telepro" ? "télépro" : "secrétaire"}`}
+        {loading ? "Création…" : `Créer le compte ${ROLE_LABELS[role]}`}
       </button>
     </form>
   );

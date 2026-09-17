@@ -29,7 +29,7 @@ import { useRouter } from "next/navigation";
 import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, LEAD_CATEGORIES, LEAD_CATEGORY_LABELS, type LeadStatus, type LeadCategory } from "@/lib/types";
 
 interface DrawerProps {
-  role: "admin" | "telepro" | "secretaire";
+  role: "admin" | "telepro" | "secretaire" | "stockage";
   userName?: string;
   unreadNotifications?: number;
   statusCounts?: Record<string, Record<string, number>>;
@@ -56,6 +56,10 @@ const secretaireNav = [
   { href: "/admin", label: "Statistique télépro", icon: TrendingUp },
 ];
 
+const stockageNav = [
+  { href: "/admin/stockage", label: "Stockage", icon: Package },
+];
+
 const teleproNav = [
   { href: "/telepro", label: "Tableau de bord", icon: LayoutDashboard },
   { href: "/telepro/leads", label: "Mes leads", icon: Users, hasStatusSubmenu: true },
@@ -74,7 +78,13 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
   const router = useRouter();
   // Le menu suit l'URL : /admin → menu admin/secretaire, /telepro → menu télépro
   const isAdminSpace = pathname.startsWith("/admin");
-  const nav = isAdminSpace ? (role === "secretaire" ? secretaireNav : adminNav) : teleproNav;
+  const adminSpaceNav =
+    role === "secretaire" ? secretaireNav : role === "stockage" ? stockageNav : adminNav;
+  const nav = isAdminSpace ? adminSpaceNav : teleproNav;
+  const adminSpaceHome =
+    role === "secretaire" ? "/admin/documents-recus" : role === "stockage" ? "/admin/stockage" : "/admin";
+  const adminSpaceLabel =
+    role === "secretaire" ? "Espace secrétaire" : role === "stockage" ? "Espace stockage" : "Espace administrateur";
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -109,7 +119,7 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
         <div className="flex flex-col h-full">
           <div className="p-4 border-b border-white/10 flex items-center justify-between">
             <div className="flex flex-col gap-1">
-              <Link href={isAdminSpace ? (role === "secretaire" ? "/admin/documents-recus" : "/admin") : "/telepro"} className="block">
+              <Link href={isAdminSpace ? adminSpaceHome : "/telepro"} className="block">
                 {/* Symbole seul : le texte « RS ÉCOLOGIE » du logo complet est en vert foncé et
                     tombe à 1,3:1 de contraste sur ce fond bleu marine (illisible). Le carré blanc
                     du logo d'origine le rendait lisible ; il n'existe plus. */}
@@ -123,7 +133,7 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
                 />
               </Link>
               <span className="text-xs font-medium text-white">
-                {isAdminSpace ? (role === "secretaire" ? "Espace secrétaire" : "Espace administrateur") : "Espace télépro"}
+                {isAdminSpace ? adminSpaceLabel : "Espace télépro"}
               </span>
             </div>
             <button
@@ -137,7 +147,7 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
 
           <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
             {nav.map((item) => {
-              const homeHref = isAdminSpace ? (role === "secretaire" ? "/admin/documents-recus" : "/admin") : "/telepro";
+              const homeHref = isAdminSpace ? adminSpaceHome : "/telepro";
               const isLeadsPage = pathname.startsWith("/admin/leads") && (item.href === "/admin/leads" || item.href.startsWith("/admin/leads?")) || (pathname.startsWith("/telepro/leads") && item.href === "/telepro/leads");
               const isActive =
                 "statusParam" in item && item.statusParam

@@ -22,7 +22,7 @@ export async function PATCH(
     .single();
 
   const role = profile?.role?.toString().trim().toLowerCase();
-  if (role !== "admin") {
+  if (role !== "admin" && role !== "stockage") {
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
   }
 
@@ -70,7 +70,7 @@ export async function DELETE(
     .single();
 
   const role = profile?.role?.toString().trim().toLowerCase();
-  if (role !== "admin") {
+  if (role !== "admin" && role !== "stockage") {
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
   }
 

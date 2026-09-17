@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const validRoles = ["telepro", "secretaire"];
+  const validRoles = ["telepro", "secretaire", "stockage"];
   const roleToCreate = validRoles.includes(newUserRole) ? newUserRole : "telepro";
 
   const supabaseAdmin = createClient(
@@ -60,7 +60,9 @@ export async function POST(request: NextRequest) {
       rawMessage.toLowerCase().includes("violates check")
     ) {
       message =
-        "Le rôle secrétaire n'est pas encore activé. Appliquez la migration 014_role_secretaire (npx supabase db push ou supabase migration up).";
+        roleToCreate === "stockage"
+          ? "Le rôle stockage n'est pas encore activé. Appliquez la migration 040_role_stockage (npx supabase db push ou supabase migration up)."
+          : "Le rôle secrétaire n'est pas encore activé. Appliquez la migration 014_role_secretaire (npx supabase db push ou supabase migration up).";
     }
     return NextResponse.json(
       { error: message },
@@ -85,7 +87,9 @@ export async function POST(request: NextRequest) {
         {
           error:
             profileError.message ||
-            "Erreur lors de la mise à jour du profil. Vérifiez que la migration 014_role_secretaire a bien été appliquée.",
+            `Erreur lors de la mise à jour du profil. Vérifiez que la migration ${
+              roleToCreate === "stockage" ? "040_role_stockage" : "014_role_secretaire"
+            } a bien été appliquée.`,
         },
         { status: 400 }
       );

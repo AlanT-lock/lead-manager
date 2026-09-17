@@ -5,6 +5,7 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AuthShell } from "@/components/auth/AuthShell";
+import { normalizeRole, roleLandingPath } from "@/lib/roles";
 
 export const dynamic = "force-dynamic";
 
@@ -31,15 +32,9 @@ export default async function HomePage() {
       profile = res.data;
     }
 
-    const role = profile?.role?.toString().trim().toLowerCase();
-    if (role === "admin") {
-      redirect("/admin");
-    }
-    if (role === "secretaire") {
-      redirect("/admin/documents-recus");
-    }
-    if (role === "telepro") {
-      redirect("/telepro");
+    const role = normalizeRole(profile?.role);
+    if (role) {
+      redirect(roleLandingPath(role));
     }
     // Rôle inconnu ou profil introuvable : afficher les deux accès
     return (

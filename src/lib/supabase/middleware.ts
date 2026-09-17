@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { isPublicAuthPath } from '@/lib/auth-paths';
+import { canAccessAdminPath, normalizeRole, roleLandingPath, usesAdminSpace } from '@/lib/roles';
 
 export async function updateSession(request: NextRequest) {
   const isAuthPage = isPublicAuthPath(request.nextUrl.pathname);
@@ -54,11 +55,8 @@ export async function updateSession(request: NextRequest) {
         .eq('id', user.id)
         .single();
 
-      const role = profile?.role?.toString().trim().toLowerCase();
-      if (role === 'admin' || role === 'secretaire') {
-        return NextResponse.redirect(new URL(role === 'secretaire' ? '/admin/documents-recus' : '/admin', request.url));
-      }
-      return NextResponse.redirect(new URL('/telepro', request.url));
+      const role = normalizeRole(profile?.role);
+      return NextResponse.redirect(new URL(roleLandingPath(role), request.url));
     }
 
     if (user && (isTeleproApp || isAdminApp)) {
@@ -68,18 +66,15 @@ export async function updateSession(request: NextRequest) {
         .eq('id', user.id)
         .single();
 
-      const role = profile?.role?.toString().trim().toLowerCase();
-      if ((role === 'admin' || role === 'secretaire') && isTeleproApp) {
-        return NextResponse.redirect(new URL(role === 'secretaire' ? '/admin/documents-recus' : '/admin', request.url));
+      const role = normalizeRole(profile?.role);
+      if (usesAdminSpace(role) && isTeleproApp) {
+        return NextResponse.redirect(new URL(roleLandingPath(role), request.url));
       }
       if (role === 'telepro' && isAdminApp) {
         return NextResponse.redirect(new URL('/telepro', request.url));
       }
-      if (role === 'secretaire' && isAdminApp) {
-        const path = request.nextUrl.pathname;
-        if (path === '/admin/users' || path.startsWith('/admin/users/') || path === '/admin/stats' || path.startsWith('/admin/stats/')) {
-          return NextResponse.redirect(new URL('/admin/documents-recus', request.url));
-        }
+      if (isAdminApp && !canAccessAdminPath(role, request.nextUrl.pathname)) {
+        return NextResponse.redirect(new URL(roleLandingPath(role), request.url));
       }
     }
 

@@ -34,6 +34,7 @@ export function UsersTable({ users }: UsersTableProps) {
   const telepros = users.filter((u) => normalize(u.role) === "telepro");
   const secretaires = users.filter((u) => normalize(u.role) === "secretaire");
   const admins = users.filter((u) => normalize(u.role) === "admin");
+  const stockages = users.filter((u) => normalize(u.role) === "stockage");
 
   const handleDelete = async (telepro: User) => {
     if (!confirm(`Supprimer le télépro ${telepro.full_name || telepro.email} ?\n\nSes leads devront être redistribués.`)) return;
@@ -100,6 +101,20 @@ export function UsersTable({ users }: UsersTableProps) {
               <TableCell className="py-3.5 px-4">
                 <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-[#f1f5f9] text-[#64748b]">
                   Secrétaire
+                </span>
+              </TableCell>
+              <TableCell className="py-3.5 px-4" />
+            </TableRow>
+          ))}
+          {stockages.map((u) => (
+            <TableRow key={u.id} className="border-b border-[#e1e8f2] hover:bg-[#f4f7fb]/60">
+              <TableCell className="py-3.5 px-4 font-medium text-[#0b1f3a]">
+                {u.full_name || "-"}
+              </TableCell>
+              <TableCell className="py-3.5 px-4 text-[#64748b] text-sm">{u.email}</TableCell>
+              <TableCell className="py-3.5 px-4">
+                <span className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-[#f1f5f9] text-[#64748b]">
+                  Stockage
                 </span>
               </TableCell>
               <TableCell className="py-3.5 px-4" />
