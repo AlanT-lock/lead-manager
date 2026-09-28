@@ -10,12 +10,13 @@ import { PageHeader } from "@/components/ui-kit/PageHeader";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { LeadsPagination } from "@/components/ui-kit/LeadsPagination";
+import { parseSurfaceRange } from "@/lib/surface-filter";
 import { PER_PAGE_COOKIE, fetchPaginatedLeads, parsePage, parsePerPage } from "@/lib/pagination";
 
 export default async function TeleproLeadsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; q?: string; from?: string; to?: string; category?: string; page?: string; per?: string; sort?: string; dir?: string }>;
+  searchParams: Promise<{ status?: string; q?: string; from?: string; to?: string; category?: string; page?: string; per?: string; sort?: string; dir?: string; m2_min?: string; m2_max?: string }>;
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -45,6 +46,9 @@ export default async function TeleproLeadsPage({
   const fromDate = from ? new Date(`${from}T00:00:00`) : null;
   const toDate = to ? new Date(`${to}T23:59:59.999`) : null;
 
+  // Tranche de surface : gte/lte excluent d'office les leads sans surface renseignée.
+  const surface = parseSurfaceRange(params.m2_min, params.m2_max);
+
   const buildQuery = () => {
     let query = adminClient
       .from("leads")
@@ -53,6 +57,8 @@ export default async function TeleproLeadsPage({
 
     if (fromDate) query = query.gte("created_at", fromDate.toISOString());
     if (toDate) query = query.lte("created_at", toDate.toISOString());
+    if (surface.min != null) query = query.gte("surface_m2", surface.min);
+    if (surface.max != null) query = query.lte("surface_m2", surface.max);
 
     if (status) {
       query = query.eq("status", status);

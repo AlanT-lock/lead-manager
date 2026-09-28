@@ -6,6 +6,8 @@ import { Search } from "lucide-react";
 import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, LEAD_CATEGORIES, LEAD_CATEGORY_LABELS, type LeadStatus } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { SurfaceFilter } from "@/components/ui-kit/SurfaceFilter";
+import { SURFACE_MAX_PARAM, SURFACE_MIN_PARAM } from "@/lib/surface-filter";
 
 export function LeadsFilters() {
   const router = useRouter();
@@ -13,6 +15,8 @@ export function LeadsFilters() {
   const [search, setSearch] = useState(searchParams.get("q") || "");
   const currentStatus = searchParams.get("status") || "";
   const currentCategory = searchParams.get("category") || "";
+  const currentM2Min = searchParams.get(SURFACE_MIN_PARAM) || "";
+  const currentM2Max = searchParams.get(SURFACE_MAX_PARAM) || "";
   const [from, setFrom] = useState(searchParams.get("from") || "");
   const [to, setTo] = useState(searchParams.get("to") || "");
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -32,18 +36,22 @@ export function LeadsFilters() {
     setTo(urlTo);
   }, [urlFrom, urlTo]);
 
-  const buildParams = useCallback((overrides?: { status?: string; q?: string; from?: string; to?: string; category?: string }) => {
+  const buildParams = useCallback((overrides?: { status?: string; q?: string; from?: string; to?: string; category?: string; m2Min?: string; m2Max?: string }) => {
     const params = new URLSearchParams();
     const s = overrides?.status ?? currentStatus;
     const cat = overrides?.category ?? currentCategory;
     const q = overrides?.q ?? search.trim();
     const f = overrides?.from ?? from;
     const t = overrides?.to ?? to;
+    const m2Min = overrides?.m2Min ?? currentM2Min;
+    const m2Max = overrides?.m2Max ?? currentM2Max;
     if (s) params.set("status", s);
     if (cat) params.set("category", cat);
     if (q) params.set("q", q);
     if (f) params.set("from", f);
     if (t) params.set("to", t);
+    if (m2Min) params.set(SURFACE_MIN_PARAM, m2Min);
+    if (m2Max) params.set(SURFACE_MAX_PARAM, m2Max);
     // Préservés à travers les changements de filtre : sans eux, changer un filtre
     // ramènerait la taille de page au défaut et perdrait l'ordre choisi.
     const per = searchParams.get("per");
@@ -54,7 +62,7 @@ export function LeadsFilters() {
     if (dir) params.set("dir", dir);
     // `page` est volontairement omis : changer un filtre ramène en page 1.
     return params;
-  }, [currentStatus, search, from, to, currentCategory, searchParams]);
+  }, [currentStatus, search, from, to, currentCategory, currentM2Min, currentM2Max, searchParams]);
 
   // Recherche automatique avec debounce (300ms)
   useEffect(() => {
@@ -137,6 +145,11 @@ export function LeadsFilters() {
             ))}
           </select>
         </div>
+        <SurfaceFilter
+          min={currentM2Min}
+          max={currentM2Max}
+          onApply={(m2Min, m2Max) => router.push(`/telepro/leads?${buildParams({ m2Min, m2Max }).toString()}`)}
+        />
         <div>
           <label className="block text-xs font-medium text-[#64748b] mb-1">Du</label>
           <Input
