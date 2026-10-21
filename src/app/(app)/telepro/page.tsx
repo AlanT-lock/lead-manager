@@ -1,4 +1,3 @@
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { startOfDay, startOfWeek, startOfMonth } from "date-fns";
 import Link from "next/link";
@@ -6,10 +5,10 @@ import { LEAD_STATUS_LABELS, LEAD_STATUSES_ADMIN, type LeadStatus } from "@/lib/
 import { NrpCallsButton } from "./NrpCallsButton";
 import { PageHeader } from "@/components/ui-kit/PageHeader";
 import { StatCard } from "@/components/ui-kit/StatCard";
+import { getSessionUser } from "@/lib/supabase/session";
 
 export default async function TeleproDashboard() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getSessionUser();
   if (!user) return null;
 
   const adminClient = createAdminClient();

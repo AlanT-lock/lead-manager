@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClientFromRequest } from "@/lib/supabase/route-handler";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getUserFromClient } from "@/lib/supabase/session";
 
 export async function GET(
   request: NextRequest,
@@ -8,7 +9,7 @@ export async function GET(
 ) {
   const { id } = await params;
   const { supabase } = await createClientFromRequest(request);
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUserFromClient(supabase);
 
   if (!user) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });

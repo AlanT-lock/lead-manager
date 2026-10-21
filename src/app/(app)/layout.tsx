@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getSessionProfile, getSessionUser } from "@/lib/supabase/session";
 import { redirect } from "next/navigation";
 import { Drawer } from "@/components/Drawer";
 import { SaveOnLeaveProvider } from "@/contexts/SaveOnLeaveContext";
@@ -13,27 +14,11 @@ export default async function AppLayout({
   children: React.ReactNode;
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getSessionUser();
 
   if (!user) redirect("/login");
 
-  let profile: { full_name: string | null; role: string; deleted_at: string | null } | null = null;
-  try {
-    const adminClient = createAdminClient();
-    const res = await adminClient
-      .from("profiles")
-      .select("full_name, role, deleted_at")
-      .eq("id", user.id)
-      .single();
-    profile = res.data;
-  } catch {
-    const res = await supabase
-      .from("profiles")
-      .select("full_name, role, deleted_at")
-      .eq("id", user.id)
-      .single();
-    profile = res.data;
-  }
+  const profile = await getSessionProfile(user.id);
 
   if (profile?.deleted_at) {
     const supabaseSignOut = await createClient();

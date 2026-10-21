@@ -1,13 +1,10 @@
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { CodeCourrierClient } from "./CodeCourrierClient";
+import { getSessionUser } from "@/lib/supabase/session";
 
 export default async function CodeCourrierPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser();
   if (!user) redirect("/login");
 
   const adminClient = createAdminClient();

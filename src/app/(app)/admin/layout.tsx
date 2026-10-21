@@ -1,5 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { getSessionProfile, getSessionUser } from "@/lib/supabase/session";
 import { redirect } from "next/navigation";
 import { CodeCourrierNotifications } from "./code-courrier/CodeCourrierNotifications";
 import { RappelsNotifications } from "./rappels-notifications/RappelsNotifications";
@@ -9,28 +8,11 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getSessionUser();
 
   if (!user) redirect("/login");
 
-  let profile: { role: string } | null = null;
-  try {
-    const adminClient = createAdminClient();
-    const res = await adminClient
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-    profile = res.data;
-  } catch {
-    const res = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-    profile = res.data;
-  }
+  const profile = await getSessionProfile(user.id);
 
   const role = profile?.role?.toString().trim().toLowerCase();
   if (role === "telepro") {

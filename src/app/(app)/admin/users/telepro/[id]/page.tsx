@@ -1,9 +1,9 @@
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { TeleproAgentConfigForm } from "./TeleproAgentConfigForm";
+import { getSessionUser } from "@/lib/supabase/session";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function safeStr(val: any): string {
@@ -17,10 +17,7 @@ export default async function TeleproConfigPage({
   params: Promise<{ id: string }>;
 }) {
   const { id: teleproId } = await params;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser();
   if (!user) redirect("/login");
 
   const adminClient = createAdminClient();

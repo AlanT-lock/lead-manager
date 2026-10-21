@@ -3,6 +3,7 @@ import { createClientFromRequest } from "@/lib/supabase/route-handler";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizePhoneToE164 } from "@/lib/phone";
 import { LEAD_CATEGORIES, type LeadCategory } from "@/lib/types";
+import { getUserFromClient } from "@/lib/supabase/session";
 
 const PHONE_COLUMNS = [
   "phone_number",
@@ -43,7 +44,7 @@ function extractValue(row: Record<string, string>, col: string | null): string {
 
 export async function POST(request: NextRequest) {
   const { supabase } = await createClientFromRequest(request);
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUserFromClient(supabase);
 
   if (!user) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });

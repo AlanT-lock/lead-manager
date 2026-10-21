@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClientFromRequest } from "@/lib/supabase/route-handler";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getUserFromClient } from "@/lib/supabase/session";
 
 /**
  * NRP utilise maintenant Twilio (plus Vapi).
@@ -13,7 +14,7 @@ export async function POST(
 ) {
   const { id: teleproId } = await params;
   const { supabase } = await createClientFromRequest(request);
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUserFromClient(supabase);
 
   if (!user) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
