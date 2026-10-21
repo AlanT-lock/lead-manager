@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClientFromRequest } from "@/lib/supabase/route-handler";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getUserFromClient } from "@/lib/supabase/session";
 
 /** En-tête requis pour éviter les anciens clients en boucle (sans ce header = 403). */
 const CLIENT_VERSION_HEADER = "x-lead-form-version";
@@ -17,7 +18,7 @@ export async function PATCH(
   }
   const { id } = await params;
   const { supabase } = await createClientFromRequest(request);
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUserFromClient(supabase);
 
   if (!user) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });

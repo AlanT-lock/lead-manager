@@ -1,13 +1,12 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { StockageClient } from "./StockageClient";
 import { PageHeader } from "@/components/ui-kit/PageHeader";
 import { normalizeRole, roleLandingPath } from "@/lib/roles";
+import { getSessionUser } from "@/lib/supabase/session";
 
 export default async function AdminStockagePage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getSessionUser();
 
   if (!user) redirect("/login");
 

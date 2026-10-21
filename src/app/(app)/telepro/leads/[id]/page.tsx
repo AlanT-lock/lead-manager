@@ -1,4 +1,3 @@
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -8,6 +7,7 @@ import { LeadLogsSidebar } from "@/components/LeadLogsSidebar";
 import { PageHeader } from "@/components/ui-kit/PageHeader";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { getSessionUser } from "@/lib/supabase/session";
 
 export default async function TeleproLeadPage({
   params,
@@ -15,8 +15,7 @@ export default async function TeleproLeadPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getSessionUser();
   if (!user) return null;
 
   const adminClient = createAdminClient();

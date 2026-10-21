@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClientFromRequest } from "@/lib/supabase/route-handler";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getUserFromClient } from "@/lib/supabase/session";
 
 const BUCKET = "agent-audio";
 const MAX_SIZE = 5 * 1024 * 1024; // 5 Mo
@@ -12,7 +13,7 @@ export async function POST(
 ) {
   const { id: teleproId } = await params;
   const { supabase } = await createClientFromRequest(request);
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUserFromClient(supabase);
 
   if (!user) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });

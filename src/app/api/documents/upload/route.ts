@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClientFromRequest } from "@/lib/supabase/route-handler";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getUserFromClient } from "@/lib/supabase/session";
 
 const ADMIN_DOC_TYPES = ["devis", "facture", "facture_materiel", "facture_sous_traitant"] as const;
 const TELEPRO_DOC_TYPES = ["taxe_fonciere", "avis_imposition"] as const;
@@ -18,7 +19,7 @@ const MAX_SIZE = 5 * 1024 * 1024; // 5 Mo
 
 export async function POST(request: NextRequest) {
   const { supabase } = await createClientFromRequest(request);
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUserFromClient(supabase);
 
   if (!user) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });

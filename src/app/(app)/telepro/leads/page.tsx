@@ -1,4 +1,3 @@
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
 import { Plus } from "lucide-react";
@@ -12,14 +11,14 @@ import { cn } from "@/lib/utils";
 import { LeadsPagination } from "@/components/ui-kit/LeadsPagination";
 import { parseSurfaceRange } from "@/lib/surface-filter";
 import { PER_PAGE_COOKIE, fetchPaginatedLeads, parsePage, parsePerPage } from "@/lib/pagination";
+import { getSessionUser } from "@/lib/supabase/session";
 
 export default async function TeleproLeadsPage({
   searchParams,
 }: {
   searchParams: Promise<{ status?: string; q?: string; from?: string; to?: string; category?: string; page?: string; per?: string; sort?: string; dir?: string; m2_min?: string; m2_max?: string }>;
 }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getSessionUser();
   if (!user) return null;
 
   const adminClient = createAdminClient();

@@ -1,12 +1,11 @@
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { AgendaClient } from "./AgendaClient";
 import { PageHeader } from "@/components/ui-kit/PageHeader";
+import { getSessionUser } from "@/lib/supabase/session";
 
 export default async function TeleproAgendaPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getSessionUser();
   if (!user) redirect("/login");
 
   const adminClient = createAdminClient();
