@@ -6,8 +6,8 @@ import "leaflet/dist/leaflet.css";
 import { Locate } from "lucide-react";
 import { SAV_STATUS_COLORS, type SavRequest } from "@/lib/sav";
 
-const FRANCE_CENTER: L.LatLngTuple = [46.6, 2.4];
-const FRANCE_ZOOM = 6;
+// France métropolitaine + Corse : la carte ne peut pas sortir de ce cadre.
+const FRANCE_BOUNDS = L.latLngBounds([41.0, -5.6], [51.4, 10.0]);
 
 interface Props {
   items: SavRequest[];
@@ -25,7 +25,18 @@ export default function SavMap({ items, selectedId, onSelect }: Props) {
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
-    const map = L.map(containerRef.current, { center: FRANCE_CENTER, zoom: FRANCE_ZOOM, zoomSnap: 0.5 });
+    const map = L.map(containerRef.current, {
+      zoomSnap: 0.5,
+      maxBounds: FRANCE_BOUNDS,
+      maxBoundsViscosity: 1,
+    });
+    // Le dézoom maximal est celui qui cadre exactement la France dans le conteneur.
+    const fitFrance = () => {
+      map.invalidateSize();
+      map.setMinZoom(map.getBoundsZoom(FRANCE_BOUNDS));
+    };
+    fitFrance();
+    map.fitBounds(FRANCE_BOUNDS, { animate: false });
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 18,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -34,7 +45,7 @@ export default function SavMap({ items, selectedId, onSelect }: Props) {
     mapRef.current = map;
 
     // La carte vit dans un conteneur dont la taille change (mobile / bureau).
-    const observer = new ResizeObserver(() => map.invalidateSize());
+    const observer = new ResizeObserver(fitFrance);
     observer.observe(containerRef.current);
     return () => {
       observer.disconnect();
@@ -66,7 +77,12 @@ export default function SavMap({ items, selectedId, onSelect }: Props) {
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !selectedId) return;
+    if (!map) return;
+    // Fiche refermée : retour à la vue d'ensemble de la France.
+    if (!selectedId) {
+      map.flyToBounds(FRANCE_BOUNDS, { duration: 0.6 });
+      return;
+    }
     const item = items.find((i) => i.id === selectedId);
     if (item?.lat != null && item.lng != null) {
       map.flyTo([item.lat, item.lng], Math.max(map.getZoom(), 10), { duration: 0.6 });
@@ -80,7 +96,7 @@ export default function SavMap({ items, selectedId, onSelect }: Props) {
       <div ref={containerRef} className="h-full w-full rounded-[12px]" />
       <button
         type="button"
-        onClick={() => mapRef.current?.flyTo(FRANCE_CENTER, FRANCE_ZOOM, { duration: 0.6 })}
+        onClick={() => mapRef.current?.flyToBounds(FRANCE_BOUNDS, { duration: 0.6 })}
         className="absolute right-3 top-3 z-[500] flex items-center gap-1.5 rounded-lg border border-[#e1e8f2] bg-white px-2.5 py-1.5 text-xs font-medium text-[#0b1f3a] shadow hover:bg-[#f4f7fb]"
       >
         <Locate className="h-3.5 w-3.5" />
