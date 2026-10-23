@@ -19,6 +19,9 @@ NEXT_PUBLIC_SUPABASE_URL=votre_url_supabase
 NEXT_PUBLIC_SUPABASE_ANON_KEY=votre_cle_anon
 SUPABASE_SERVICE_ROLE_KEY=votre_cle_service_role
 NEXT_PUBLIC_SITE_URL=https://crm-rs-ecologie.netlify.app
+# SAV : clé Google Maps Platform avec « Places API (New) » activée (côté serveur).
+# Facultative : sans elle, les suggestions d'adresse passent par la Base Adresse Nationale.
+GOOGLE_MAPS_API_KEY=votre_cle_google
 # Pas de variable Vapi sur Vercel : tout est dans les Edge Functions Supabase
 ```
 
