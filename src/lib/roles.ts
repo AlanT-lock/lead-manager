@@ -31,6 +31,7 @@ export function usesAdminSpace(role: UserRole | undefined): boolean {
 }
 
 const SECRETAIRE_DENIED_PREFIXES = ["/admin/users", "/admin/stats"];
+const STOCKAGE_ALLOWED_PREFIXES = ["/admin/stockage", "/admin/taches"];
 
 /**
  * Restrictions à l'intérieur de l'espace /admin. Les pages admin lisent leurs
@@ -46,10 +47,12 @@ export function canAccessAdminPath(role: UserRole | undefined, pathname: string)
     );
   }
 
-  // Le rôle stockage ne voit qu'une seule page : liste blanche, pas liste noire,
+  // Le rôle stockage ne voit que Stockage et Tâches : liste blanche, pas liste noire,
   // pour qu'une page admin ajoutée plus tard lui reste fermée par défaut.
   if (role === "stockage") {
-    return pathname === "/admin/stockage" || pathname.startsWith("/admin/stockage/");
+    return STOCKAGE_ALLOWED_PREFIXES.some(
+      (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+    );
   }
 
   if (role === "telepro") return false;

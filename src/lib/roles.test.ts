@@ -63,8 +63,9 @@ describe("canAccessAdminPath", () => {
     expect(canAccessAdminPath("secretaire", "/admin/stats/global")).toBe(false);
   });
 
-  it("n'ouvre au rôle stockage que la page Stockage", () => {
+  it("n'ouvre au rôle stockage que les pages Stockage et Tâches", () => {
     expect(canAccessAdminPath("stockage", "/admin/stockage")).toBe(true);
+    expect(canAccessAdminPath("stockage", "/admin/taches")).toBe(true);
     expect(canAccessAdminPath("stockage", "/admin")).toBe(false);
     expect(canAccessAdminPath("stockage", "/admin/leads")).toBe(false);
     expect(canAccessAdminPath("stockage", "/admin/users")).toBe(false);
@@ -74,6 +75,10 @@ describe("canAccessAdminPath", () => {
 
   it("ne confond pas un préfixe avec un segment (liste blanche stricte)", () => {
     expect(canAccessAdminPath("stockage", "/admin/stockage-archive")).toBe(false);
+  });
+
+  it("ouvre la page Tâches à la secrétaire", () => {
+    expect(canAccessAdminPath("secretaire", "/admin/taches")).toBe(true);
   });
 
   it("ferme l'espace admin au télépro", () => {

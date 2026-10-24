@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { CallbackNotifications } from "./teleprospection/CallbackNotifications";
+import { TaskReminders } from "@/components/tasks/TaskReminders";
 import { normalizeRole, roleLandingPath, usesAdminSpace } from "@/lib/roles";
 
 export default async function TeleproLayout({
@@ -40,6 +41,7 @@ export default async function TeleproLayout({
   return (
     <>
       <CallbackNotifications />
+      <TaskReminders tasksHref="/telepro/taches" />
       {children}
     </>
   );
