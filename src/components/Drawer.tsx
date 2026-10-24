@@ -24,6 +24,7 @@ import {
   ChevronDown,
   Mail,
   Wrench,
+  ListTodo,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -34,6 +35,7 @@ interface DrawerProps {
   userName?: string;
   unreadNotifications?: number;
   statusCounts?: Record<string, Record<string, number>>;
+  pendingTasks?: number;
 }
 
 const adminNav = [
@@ -42,6 +44,7 @@ const adminNav = [
   { href: "/admin/leads", label: "Tous les leads", icon: List, hasStatusSubmenu: true },
   { href: "/admin/code-courrier", label: "Code courrier", icon: Mail },
   { href: "/admin/sav", label: "SAV", icon: Wrench },
+  { href: "/admin/taches", label: "Tâches", icon: ListTodo, tasksBadge: true },
   { href: "/admin/stockage", label: "Stockage", icon: Package },
   { href: "/admin/import", label: "Import CSV", icon: FileUp },
   { href: "/admin/users", label: "Utilisateurs", icon: UserPlus },
@@ -54,6 +57,7 @@ const secretaireNav = [
   { href: "/admin/code-courrier", label: "Code courrier", icon: Mail },
   { href: "/admin/sav", label: "SAV", icon: Wrench },
   { href: "/admin/agenda-courrier", label: "Agenda", icon: Calendar },
+  { href: "/admin/taches", label: "Tâches", icon: ListTodo, tasksBadge: true },
   { href: "/admin/import", label: "Import CSV", icon: FileUp },
   { href: "/admin/stats-secretaire", label: "Statistiques", icon: BarChart3 },
   { href: "/admin", label: "Statistique télépro", icon: TrendingUp },
@@ -61,6 +65,7 @@ const secretaireNav = [
 
 const stockageNav = [
   { href: "/admin/stockage", label: "Stockage", icon: Package },
+  { href: "/admin/taches", label: "Tâches", icon: ListTodo, tasksBadge: true },
 ];
 
 const teleproNav = [
@@ -68,9 +73,10 @@ const teleproNav = [
   { href: "/telepro/leads", label: "Mes leads", icon: Users, hasStatusSubmenu: true },
   { href: "/telepro/teleprospection", label: "Téléprospection", icon: Phone },
   { href: "/telepro/agenda", label: "Agenda", icon: Calendar },
+  { href: "/telepro/taches", label: "Tâches", icon: ListTodo, tasksBadge: true },
 ];
 
-export function Drawer({ role, userName, unreadNotifications = 0, statusCounts = {} }: DrawerProps) {
+export function Drawer({ role, userName, unreadNotifications = 0, statusCounts = {}, pendingTasks = 0 }: DrawerProps) {
   const [open, setOpen] = useState(false);
   // Sous-menu des statuts : fermé par défaut, ne se ferme que au clic sur la flèche (persiste à la navigation)
   // Niveau 0 : déploie les catégories ; Niveau 1 : déploie les statuts d'UNE catégorie à la fois
@@ -295,6 +301,11 @@ export function Drawer({ role, userName, unreadNotifications = 0, statusCounts =
                     >
                       <item.icon className="w-5 h-5 shrink-0" />
                       {item.label}
+                      {"tasksBadge" in item && item.tasksBadge && pendingTasks > 0 && (
+                        <span className="ml-auto bg-white/30 text-white text-xs font-medium px-2 py-0.5 rounded-full tabular-nums">
+                          {pendingTasks}
+                        </span>
+                      )}
                     </Link>
                   )}
                 </div>

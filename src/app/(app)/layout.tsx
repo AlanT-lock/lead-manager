@@ -33,7 +33,7 @@ export default async function AppLayout({
 
   // Ces deux requêtes ne dépendent que de user.id / role : les enchaîner coûtait
   // un aller-retour pour rien.
-  const [notifRes, countsRes] = await Promise.all([
+  const [notifRes, countsRes, tasksRes] = await Promise.all([
     supabase
       .from("notifications")
       .select("*", { count: "exact", head: true })
@@ -42,6 +42,12 @@ export default async function AppLayout({
     adminClient.rpc("lead_status_counts", {
       p_assigned_to: isAdminOrSecretaire ? null : user.id,
     }),
+    // Tâches reçues et non validées : compteur affiché à côté de « Tâches » dans le menu.
+    adminClient
+      .from("tasks")
+      .select("id", { count: "exact", head: true })
+      .eq("assigned_to", user.id)
+      .is("completed_at", null),
   ]);
 
   const count = notifRes.count;
@@ -61,6 +67,7 @@ export default async function AppLayout({
             userName={profile?.full_name || user.email || undefined}
             unreadNotifications={count || 0}
             statusCounts={statusCounts}
+            pendingTasks={tasksRes.count || 0}
           />
         </Suspense>
         <main className="flex-1 min-w-0 lg:ml-64 min-h-screen pt-4 pb-8 px-4 lg:px-8 bg-[#f4f7fb]">

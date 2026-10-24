@@ -2,6 +2,7 @@ import { getSessionProfile, getSessionUser } from "@/lib/supabase/session";
 import { redirect } from "next/navigation";
 import { CodeCourrierNotifications } from "./code-courrier/CodeCourrierNotifications";
 import { RappelsNotifications } from "./rappels-notifications/RappelsNotifications";
+import { TaskReminders } from "@/components/tasks/TaskReminders";
 
 export default async function AdminLayout({
   children,
@@ -27,6 +28,7 @@ export default async function AdminLayout({
           <RappelsNotifications />
         </div>
       )}
+      <TaskReminders tasksHref="/admin/taches" />
       {children}
     </>
   );
