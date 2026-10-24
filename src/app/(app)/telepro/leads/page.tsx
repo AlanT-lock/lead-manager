@@ -55,8 +55,8 @@ export default async function TeleproLeadsPage({
       .select("*", { count: "exact" })
       .eq("assigned_to", user.id);
 
-    if (fromDate) query = query.gte("created_at", fromDate.toISOString());
-    if (toDate) query = query.lte("created_at", toDate.toISOString());
+    if (fromDate) query = query.gte("telepro_added_at", fromDate.toISOString());
+    if (toDate) query = query.lte("telepro_added_at", toDate.toISOString());
     if (surface.min != null) query = query.gte("surface_m2", surface.min);
     if (surface.max != null) query = query.lte("surface_m2", surface.max);
 
@@ -75,7 +75,9 @@ export default async function TeleproLeadsPage({
       );
     }
 
-    // `.order("id")` garantit un ordre total : sans lui, deux leads de même created_at
+    // Dates côté télépro : telepro_added_at (date à laquelle il a reçu le lead,
+    // remise à jour lors d'une redistribution), jamais la vraie date d'ajout.
+    // `.order("id")` garantit un ordre total : sans lui, deux leads de même date
     // peuvent changer de place entre deux requêtes et donc apparaître deux fois ou être sautés.
     if (statusSort !== "none") {
       return query
@@ -84,7 +86,7 @@ export default async function TeleproLeadsPage({
     }
 
     return query
-      .order("created_at", { ascending: false })
+      .order("telepro_added_at", { ascending: false })
       .order("id", { ascending: false });
   };
 

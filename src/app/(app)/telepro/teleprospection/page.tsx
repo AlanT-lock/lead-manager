@@ -35,19 +35,19 @@ export default async function TeleprospectionPage({
       .select("id")
       .eq("assigned_to", user.id)
       .eq("status", "nouveau")
-      .order("created_at", { ascending: false }),
+      .order("telepro_added_at", { ascending: false }),
     adminClient
       .from("leads")
       .select("id")
       .eq("assigned_to", user.id)
       .eq("status", "nrp")
-      .order("created_at", { ascending: false }),
+      .order("telepro_added_at", { ascending: false }),
     adminClient
       .from("leads")
       .select("id")
       .eq("assigned_to", user.id)
       .eq("status", "en_attente_doc")
-      .order("created_at", { ascending: false }),
+      .order("telepro_added_at", { ascending: false }),
   ]);
 
   const leadIds: string[] = [

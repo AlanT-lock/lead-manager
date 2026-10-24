@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { AdminLeadForm } from "./AdminLeadForm";
 import { DocumentsSection } from "./DocumentsSection";
+import { RedistributionHistorySection, type DistributionEntry } from "./RedistributionHistorySection";
 import { LeadLogsSidebar } from "@/components/LeadLogsSidebar";
 import { PageHeader } from "@/components/ui-kit/PageHeader";
 import { buttonVariants } from "@/components/ui/button";
@@ -41,6 +42,21 @@ export default async function AdminLeadPage({
     .eq("lead_id", id)
     .order("created_at", { ascending: false });
 
+  const { data: distributions } = await adminClient
+    .from("lead_distributions")
+    .select(`
+      id,
+      created_at,
+      previous_status,
+      previous_nrp_count,
+      previous_commentaire,
+      previous_telepro_added_at,
+      from:profiles!from_telepro(full_name, email),
+      to:profiles!to_telepro(full_name, email)
+    `)
+    .eq("lead_id", id)
+    .order("created_at", { ascending: true });
+
   const logEntries = (logs || []).map((log) => ({
     id: log.id,
     action: log.action,
@@ -74,6 +90,10 @@ export default async function AdminLeadPage({
       <div className="flex gap-6 items-start">
         <div className="flex-1 min-w-0 space-y-4">
           <AdminLeadForm lead={lead} />
+          <RedistributionHistorySection
+            realAddedAt={lead.added_at ?? lead.created_at}
+            distributions={(distributions || []) as unknown as DistributionEntry[]}
+          />
           <DocumentsSection leadId={id} documents={documents || []} />
         </div>
         <LeadLogsSidebar logs={logEntries} />
