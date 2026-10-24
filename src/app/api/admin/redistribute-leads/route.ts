@@ -3,6 +3,7 @@ import { createClientFromRequest } from "@/lib/supabase/route-handler";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizeRole } from "@/lib/roles";
 import {
+  isExcludedFromRedistribution,
   parisEndOfDayIso,
   parseRedistributionLimit,
   planRedistribution,
@@ -77,7 +78,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: teleprosError.message }, { status: 500 });
   }
 
-  const activeIds = new Set((telepros || []).map((t) => t.id));
+  // Les télépros exclus ne sont ni sources ni destinataires, quoi qu'envoie le client.
+  const eligibleTelepros = (telepros || []).filter((t) => !isExcludedFromRedistribution(t.email));
+  const activeIds = new Set(eligibleTelepros.map((t) => t.id));
   const pickIds = (raw: unknown): string[] => {
     // Absent = tous les télépros actifs. Les identifiants inconnus ou supprimés sont ignorés.
     if (!Array.isArray(raw)) return [...activeIds];
@@ -144,7 +147,7 @@ export async function POST(request: NextRequest) {
 
   const plan = planRedistribution(candidates, targetIds);
 
-  const names = new Map((telepros || []).map((t) => [t.id, t.full_name || t.email]));
+  const names = new Map(eligibleTelepros.map((t) => [t.id, t.full_name || t.email]));
   const countBy = (ids: string[]) => {
     const counts = new Map<string, number>();
     for (const id of ids) counts.set(id, (counts.get(id) ?? 0) + 1);

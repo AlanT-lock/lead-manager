@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  isExcludedFromRedistribution,
   parisDateString,
   parisEndOfDayIso,
   parseRedistributionLimit,
@@ -97,5 +98,14 @@ describe("parseRedistributionLimit", () => {
     expect(parseRedistributionLimit(1.5)).toBeNull();
     expect(parseRedistributionLimit("abc")).toBeNull();
     expect(parseRedistributionLimit(10_000)).toBeNull();
+  });
+});
+
+describe("isExcludedFromRedistribution", () => {
+  it("exclut thierry.eco69@gmail.com, quelle que soit la casse", () => {
+    expect(isExcludedFromRedistribution("thierry.eco69@gmail.com")).toBe(true);
+    expect(isExcludedFromRedistribution(" Thierry.Eco69@Gmail.com ")).toBe(true);
+    expect(isExcludedFromRedistribution("autre@gmail.com")).toBe(false);
+    expect(isExcludedFromRedistribution(null)).toBe(false);
   });
 });

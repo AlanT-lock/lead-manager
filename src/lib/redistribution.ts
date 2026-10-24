@@ -7,6 +7,17 @@ export const REDISTRIBUTION_LIMIT_OPTIONS = [10, 20, 30, 50, 100, 200] as const;
 export const REDISTRIBUTION_DEFAULT_LIMIT = 50;
 export const REDISTRIBUTION_MAX_LIMIT = 500;
 
+/**
+ * Télépros tenus à l'écart de la redistribution : on ne leur prend aucun lead
+ * et on ne leur en donne aucun.
+ */
+const REDISTRIBUTION_EXCLUDED_EMAILS = ["thierry.eco69@gmail.com"];
+
+export function isExcludedFromRedistribution(email: string | null | undefined): boolean {
+  const normalized = (email ?? "").trim().toLowerCase();
+  return REDISTRIBUTION_EXCLUDED_EMAILS.includes(normalized);
+}
+
 export interface RedistributionCandidate {
   id: string;
   /** Télépro qui a le lead aujourd'hui. */

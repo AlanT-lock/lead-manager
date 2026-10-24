@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeRole } from "@/lib/roles";
+import { isExcludedFromRedistribution } from "@/lib/redistribution";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { CHANTIER_STATUS_FIELDS, LEAD_CATEGORIES, type LeadCategory, type LeadStatus } from "@/lib/types";
@@ -166,7 +167,9 @@ export default async function AdminLeadsPage({
         subtitle="Liste de tous les leads importés. Sélectionnez des leads pour les transférer ou les supprimer."
         actions={
           <div className="flex items-center gap-2">
-            {isAdmin && <RedistributeLeadsDialog telepros={activeTelepros || []} />}
+            {isAdmin && <RedistributeLeadsDialog
+                telepros={(activeTelepros || []).filter((t) => !isExcludedFromRedistribution(t.email))}
+              />}
             <Link
               href="/admin/leads/new"
               className={cn(buttonVariants(), "gap-2")}
