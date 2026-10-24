@@ -1,9 +1,14 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
-import { isPublicAuthPath } from '@/lib/auth-paths';
+import { isPublicAuthPath, isPublicSavPath } from '@/lib/auth-paths';
 import { canAccessAdminPath, normalizeRole, roleLandingPath, usesAdminSpace } from '@/lib/roles';
 
 export async function updateSession(request: NextRequest) {
+  // Formulaire SAV client : public, aucune session ni vérification de rôle.
+  if (isPublicSavPath(request.nextUrl.pathname)) {
+    return NextResponse.next({ request });
+  }
+
   const isAuthPage = isPublicAuthPath(request.nextUrl.pathname);
   const isSetupPage = request.nextUrl.pathname.startsWith('/setup');
   const isSetupApi = request.nextUrl.pathname.startsWith('/api/setup');

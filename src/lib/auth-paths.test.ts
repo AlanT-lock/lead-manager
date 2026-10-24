@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isPublicAuthPath } from "@/lib/auth-paths";
+import { isPublicAuthPath, isPublicSavPath } from "@/lib/auth-paths";
 
 describe("isPublicAuthPath", () => {
   it("laisse passer les pages d'auth sans session", () => {
@@ -18,5 +18,20 @@ describe("isPublicAuthPath", () => {
     expect(isPublicAuthPath("/admin")).toBe(false);
     expect(isPublicAuthPath("/telepro")).toBe(false);
     expect(isPublicAuthPath("/admin/leads")).toBe(false);
+  });
+});
+
+describe("isPublicSavPath", () => {
+  it("ouvre le formulaire client et ses routes d'API", () => {
+    expect(isPublicSavPath("/demande-sav")).toBe(true);
+    expect(isPublicSavPath("/api/sav/public")).toBe(true);
+    expect(isPublicSavPath("/api/sav/places/autocomplete")).toBe(true);
+  });
+
+  it("garde la page de gestion et son API protégées", () => {
+    expect(isPublicSavPath("/admin/sav")).toBe(false);
+    expect(isPublicSavPath("/api/admin/sav")).toBe(false);
+    expect(isPublicSavPath("/api/admin/sav/123/photos")).toBe(false);
+    expect(isPublicSavPath("/demande-savoir")).toBe(false);
   });
 });
