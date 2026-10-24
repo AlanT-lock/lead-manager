@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { fetchTeleproLeadLogs } from "@/lib/telepro-logs";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -35,15 +36,7 @@ export default async function TeleproLeadPage({
     .eq("lead_id", id)
     .in("type", ["taxe_fonciere", "avis_imposition"]);
 
-  const { data: logs } = await adminClient
-    .from("lead_logs")
-    .select(`
-      *,
-      profile:profiles!user_id(full_name)
-    `)
-    .eq("lead_id", id)
-    .order("created_at", { ascending: false })
-    .limit(20);
+  const { data: logs } = await fetchTeleproLeadLogs(adminClient, id);
 
   const logEntries = (logs || []).map((log) => ({
     id: log.id,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClientFromRequest } from "@/lib/supabase/route-handler";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getUserFromClient } from "@/lib/supabase/session";
+import { fetchTeleproLeadLogs } from "@/lib/telepro-logs";
 
 export async function GET(
   request: NextRequest,
@@ -27,19 +28,7 @@ export async function GET(
     return NextResponse.json({ error: "Lead non trouvé" }, { status: 404 });
   }
 
-  const { data: logs } = await adminClient
-    .from("lead_logs")
-    .select(`
-      id,
-      action,
-      old_status,
-      new_status,
-      created_at,
-      profile:profiles!user_id(full_name)
-    `)
-    .eq("lead_id", id)
-    .order("created_at", { ascending: false })
-    .limit(20);
+  const { data: logs } = await fetchTeleproLeadLogs(adminClient, id);
 
   return NextResponse.json(logs || []);
 }

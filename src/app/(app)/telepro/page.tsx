@@ -23,23 +23,25 @@ export default async function TeleproDashboard() {
     .select("*", { count: "exact", head: true })
     .eq("assigned_to", user.id);
 
+  // « Reçus » = date à laquelle le lead a été attribué au télépro (telepro_added_at),
+  // ce qui inclut les leads redistribués le jour même.
   const { count: today } = await adminClient
     .from("leads")
     .select("*", { count: "exact", head: true })
     .eq("assigned_to", user.id)
-    .gte("imported_at", todayStart.toISOString());
+    .gte("telepro_added_at", todayStart.toISOString());
 
   const { count: week } = await adminClient
     .from("leads")
     .select("*", { count: "exact", head: true })
     .eq("assigned_to", user.id)
-    .gte("imported_at", weekStart.toISOString());
+    .gte("telepro_added_at", weekStart.toISOString());
 
   const { count: month } = await adminClient
     .from("leads")
     .select("*", { count: "exact", head: true })
     .eq("assigned_to", user.id)
-    .gte("imported_at", monthStart.toISOString());
+    .gte("telepro_added_at", monthStart.toISOString());
 
   const { data: byStatus } = await adminClient
     .from("leads")

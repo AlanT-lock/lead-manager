@@ -45,7 +45,7 @@ interface Lead {
   callback_at: string | null;
   nrp_count: number;
   is_duplicate: boolean;
-  added_at: string | null;
+  telepro_added_at: string | null;
   commentaire: string | null;
   status_changed_at: string | null;
 }
@@ -218,8 +218,8 @@ export function TeleproLeadsTable({ leads, statusSort }: TeleproLeadsTableProps)
                     : "-"}
                 </TableCell>
                 <TableCell className="py-3 text-[#64748b] text-sm">
-                  {lead.added_at
-                    ? formatDateParis(lead.added_at)
+                  {lead.telepro_added_at
+                    ? formatDateParis(lead.telepro_added_at)
                     : "-"}
                 </TableCell>
                 <TableCell

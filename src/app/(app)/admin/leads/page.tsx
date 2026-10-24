@@ -1,9 +1,13 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
+import { normalizeRole } from "@/lib/roles";
+import { isExcludedFromRedistribution } from "@/lib/redistribution";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { CHANTIER_STATUS_FIELDS, LEAD_CATEGORIES, type LeadCategory, type LeadStatus } from "@/lib/types";
 import { AdminLeadsFilters } from "./AdminLeadsFilters";
 import { AdminLeadsTable } from "./AdminLeadsTable";
+import { RedistributeLeadsDialog } from "./RedistributeLeadsDialog";
 import { DocumentsRecusTable } from "../documents-recus/DocumentsRecusTable";
 import { PageHeader } from "@/components/ui-kit/PageHeader";
 import { buttonVariants } from "@/components/ui/button";
@@ -119,7 +123,11 @@ export default async function AdminLeadsPage({
   const fetchPage = (target: number) =>
     buildQuery().range((target - 1) * per, target * per - 1);
 
-  const [{ leads, page, total }, { data: allTelepros }, { data: activeTelepros }] = await Promise.all([
+  // La redistribution est réservée à l'admin : la secrétaire voit aussi cette page.
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const [{ leads, page, total }, { data: allTelepros }, { data: activeTelepros }, { data: viewer }] = await Promise.all([
     fetchPaginatedLeads(fetchPage, requestedPage, per),
     adminClient
       .from("profiles")
@@ -132,7 +140,11 @@ export default async function AdminLeadsPage({
       .eq("role", "telepro")
       .is("deleted_at", null)
       .order("full_name"),
+    user
+      ? adminClient.from("profiles").select("role").eq("id", user.id).single()
+      : Promise.resolve({ data: null }),
   ]);
+  const isAdmin = normalizeRole(viewer?.role) === "admin";
 
   const teleprosForFilter = (allTelepros || []).map((t) => ({
     ...t,
@@ -154,13 +166,18 @@ export default async function AdminLeadsPage({
         title="Tous les leads"
         subtitle="Liste de tous les leads importés. Sélectionnez des leads pour les transférer ou les supprimer."
         actions={
-          <Link
-            href="/admin/leads/new"
-            className={cn(buttonVariants(), "gap-2")}
-          >
-            <Plus className="w-4 h-4" />
-            Ajouter un lead
-          </Link>
+          <div className="flex items-center gap-2">
+            {isAdmin && <RedistributeLeadsDialog
+                telepros={(activeTelepros || []).filter((t) => !isExcludedFromRedistribution(t.email))}
+              />}
+            <Link
+              href="/admin/leads/new"
+              className={cn(buttonVariants(), "gap-2")}
+            >
+              <Plus className="w-4 h-4" />
+              Ajouter un lead
+            </Link>
+          </div>
         }
       />
 
