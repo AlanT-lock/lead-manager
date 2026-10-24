@@ -11,6 +11,7 @@ export type LeadStatus =
   | 'incomplet'
   | 'bloque_mpr'
   | 'avis_2025_bloque'
+  | 'pas_eligible'
   | 'valide'
   | 'installe'
   | 'ancien_documents_recus'
@@ -19,7 +20,7 @@ export type LeadStatus =
 
 /** Tous les statuts (accessibles par tous les rôles, partout) */
 export const LEAD_STATUSES_ADMIN: LeadStatus[] = [
-  'nouveau', 'nrp', 'a_rappeler', 'en_attente_doc', 'documents_recus', 'devis_a_envoyer', 'devis_envoye', 'incomplet', 'bloque_mpr', 'avis_2025_bloque', 'valide', 'installe', 'ancien_documents_recus', 'transfert', 'annule',
+  'nouveau', 'nrp', 'a_rappeler', 'en_attente_doc', 'documents_recus', 'devis_a_envoyer', 'devis_envoye', 'incomplet', 'bloque_mpr', 'avis_2025_bloque', 'pas_eligible', 'valide', 'installe', 'ancien_documents_recus', 'transfert', 'annule',
 ];
 
 /** Tous les statuts sont désormais accessibles par tous les rôles : ces alias pointent sur la liste complète. */
@@ -81,6 +82,7 @@ export const LEAD_STATUS_LABELS: Record<LeadStatus, string> = {
   incomplet: 'Incomplet',
   bloque_mpr: 'Bloqué MPR',
   avis_2025_bloque: 'Avis 2025 bloqué',
+  pas_eligible: 'Pas éligible',
   valide: 'Validé',
   installe: 'Installé',
   ancien_documents_recus: 'Ancien documents reçus',
@@ -101,6 +103,7 @@ export const STATUS_CHART_COLORS: Record<LeadStatus, string> = {
   incomplet: '#f59e0b',     // amber
   bloque_mpr: '#dc2626',    // red-600
   avis_2025_bloque: '#9f1239', // rose-800 (avis 2025 bloqué)
+  pas_eligible: '#57534e',  // stone-600 (pas éligible)
   valide: '#10b981',        // emerald-500
   installe: '#0ABAB5',      // Bleu Tiffany
   ancien_documents_recus: '#64748b', // slate (archivé)
