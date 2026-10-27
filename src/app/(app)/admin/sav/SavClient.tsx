@@ -3,14 +3,30 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { toast } from "sonner";
-import { Calendar, Camera, Check, ChevronDown, Link2, MapPin, Phone, Plus, RotateCcw, UserX, X } from "lucide-react";
+import {
+  Archive,
+  ArchiveRestore,
+  Calendar,
+  Camera,
+  Check,
+  ChevronDown,
+  Inbox,
+  Link2,
+  MapPin,
+  Phone,
+  Plus,
+  RotateCcw,
+  UserX,
+  X,
+} from "lucide-react";
 import { SavForm } from "@/components/sav/SavForm";
 import { Button } from "@/components/ui/button";
 import { compressImage } from "@/lib/compress-image";
 import { formatFullDateTimeParis, fromDatetimeLocalValueParis } from "@/lib/date";
 import {
+  isSavArchived,
+  SAV_ACTIVE_STATUSES,
   SAV_PUBLIC_PATH,
-  SAV_STATUSES,
   SAV_STATUS_COLORS,
   SAV_STATUS_LABELS,
   type SavRequestWithUrls,
@@ -24,6 +40,7 @@ const SavMap = dynamic(() => import("./SavMap"), {
 });
 
 type Filter = "all" | SavStatus;
+type View = "en_cours" | "archives";
 
 function StatusBadge({ status }: { status: SavStatus }) {
   return (
@@ -41,22 +58,36 @@ export function SavClient({ initialItems }: { initialItems: SavRequestWithUrls[]
   const [items, setItems] = useState(initialItems);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
+  const [view, setView] = useState<View>("en_cours");
   const [showForm, setShowForm] = useState(false);
   const rowRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+  // Les SAV résolus sont archivés : ils n'apparaissent (liste et carte) que dans l'onglet « SAV archivés ».
+  const active = useMemo(() => items.filter((i) => !isSavArchived(i)), [items]);
+  const archived = useMemo(() => items.filter(isSavArchived), [items]);
+
   const counts = useMemo(() => {
-    const c: Record<string, number> = { all: items.length };
-    for (const s of SAV_STATUSES) c[s] = items.filter((i) => i.status === s).length;
+    const c: Record<string, number> = { all: active.length };
+    for (const s of SAV_ACTIVE_STATUSES) c[s] = active.filter((i) => i.status === s).length;
     return c;
-  }, [items]);
+  }, [active]);
 
-  const visible = useMemo(
-    () => (filter === "all" ? items : items.filter((i) => i.status === filter)),
-    [items, filter]
-  );
+  const visible = useMemo(() => {
+    if (view === "archives") return archived;
+    return filter === "all" ? active : active.filter((i) => i.status === filter);
+  }, [view, active, archived, filter]);
 
-  const replaceItem = (updated: SavRequestWithUrls) =>
+  const replaceItem = (updated: SavRequestWithUrls) => {
+    // Résolu ou désarchivé : le SAV quitte l'onglet affiché, sa fiche se referme.
+    if (isSavArchived(updated) !== (view === "archives")) setExpandedId(null);
     setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
+  };
+
+  const switchView = (next: View) => {
+    setView(next);
+    setFilter("all");
+    setExpandedId(null);
+  };
 
   const selectFromMap = (id: string) => {
     // Si le SAV est masqué par le filtre, on l'affiche pour que la fiche s'ouvre.
@@ -80,7 +111,12 @@ export function SavClient({ initialItems }: { initialItems: SavRequestWithUrls[]
 
   const filters: { key: Filter; label: string }[] = [
     { key: "all", label: "Tous" },
-    ...SAV_STATUSES.map((s) => ({ key: s as Filter, label: SAV_STATUS_LABELS[s] })),
+    ...SAV_ACTIVE_STATUSES.map((s) => ({ key: s as Filter, label: SAV_STATUS_LABELS[s] })),
+  ];
+
+  const views: { key: View; label: string; icon: React.ReactNode; count: number }[] = [
+    { key: "en_cours", label: "SAV en cours", icon: <Inbox className="h-4 w-4" />, count: active.length },
+    { key: "archives", label: "SAV archivés", icon: <Archive className="h-4 w-4" />, count: archived.length },
   ];
 
   return (
@@ -107,6 +143,7 @@ export function SavClient({ initialItems }: { initialItems: SavRequestWithUrls[]
                 const sav = created as SavRequestWithUrls;
                 setItems((prev) => [sav, ...prev]);
                 setShowForm(false);
+                switchView("en_cours");
                 setExpandedId(sav.id);
                 toast.success("SAV enregistré");
               }}
@@ -114,27 +151,55 @@ export function SavClient({ initialItems }: { initialItems: SavRequestWithUrls[]
           </div>
         )}
 
-        <div className="flex flex-wrap gap-1.5">
-          {filters.map((f) => (
+        <div role="tablist" className="inline-flex rounded-[10px] border border-[#e1e8f2] bg-white p-1 shadow-sm">
+          {views.map((v) => (
             <button
-              key={f.key}
+              key={v.key}
               type="button"
-              onClick={() => setFilter(f.key)}
-              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                filter === f.key
-                  ? "border-[#2563eb] bg-[#2563eb] text-white"
-                  : "border-[#e1e8f2] bg-white text-[#475569] hover:bg-[#f4f7fb]"
+              role="tab"
+              aria-selected={view === v.key}
+              onClick={() => switchView(v.key)}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                view === v.key ? "bg-[#0b1f3a] text-white" : "text-[#475569] hover:bg-[#f4f7fb]"
               }`}
             >
-              {f.label} <span className="tabular-nums opacity-80">{counts[f.key]}</span>
+              {v.icon}
+              {v.label} <span className="tabular-nums opacity-80">{v.count}</span>
             </button>
           ))}
         </div>
 
+        {view === "archives" ? (
+          <p className="text-sm text-[#64748b]">
+            SAV résolus. Désarchivez-en un pour le remettre dans les SAV en cours.
+          </p>
+        ) : (
+          <div className="flex flex-wrap gap-1.5">
+            {filters.map((f) => (
+              <button
+                key={f.key}
+                type="button"
+                onClick={() => setFilter(f.key)}
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                  filter === f.key
+                    ? "border-[#2563eb] bg-[#2563eb] text-white"
+                    : "border-[#e1e8f2] bg-white text-[#475569] hover:bg-[#f4f7fb]"
+                }`}
+              >
+                {f.label} <span className="tabular-nums opacity-80">{counts[f.key]}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="space-y-2">
           {visible.length === 0 && (
             <p className="rounded-[12px] border border-dashed border-[#d5deec] bg-white p-8 text-center text-sm text-[#64748b]">
-              {items.length === 0 ? "Aucune demande de SAV pour le moment." : "Aucune demande dans cette catégorie."}
+              {view === "archives"
+                ? "Aucun SAV archivé pour le moment."
+                : active.length === 0
+                  ? "Aucun SAV en cours."
+                  : "Aucune demande dans cette catégorie."}
             </p>
           )}
           {visible.map((item) => (
@@ -180,6 +245,7 @@ function SavCard({
   const [rescheduling, setRescheduling] = useState(false);
   const [when, setWhen] = useState("");
   const photoInput = useRef<HTMLInputElement>(null);
+  const archived = isSavArchived(item);
 
   const updateStatus = async (status: SavStatus, rescheduledAt?: string) => {
     setBusy(true);
@@ -193,7 +259,13 @@ function SavCard({
       if (!res.ok) throw new Error(json.error ?? "Erreur");
       onUpdated(json);
       setRescheduling(false);
-      toast.success(`SAV : ${SAV_STATUS_LABELS[status].toLowerCase()}`);
+      toast.success(
+        isSavArchived(json)
+          ? "SAV résolu et archivé"
+          : archived
+            ? "SAV désarchivé"
+            : `SAV : ${SAV_STATUS_LABELS[status].toLowerCase()}`
+      );
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur");
     } finally {
@@ -333,19 +405,33 @@ function SavCard({
           )}
 
           <div className="flex flex-wrap gap-2 border-t border-[#e1e8f2] pt-4">
-            <Button size="lg" disabled={busy || item.status === "resolu"} onClick={() => updateStatus("resolu")} className="bg-[#16a34a] text-white hover:bg-[#15803d]">
-              <Check /> Résolu
-            </Button>
-            <Button size="lg" variant="outline" disabled={busy} onClick={() => setRescheduling((v) => !v)}>
-              <Calendar /> À reprogrammer
-            </Button>
-            <Button size="lg" variant="outline" disabled={busy || item.status === "absent"} onClick={() => updateStatus("absent")}>
-              <UserX /> Absent
-            </Button>
+            {archived ? (
+              <Button size="lg" variant="outline" disabled={busy} onClick={() => updateStatus("a_traiter")}>
+                <ArchiveRestore /> Désarchiver
+              </Button>
+            ) : (
+              <>
+                <Button
+                  size="lg"
+                  disabled={busy}
+                  onClick={() => updateStatus("resolu")}
+                  title="Le SAV sera archivé"
+                  className="bg-[#16a34a] text-white hover:bg-[#15803d]"
+                >
+                  <Check /> Résolu
+                </Button>
+                <Button size="lg" variant="outline" disabled={busy} onClick={() => setRescheduling((v) => !v)}>
+                  <Calendar /> À reprogrammer
+                </Button>
+                <Button size="lg" variant="outline" disabled={busy || item.status === "absent"} onClick={() => updateStatus("absent")}>
+                  <UserX /> Absent
+                </Button>
+              </>
+            )}
             <Button size="lg" variant="outline" disabled={busy} onClick={() => photoInput.current?.click()}>
               <Camera /> Ajouter une photo
             </Button>
-            {item.status !== "a_traiter" && (
+            {!archived && item.status !== "a_traiter" && (
               <Button size="lg" variant="ghost" disabled={busy} onClick={() => updateStatus("a_traiter")}>
                 <RotateCcw /> Remettre à traiter
               </Button>

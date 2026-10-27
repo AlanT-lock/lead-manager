@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isSavStatus, parseSavInput, SAV_PROBLEM_TYPES } from "@/lib/sav";
+import { isSavArchived, isSavStatus, parseSavInput, SAV_ACTIVE_STATUSES, SAV_PROBLEM_TYPES } from "@/lib/sav";
 
 const valid = {
   name: " Jean Dupont ",
@@ -53,5 +53,18 @@ describe("isSavStatus", () => {
     expect(isSavStatus("a_reprogrammer")).toBe(true);
     expect(isSavStatus("nope")).toBe(false);
     expect(isSavStatus(undefined)).toBe(false);
+  });
+});
+
+describe("archivage", () => {
+  it("archive uniquement les SAV résolus", () => {
+    expect(isSavArchived({ status: "resolu" })).toBe(true);
+    expect(isSavArchived({ status: "a_traiter" })).toBe(false);
+    expect(isSavArchived({ status: "a_reprogrammer" })).toBe(false);
+    expect(isSavArchived({ status: "absent" })).toBe(false);
+  });
+
+  it("exclut le statut résolu des filtres des SAV en cours", () => {
+    expect(SAV_ACTIVE_STATUSES).toEqual(["a_traiter", "a_reprogrammer", "absent"]);
   });
 });

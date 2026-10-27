@@ -28,6 +28,14 @@ export const SAV_STATUS_LABELS: Record<SavStatus, string> = {
   absent: "Absent",
 };
 
+/** Un SAV passé en « Résolu » est archivé : il quitte la liste et la carte des SAV en cours. */
+export const SAV_ARCHIVED_STATUS: SavStatus = "resolu";
+export const SAV_ACTIVE_STATUSES = SAV_STATUSES.filter((s) => s !== SAV_ARCHIVED_STATUS);
+
+export function isSavArchived(item: { status: SavStatus }): boolean {
+  return item.status === SAV_ARCHIVED_STATUS;
+}
+
 /** Couleurs partagées par les badges de la liste et les points de la carte. */
 export const SAV_STATUS_COLORS: Record<SavStatus, string> = {
   a_traiter: "#2563eb",
