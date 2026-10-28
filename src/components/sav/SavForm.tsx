@@ -20,7 +20,7 @@ interface PhotoItem {
   preview: string;
 }
 
-/** Formulaire SAV, partagé par la page publique client et l'espace admin/secrétaire. */
+/** Formulaire SAV, partagé par la page publique client et l'espace interne (admin, secrétaire, stockage). */
 export function SavForm({ endpoint, onSuccess, submitLabel = "Envoyer la demande" }: Props) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");

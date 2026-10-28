@@ -65,6 +65,7 @@ const secretaireNav = [
 
 const stockageNav = [
   { href: "/admin/stockage", label: "Stockage", icon: Package },
+  { href: "/admin/sav", label: "SAV", icon: Wrench },
   { href: "/admin/taches", label: "Tâches", icon: ListTodo, tasksBadge: true },
 ];
 

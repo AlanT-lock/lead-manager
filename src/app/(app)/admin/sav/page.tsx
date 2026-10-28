@@ -19,7 +19,7 @@ export default async function AdminSavPage() {
 
   // Les pages /admin lisent en service role : le contrôle de rôle se fait ici.
   const role = normalizeRole(profile?.role);
-  if (role !== "admin" && role !== "secretaire") redirect(roleLandingPath(role));
+  if (role !== "admin" && role !== "secretaire" && role !== "stockage") redirect(roleLandingPath(role));
 
   const { data } = await admin
     .from("sav_requests")

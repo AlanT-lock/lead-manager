@@ -111,7 +111,7 @@ export async function withPhotoUrls(admin: SupabaseClient, rows: SavRequest[]): 
   }));
 }
 
-/** Vérifie que l'appelant est connecté en admin ou secrétaire. */
+/** Vérifie que l'appelant est connecté en admin, secrétaire ou stockage. */
 export async function requireSavStaff(
   getUser: () => Promise<{ id: string } | null>,
   admin: SupabaseClient
@@ -120,6 +120,6 @@ export async function requireSavStaff(
   if (!user) return { error: "Non autorisé", status: 401 };
   const { data: profile } = await admin.from("profiles").select("role").eq("id", user.id).single();
   const role = profile?.role?.toString().trim().toLowerCase();
-  if (role !== "admin" && role !== "secretaire") return { error: "Accès refusé", status: 403 };
+  if (role !== "admin" && role !== "secretaire" && role !== "stockage") return { error: "Accès refusé", status: 403 };
   return { userId: user.id };
 }

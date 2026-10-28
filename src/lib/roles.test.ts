@@ -63,8 +63,9 @@ describe("canAccessAdminPath", () => {
     expect(canAccessAdminPath("secretaire", "/admin/stats/global")).toBe(false);
   });
 
-  it("n'ouvre au rôle stockage que les pages Stockage et Tâches", () => {
+  it("n'ouvre au rôle stockage que les pages Stockage, SAV et Tâches", () => {
     expect(canAccessAdminPath("stockage", "/admin/stockage")).toBe(true);
+    expect(canAccessAdminPath("stockage", "/admin/sav")).toBe(true);
     expect(canAccessAdminPath("stockage", "/admin/taches")).toBe(true);
     expect(canAccessAdminPath("stockage", "/admin")).toBe(false);
     expect(canAccessAdminPath("stockage", "/admin/leads")).toBe(false);

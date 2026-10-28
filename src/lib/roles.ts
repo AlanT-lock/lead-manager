@@ -31,7 +31,7 @@ export function usesAdminSpace(role: UserRole | undefined): boolean {
 }
 
 const SECRETAIRE_DENIED_PREFIXES = ["/admin/users", "/admin/stats"];
-const STOCKAGE_ALLOWED_PREFIXES = ["/admin/stockage", "/admin/taches"];
+const STOCKAGE_ALLOWED_PREFIXES = ["/admin/stockage", "/admin/sav", "/admin/taches"];
 
 /**
  * Restrictions à l'intérieur de l'espace /admin. Les pages admin lisent leurs
@@ -47,7 +47,7 @@ export function canAccessAdminPath(role: UserRole | undefined, pathname: string)
     );
   }
 
-  // Le rôle stockage ne voit que Stockage et Tâches : liste blanche, pas liste noire,
+  // Le rôle stockage ne voit que Stockage, SAV et Tâches : liste blanche, pas liste noire,
   // pour qu'une page admin ajoutée plus tard lui reste fermée par défaut.
   if (role === "stockage") {
     return STOCKAGE_ALLOWED_PREFIXES.some(
